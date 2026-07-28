@@ -69,3 +69,40 @@ def test_poll_once_processes_and_moves(cfg, monkeypatch):
 def test_poll_lock_blocks_concurrent(cfg):
     (cfg.repo_root / ".poll.lock").write_text("999999")
     assert poll_once(cfg, None) == []
+
+def test_corrupted_state_file_recovers(cfg):
+    state_path = cfg.repo_root / ".poll_state.json"
+    state_path.write_text("not json{")
+    assert poll_once(cfg, None) == []            # doesn't crash the poll cycle
+    new_state = json.loads(state_path.read_text())  # rewritten file is valid json
+    assert new_state == {"_failures": {}}
+
+def test_stable_files_tolerates_stat_race(cfg, monkeypatch):
+    f1 = drop(cfg, name="hoops__20260727-061204.m4a")
+    f2 = drop(cfg, name="hoops__20260727-071204.m4a")
+    _, state = stable_files(cfg.inbox, {}, "hoops")   # poll 1: record both sizes
+    orig_stat = Path.stat
+    def flaky_stat(self, *a, **k):
+        if self.name == f1.name:
+            raise FileNotFoundError("evicted mid-scan")
+        return orig_stat(self, *a, **k)
+    monkeypatch.setattr(Path, "stat", flaky_stat)
+    ready, new_state = stable_files(cfg.inbox, state, "hoops")
+    assert ready == [f2]                              # f1's flakiness doesn't kill the cycle
+    assert f1.name not in new_state
+
+def test_alert_refires_at_multiples_of_three(cfg, monkeypatch):
+    class BoomTranscriber:
+        model_id = "fake"
+        def transcribe(self, path, prompt): raise RuntimeError("transcription boom")
+    f = drop(cfg)
+    size = f.stat().st_size
+    calls = []
+    monkeypatch.setattr("hoops.mailer.send", lambda *a, **k: calls.append(a))
+    state_path = cfg.repo_root / ".poll_state.json"
+    state_path.write_text(json.dumps({f.name: {"size": size}, "_failures": {f.name: 5}}))
+    done = poll_once(cfg, BoomTranscriber())
+    assert done == []
+    assert len(calls) == 1                            # re-armed at 6, not silent forever
+    new_state = json.loads(state_path.read_text())
+    assert new_state["_failures"][f.name] == 6

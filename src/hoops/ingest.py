@@ -15,11 +15,15 @@ def stable_files(inbox: Path, state: dict, prefix: str) -> tuple[list[Path], dic
             continue
         if not pat.match(p.name):
             continue
-        size = p.stat().st_size
-        new_state[p.name] = {"size": size}
-        prev = state.get(p.name)
-        if prev and prev["size"] == size and time.time() - p.stat().st_mtime > 60:
-            ready.append(p)
+        try:
+            st = p.stat()
+            size = st.st_size
+            new_state[p.name] = {"size": size}
+            prev = state.get(p.name)
+            if prev and prev["size"] == size and time.time() - p.stat().st_mtime > 60:
+                ready.append(p)
+        except (FileNotFoundError, OSError):
+            continue
     return ready, new_state
 
 def _alert_email(cfg: Config, name: str, err: str) -> None:
@@ -29,7 +33,7 @@ def _alert_email(cfg: Config, name: str, err: str) -> None:
         msg = EmailMessage()
         msg["From"], msg["To"] = cfg.email["from"], cfg.email["to"]
         msg["Subject"] = f"⚠️ 🏀 processing failing for {name}"
-        msg.set_content(f"3 consecutive failed polls.\nLast error: {err}")
+        msg.set_content(f"Repeated consecutive failed polls.\nLast error: {err}")
         send(msg, cfg)
     except Exception:
         pass
@@ -43,11 +47,14 @@ def poll_once(cfg: Config, transcriber) -> list[Path]:
     except FileExistsError:
         if time.time() - lock.stat().st_mtime < 1800:
             return []
-        lock.unlink()                                    # stale lock
+        lock.unlink(missing_ok=True)                      # stale lock
         return poll_once(cfg, transcriber)
     try:
         state_path = cfg.repo_root / ".poll_state.json"
-        state = json.loads(state_path.read_text()) if state_path.exists() else {}
+        try:
+            state = json.loads(state_path.read_text()) if state_path.exists() else {}
+        except (json.JSONDecodeError, OSError):
+            state = {}
         failures = state.get("_failures", {})
         ready, new_state = stable_files(cfg.inbox, state, cfg.prefix)
         processed = []
@@ -58,10 +65,12 @@ def poll_once(cfg: Config, transcriber) -> list[Path]:
                 failures.pop(f.name, None)
             except Exception as e:
                 failures[f.name] = failures.get(f.name, 0) + 1
-                if failures[f.name] == 3:
+                if failures[f.name] % 3 == 0:
                     _alert_email(cfg, f.name, repr(e))
         new_state["_failures"] = failures
-        state_path.write_text(json.dumps(new_state))
+        tmp_path = state_path.with_suffix(".json.tmp")
+        tmp_path.write_text(json.dumps(new_state))
+        os.replace(tmp_path, state_path)
         return processed
     finally:
         lock.unlink(missing_ok=True)
