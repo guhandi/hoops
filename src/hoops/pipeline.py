@@ -30,10 +30,11 @@ def _audio_duration(path: Path) -> float | None:
     except Exception:
         return None
 
-def _reject(path: Path, cfg: Config, archive: str, sid: str) -> Outcome:
-    rej = cfg.repo_root / "rejected"
-    rej.mkdir(exist_ok=True)
-    (shutil.move if archive == "move" else shutil.copy)(str(path), str(rej / path.name))
+def _reject(path: Path, cfg: Config, archive: str, sid: str, base: Path) -> Outcome:
+    rej = base / "rejected"
+    if archive != "none":
+        rej.mkdir(exist_ok=True)
+        (shutil.move if archive == "move" else shutil.copy)(str(path), str(rej / path.name))
     return Outcome(status="rejected", sid=sid)
 
 def process_file(path: Path, cfg: Config, transcriber, *, email: bool,
@@ -44,6 +45,7 @@ def process_file(path: Path, cfg: Config, transcriber, *, email: bool,
     vocab = cfg.vocab(vocab_name)
     sid, sid_source = session_id_for(path, cfg.tz)
     root = out_root or cfg.sessions_root
+    base = out_root.parent if out_root is not None else cfg.repo_root
     sdir = session_dir_for(root, sid)
     if sdir.exists():                                   # I7
         return Outcome(status="duplicate", sid=sid, session_dir=sdir)
@@ -51,7 +53,7 @@ def process_file(path: Path, cfg: Config, transcriber, *, email: bool,
     dur = _audio_duration(path)
     min_dur = min_duration_override or cfg.min_duration_s
     if dur is None or dur < min_dur:
-        return _reject(path, cfg, archive, sid)
+        return _reject(path, cfg, archive, sid, base)
 
     if cached_env is not None:
         env = cached_env
@@ -66,7 +68,7 @@ def process_file(path: Path, cfg: Config, transcriber, *, email: bool,
     date_local, time_local = sid_date_and_time(sid)
 
     if not parsed.calls:
-        nr = cfg.repo_root / "needs_review"
+        nr = base / "needs_review"
         nr.mkdir(exist_ok=True)
         target = nr / sdir.name
         shutil.move(str(sdir), str(target))
@@ -95,6 +97,7 @@ def process_file(path: Path, cfg: Config, transcriber, *, email: bool,
     if dur > cfg.max_duration_s:
         flags.append(f"session audio {dur:.0f}s exceeds {cfg.max_duration_s:.0f}s — forgot to stop?")
     stats["invariants_passed"] = not violations
+    stats["session_id_source"] = sid_source
 
     write_shots_csv(sdir, rows)
     write_session_json(sdir, stats)
@@ -153,7 +156,10 @@ def replay_session(sdir: Path, cfg: Config, vocab_name: str | None = None) -> Ou
         parser_version=PARSER_VERSION, profanity=cfg.profanity)
     stats["invariants_passed"] = not violations
     try:
-        stats["quote_of_day"] = read_session_json(sdir).get("quote_of_day", "")
+        old = read_session_json(sdir)
+        stats["quote_of_day"] = old.get("quote_of_day", "")
+        if "session_id_source" in old:
+            stats["session_id_source"] = old["session_id_source"]
     except FileNotFoundError:
         pass
     flags = [f"{v.id}: {v.message}" for v in violations]

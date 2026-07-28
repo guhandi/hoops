@@ -41,6 +41,7 @@ def test_happy_path(tmp_path, cfg):
     assert out.stats["shots_to_three"] == 4 and out.stats["invariants_passed"] is True
     assert out.stats["notes"] == "felt good"
     assert out.flags == []
+    assert out.stats["session_id_source"] == "filename"
 
 def test_duplicate_skipped(tmp_path, cfg):
     f = audio(tmp_path)
@@ -56,6 +57,15 @@ def test_short_audio_rejected(tmp_path, cfg):
     assert out.status == "rejected"
     assert any((cfg.repo_root / "rejected").iterdir())
 
+def test_reject_archive_none_leaves_source_untouched(tmp_path, cfg):
+    f = audio(tmp_path)
+    out = process_file(f, cfg, FakeTranscriber(make_env(GOOD)), email=False,
+                       archive="none", min_duration_override=999999)
+    assert out.status == "rejected"
+    assert f.exists()
+    rej = cfg.repo_root / "rejected"
+    assert not rej.exists() or not any(rej.iterdir())
+
 def test_truncated_audio_rejected(tmp_path, cfg):
     f = tmp_path / "hoops__20260727-070000.m4a"
     f.write_bytes(b"not an mp4 at all")
@@ -67,6 +77,15 @@ def test_zero_calls_needs_review(tmp_path, cfg):
     out = process_file(audio(tmp_path), cfg, FakeTranscriber(env), email=False, archive="copy")
     assert out.status == "needs_review"
     assert (cfg.repo_root / "needs_review").exists()
+
+def test_needs_review_respects_out_root(tmp_path, cfg):
+    out_root = tmp_path / "isolated" / "sessions"
+    env = make_env([("just", 1.0, 1.2), ("talking", 1.3, 1.6)], duration=30.0)
+    out = process_file(audio(tmp_path), cfg, FakeTranscriber(env), email=False,
+                       archive="copy", out_root=out_root)
+    assert out.status == "needs_review"
+    assert (out_root.parent / "needs_review").exists()
+    assert not (cfg.repo_root / "needs_review").exists()
 
 def test_invariant_failure_flagged_not_dropped(tmp_path, cfg):
     env = make_env([("make", 5.0, 5.3), ("miss", 10.0, 10.3)], duration=30.0)
