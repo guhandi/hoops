@@ -14,4 +14,9 @@ sessions/**/audio.m4a
 sessions/**/report.html
 sessions/**/strip.png
 sessions/**/pending_email
+rejected/
+needs_review/
+logs/
+.poll_state.json
+.poll.lock
 .superpowers/
