@@ -6,8 +6,8 @@ prefix: hoops
 vocab_default: swish_brick
 vocabularies:
   swish_brick:
-    make: [swish]
-    miss: [brick]
+    make: [swish, splash, make]
+    miss: [brick, break, miss]
   make_miss:
     make: [make]
     miss: [miss]

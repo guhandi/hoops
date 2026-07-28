@@ -7,7 +7,10 @@ REPO = Path(__file__).resolve().parents[1]
 
 def test_load_real_config():
     cfg = load_config(REPO / "config.yaml")
-    assert cfg.vocab().surface_to_canonical == {"swish": "make", "brick": "miss"}
+    assert cfg.vocab().surface_to_canonical == {
+        "swish": "make", "splash": "make", "make": "make",
+        "brick": "miss", "break": "miss", "miss": "miss",
+    }
     assert cfg.isolation_low == 0.15 and cfg.isolation_high == 0.4
     assert cfg.min_gap_s == 1.5 and cfg.max_gap_s == 120
     assert cfg.inbox.is_absolute()          # ~ expanded
