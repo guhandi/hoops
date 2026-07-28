@@ -66,6 +66,28 @@ def test_poll_once_processes_and_moves(cfg, monkeypatch):
     assert len(sdirs) == 1
     assert (sdirs[0].parent / "pending_email").exists() # email failed (no SMTP) → marker
 
+def test_poll_once_applies_and_archives_sidecar_vocab(cfg, monkeypatch):
+    class FakeTranscriber:
+        model_id = "fake"
+        def transcribe(self, path, prompt):
+            return make_env([("make", 5.0, 5.3), ("miss", 12.0, 12.3)],
+                             duration=30.0)["response"]
+    # never let unit tests reach real APIs, even if keys are in the shell env
+    monkeypatch.setattr("hoops.narrative.generate_narrative", lambda *a, **k: None)
+    def boom(*a, **k): raise RuntimeError("no smtp in tests")
+    monkeypatch.setattr("hoops.mailer.send", boom)
+    f = drop(cfg, name="hoops__20260727-070000.m4a")
+    sidecar = f.with_suffix(".json")
+    sidecar.write_text('{"vocabulary": "make_miss"}')
+    assert poll_once(cfg, FakeTranscriber()) == []      # poll 1: records size
+    done = poll_once(cfg, FakeTranscriber())            # poll 2: processes
+    assert done == [f]
+    assert not f.exists()                               # inbox drained (audio)
+    assert not sidecar.exists()                          # inbox drained (sidecar)
+    sdirs = list((cfg.sessions_root).rglob("vocab.json"))
+    assert len(sdirs) == 1
+    assert sdirs[0].parent / "audio.m4a" in list((cfg.sessions_root).rglob("audio.m4a"))
+
 def test_poll_lock_blocks_concurrent(cfg):
     (cfg.repo_root / ".poll.lock").write_text("999999")
     assert poll_once(cfg, None) == []

@@ -1,3 +1,4 @@
+import json
 import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -14,6 +15,32 @@ from .session import (session_id_for, session_dir_for, sid_date_and_time,
 from .stats import build_shot_rows, build_session_stats
 from .transcribe import (make_envelope, words_from_envelope, envelope_duration,
                          vocab_prompt)
+
+class SidecarError(ValueError):
+    pass
+
+def _resolve_vocab(path: Path, cfg: Config, vocab_name: str | None):
+    """Returns (vocab, sidecar_path | None). Raises SidecarError on a bad sidecar."""
+    if vocab_name:
+        return cfg.vocab(vocab_name), None
+    sc = path.with_suffix(".json")
+    if not sc.exists():
+        return cfg.vocab(None), None
+    try:
+        data = json.loads(sc.read_text())
+        if not isinstance(data, dict):
+            raise SidecarError("sidecar is not a JSON object")
+        if "vocabulary" in data:
+            try:
+                return cfg.vocab(str(data["vocabulary"])), sc
+            except KeyError:
+                raise SidecarError(f"unknown vocabulary {data['vocabulary']!r} — "
+                                   f"available: {', '.join(sorted(cfg.vocabularies))}")
+        if "vocab_map" in data:
+            return Vocabulary.from_dict("sidecar", data["vocab_map"]), sc
+        raise SidecarError("sidecar needs a 'vocabulary' or 'vocab_map' key")
+    except (json.JSONDecodeError, AttributeError, TypeError, ValueError) as e:
+        raise e if isinstance(e, SidecarError) else SidecarError(f"unreadable sidecar: {e}")
 
 @dataclass
 class Outcome:
@@ -42,10 +69,21 @@ def process_file(path: Path, cfg: Config, transcriber, *, email: bool,
                  vocab_name: str | None = None, cached_env: dict | None = None,
                  repair_enabled: bool = True,
                  min_duration_override: float | None = None) -> Outcome:
-    vocab = cfg.vocab(vocab_name)
     sid, sid_source = session_id_for(path, cfg.tz)
     root = out_root or cfg.sessions_root
     base = out_root.parent if out_root is not None else cfg.repo_root
+    try:
+        vocab, sidecar = _resolve_vocab(path, cfg, vocab_name)
+    except SidecarError as e:
+        nr = base / "needs_review"
+        nr.mkdir(exist_ok=True)
+        if archive != "none":
+            op = shutil.move if archive == "move" else shutil.copy
+            op(str(path), str(nr / path.name))
+            sc = path.with_suffix(".json")
+            if sc.exists():
+                op(str(sc), str(nr / sc.name))
+        return Outcome(status="needs_review", sid=sid, flags=[f"sidecar: {e}"])
     sdir = session_dir_for(root, sid)
     if sdir.exists():                                   # I7
         return Outcome(status="duplicate", sid=sid, session_dir=sdir)
@@ -128,6 +166,9 @@ def process_file(path: Path, cfg: Config, transcriber, *, email: bool,
         shutil.move(str(path), str(sdir / "audio.m4a"))
     elif archive == "copy":
         shutil.copy(str(path), str(sdir / "audio.m4a"))
+
+    if archive in ("move", "copy") and sidecar is not None and sidecar.exists():
+        (shutil.move if archive == "move" else shutil.copy)(str(sidecar), str(sdir / "vocab.json"))
 
     if email:
         try:

@@ -106,6 +106,43 @@ def test_replay_rewrites_and_preserves_quote(tmp_path, cfg):
     assert read_session_json(out.session_dir)["quote_of_day"] == "kept quote"
     assert read_session_json(out.session_dir)["shots_to_three"] == 4
 
+def test_sidecar_named_vocab_applies(tmp_path, cfg):
+    f = audio(tmp_path)
+    f.with_suffix(".json").write_text('{"vocabulary": "make_miss"}')
+    env = make_env([("make", 5.0, 5.3), ("miss", 12.0, 12.3)], duration=30.0)
+    out = process_file(f, cfg, FakeTranscriber(env), email=False,
+                       cached_env=env, repair_enabled=False, archive="move")
+    assert out.status == "ok"
+    assert [r["result"] for r in out.rows] == ["make", "miss"]
+    assert (out.session_dir / "vocab.json").exists()
+    assert not f.with_suffix(".json").exists()      # consumed
+
+def test_sidecar_inline_map_applies(tmp_path, cfg):
+    f = audio(tmp_path)
+    f.with_suffix(".json").write_text('{"vocab_map": {"make": ["bucket"], "miss": ["clank"]}}')
+    env = make_env([("bucket", 5.0, 5.3), ("clank", 12.0, 12.3)], duration=30.0)
+    out = process_file(f, cfg, FakeTranscriber(env), email=False,
+                       cached_env=env, repair_enabled=False)
+    assert out.status == "ok"
+    assert [r["result"] for r in out.rows] == ["make", "miss"]
+
+def test_malformed_sidecar_routes_to_needs_review(tmp_path, cfg):
+    f = audio(tmp_path)
+    f.with_suffix(".json").write_text("{not json")
+    out = process_file(f, cfg, FakeTranscriber(make_env([])), email=False,
+                       archive="move")
+    assert out.status == "needs_review"
+    nr = cfg.repo_root / "needs_review"
+    assert (nr / f.name).exists() and (nr / f.with_suffix(".json").name).exists()
+
+def test_explicit_vocab_name_beats_sidecar(tmp_path, cfg):
+    f = audio(tmp_path)
+    f.with_suffix(".json").write_text('{"vocab_map": {"make": ["bucket"], "miss": ["clank"]}}')
+    env = make_env([("make", 5.0, 5.3)], duration=30.0)
+    out = process_file(f, cfg, FakeTranscriber(env), email=False,
+                       vocab_name="make_miss", cached_env=env, repair_enabled=False)
+    assert out.status == "ok" and [r["result"] for r in out.rows] == ["make"]
+
 def test_session_json_persists_vocab_and_replay_uses_it(tmp_path, cfg):
     f = audio(tmp_path)
     env = make_env([("make", 5.0, 5.3), ("miss", 12.0, 12.3)], duration=30.0)
