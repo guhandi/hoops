@@ -25,5 +25,63 @@ def build_parser() -> argparse.ArgumentParser:
     return p
 
 def main() -> int:
+    import sys
+    from pathlib import Path
+    from dotenv import load_dotenv
+    from .config import load_config
+    from .fixtures import run_all, read_manifest, transcript_cache_path, run_fixture
+    from .pipeline import process_file, replay_session
+    from .session import find_session_dirs
+    from .transcribe import WhisperApiTranscriber
+
     args = build_parser().parse_args()
-    raise SystemExit(f"{args.command}: not implemented yet")
+    cfg = load_config(Path(__file__).resolve().parents[2] / "config.yaml")
+    load_dotenv(cfg.repo_root / ".env")
+    transcriber = WhisperApiTranscriber(cfg.transcriber_model)
+
+    if args.command == "process":
+        out = process_file(Path(args.path).expanduser(), cfg, transcriber,
+                           email=not args.no_email, archive="copy")
+        print(f"{out.sid}: {out.status}" + (f" — {out.session_dir}" if out.session_dir else ""))
+        return 0 if out.status in ("ok", "duplicate") else 1
+
+    if args.command == "process-all":
+        entries = run_all(cfg, transcriber, Path(args.fixtures_dir).expanduser())
+        bad = [e for e in entries if e["expected"] and e["expected"] != e["got"]]
+        print(f"{len(entries)} fixtures processed, {len(bad)} mismatches — "
+              f"open {cfg.repo_root / 'out' / 'index.html'}")
+        return 0
+
+    if args.command == "replay":
+        if not args.all and not args.sid:
+            print("replay: specify --all or a session id")
+            return 2
+        dirs = (find_session_dirs(cfg.sessions_root) if args.all
+                else [d for d in find_session_dirs(cfg.sessions_root)
+                      if d.name.endswith(args.sid)])
+        for d in dirs:
+            r = replay_session(d, cfg)
+            print(f"{r.sid}: replayed ({len(r.rows)} calls, "
+                  f"{'clean' if not r.flags else 'FLAGS: ' + '; '.join(r.flags)})")
+        return 0
+
+    if args.command == "score":
+        from .score import score_and_print
+        return score_and_print(cfg)
+
+    if args.command == "transcribe-fixtures":
+        for row in read_manifest(cfg.repo_root / "fixtures" / "manifest.csv"):
+            if args.only and args.only not in row["filename"]:
+                continue
+            cache = transcript_cache_path(cfg.repo_root, row["filename"])
+            cache.unlink(missing_ok=True)
+            run_fixture(row, cfg, transcriber, cfg.repo_root / "out" / "fixtures")
+            print(f"transcribed {row['filename']} -> {cache}")
+        return 0
+
+    if args.command == "poll":
+        from .ingest import poll_once
+        processed = poll_once(cfg, transcriber)
+        print(f"poll: {len(processed)} file(s) processed")
+        return 0
+    return 2
