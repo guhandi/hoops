@@ -42,6 +42,26 @@ def test_gap_mae(sandbox):
     s = score_fixture(row("f06.m4a", "miss make make make", gaps="7.0 6.0 6.0"), sandbox)
     assert s.gap_mae == pytest.approx(0.0)
 
+def test_invariant_mismatch_detected(sandbox):
+    words = [("miss", 5.0, 5.3), ("make", 12.0, 12.3)]      # only 2 live calls -> invariants fail
+    put_cache(sandbox, "f10.m4a", words)
+    s = score_fixture(row("f10.m4a", "miss make"), sandbox)  # row() hardcodes expect_invariants_pass=yes
+    assert s.invariants_ok_expected is True and s.invariants_ok_got is False
+    agg = aggregate([s])
+    assert agg["invariant_mismatches"] == 1
+
+def test_score_and_print_fails_on_invariant_mismatch(sandbox, capsys):
+    from hoops.score import score_and_print
+    words = [("miss", 5.0, 5.3), ("make", 12.0, 12.3)]
+    put_cache(sandbox, "f10.m4a", words)
+    (sandbox.repo_root / "fixtures" / "manifest.csv").write_text(
+        "filename,expected_calls,traps_planted,expect_invariants_pass,vocab,gating,expected_gaps,notes\n"
+        "f10.m4a,miss make,,yes,,yes,,invariant trap\n")
+    rc = score_and_print(sandbox)
+    out = capsys.readouterr().out
+    assert rc == 1
+    assert "invariant_mismatches" in out
+
 def test_aggregate_gates():
     from hoops.score import FixtureScore
     good = FixtureScore(name="a", expected=["make"] * 4, got=["make"] * 4, matched=4,

@@ -29,7 +29,8 @@ def main() -> int:
     from pathlib import Path
     from dotenv import load_dotenv
     from .config import load_config
-    from .fixtures import run_all, read_manifest, transcript_cache_path, run_fixture
+    from .fixtures import (run_all, read_manifest, transcript_cache_path, run_fixture,
+                           fixture_out_dir)
     from .pipeline import process_file, replay_session
     from .session import find_session_dirs
     from .transcribe import WhisperApiTranscriber
@@ -70,11 +71,16 @@ def main() -> int:
         return score_and_print(cfg)
 
     if args.command == "transcribe-fixtures":
+        import shutil
         for row in read_manifest(cfg.repo_root / "fixtures" / "manifest.csv"):
             if args.only and args.only not in row["filename"]:
                 continue
             cache = transcript_cache_path(cfg.repo_root, row["filename"])
             cache.unlink(missing_ok=True)
+            # Clear any stale out dir from a prior process-all/transcribe-fixtures run —
+            # otherwise the I7 duplicate check in process_file skips transcription and
+            # the stale transcript.json gets copied right back into the cache.
+            shutil.rmtree(fixture_out_dir(cfg.repo_root, row["filename"]), ignore_errors=True)
             run_fixture(row, cfg, transcriber, cfg.repo_root / "out" / "fixtures")
             print(f"transcribed {row['filename']} -> {cache}")
         return 0

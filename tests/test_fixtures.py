@@ -41,6 +41,33 @@ def test_run_fixture_writes_cache_then_reuses(sandbox):
     e2 = run_fixture(row, sandbox, t, sandbox.repo_root / "out" / "fixtures")
     assert e2["got"] == e1["got"] and t.calls == 1
 
+def test_transcribe_fixtures_cli_clears_stale_out_dir(sandbox, monkeypatch):
+    import sys
+    from hoops import cli
+    row = read_manifest(sandbox.repo_root / "fixtures" / "manifest.csv")[0]
+    out_root = sandbox.repo_root / "out" / "fixtures"
+    # Simulate a prior process-all run leaving a populated out dir + cached transcript.
+    t0 = FakeTranscriber(make_env(GOOD, duration=30.0))
+    run_fixture(row, sandbox, t0, out_root)
+    assert t0.calls == 1
+    assert transcript_cache_path(sandbox.repo_root, row["filename"]).exists()
+
+    calls = {"n": 0}
+    class CountingTranscriber:
+        model_id = "fake"
+        def __init__(self, model): pass
+        def transcribe(self, path, prompt):
+            calls["n"] += 1
+            return make_env(GOOD, duration=30.0)["response"]
+
+    monkeypatch.setattr("hoops.config.load_config", lambda *a, **k: sandbox)
+    monkeypatch.setattr("hoops.transcribe.WhisperApiTranscriber", CountingTranscriber)
+    monkeypatch.setattr(sys, "argv", ["hoops", "transcribe-fixtures"])
+    assert cli.main() == 0
+    # Without clearing the stale out dir, the I7 duplicate check would short-circuit
+    # process_file before transcription and this would stay 0.
+    assert calls["n"] == 1
+
 def test_run_all_writes_gallery(sandbox):
     t = FakeTranscriber(make_env(GOOD, duration=30.0))
     entries = run_all(sandbox, t, sandbox.repo_root / "fixtures")

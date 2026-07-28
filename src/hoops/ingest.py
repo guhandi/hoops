@@ -1,4 +1,4 @@
-import json, os, re, subprocess, time
+import json, os, re, shutil, subprocess, time
 from pathlib import Path
 from .config import Config
 from .pipeline import process_file
@@ -25,6 +25,43 @@ def stable_files(inbox: Path, state: dict, prefix: str) -> tuple[list[Path], dic
         except (FileNotFoundError, OSError):
             continue
     return ready, new_state
+
+def _repair_duplicate(inbox_file: Path, session_dir: Path | None, repo_root: Path) -> None:
+    """A duplicate hit means the session dir already exists but this inbox file was
+    never consumed. If the session is missing its audio, adopt this copy; otherwise
+    it's a redundant copy — file it under rejected/ so the inbox still drains."""
+    if session_dir is None:
+        return
+    target_audio = session_dir / "audio.m4a"
+    if not target_audio.exists():
+        shutil.move(str(inbox_file), str(target_audio))
+        return
+    rej = repo_root / "rejected"
+    rej.mkdir(exist_ok=True)
+    target = rej / inbox_file.name
+    if target.exists():
+        n = 2
+        while (rej / f"{inbox_file.stem}__{n}{inbox_file.suffix}").exists():
+            n += 1
+        target = rej / f"{inbox_file.stem}__{n}{inbox_file.suffix}"
+    shutil.move(str(inbox_file), str(target))
+
+def _retry_pending_emails(cfg: Config) -> None:
+    from .mailer import build_email, send
+    from .session import find_session_dirs, read_session_json
+    for sdir in find_session_dirs(cfg.sessions_root):
+        marker = sdir / "pending_email"
+        if not marker.exists():
+            continue
+        try:
+            stats = read_session_json(sdir)
+            flags = ([] if stats.get("invariants_passed", True)
+                     else ["invariants failed — see session.json"])
+            msg = build_email(stats, sdir, None, flags, cfg)
+            send(msg, cfg)
+            marker.unlink()
+        except Exception:
+            pass                                           # leave marker, retry next poll
 
 def _alert_email(cfg: Config, name: str, err: str) -> None:
     try:
@@ -61,6 +98,10 @@ def poll_once(cfg: Config, transcriber) -> list[Path]:
         for f in ready:
             try:
                 out = process_file(f, cfg, transcriber, email=True, archive="move")
+                if out.status == "duplicate":
+                    _repair_duplicate(f, out.session_dir, cfg.repo_root)
+                # "ok" / "needs_review" / "rejected" already consumed the inbox file
+                # via archive="move" inside process_file.
                 processed.append(f)
                 failures.pop(f.name, None)
             except Exception as e:
@@ -68,6 +109,7 @@ def poll_once(cfg: Config, transcriber) -> list[Path]:
                 if failures[f.name] % 3 == 0:
                     _alert_email(cfg, f.name, repr(e))
         new_state["_failures"] = failures
+        _retry_pending_emails(cfg)
         tmp_path = state_path.with_suffix(".json.tmp")
         tmp_path.write_text(json.dumps(new_state))
         os.replace(tmp_path, state_path)

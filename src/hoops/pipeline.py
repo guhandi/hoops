@@ -71,7 +71,16 @@ def process_file(path: Path, cfg: Config, transcriber, *, email: bool,
         nr = base / "needs_review"
         nr.mkdir(exist_ok=True)
         target = nr / sdir.name
+        if target.exists():                              # idempotent: don't crash/nest
+            n = 2
+            while (nr / f"{sdir.name}__{n}").exists():
+                n += 1
+            target = nr / f"{sdir.name}__{n}"
         shutil.move(str(sdir), str(target))
+        if archive == "move":
+            shutil.move(str(path), str(target / "audio.m4a"))
+        elif archive == "copy":
+            shutil.copy(str(path), str(target / "audio.m4a"))
         if email:
             _email_needs_review(target, sid, cfg)
         return Outcome(status="needs_review", sid=sid, session_dir=target)

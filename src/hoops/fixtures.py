@@ -8,15 +8,20 @@ def read_manifest(path: Path) -> list[dict]:
     with path.open() as f:
         return list(csv.DictReader(f))
 
+def fixture_stem(fixture_filename: str) -> str:
+    return fixture_filename.replace("/", "__").rsplit(".", 1)[0]
+
+def fixture_out_dir(repo_root: Path, fixture_filename: str) -> Path:
+    return repo_root / "out" / "fixtures" / fixture_stem(fixture_filename)
+
 def transcript_cache_path(repo_root: Path, fixture_filename: str) -> Path:
-    stem = fixture_filename.replace("/", "__").rsplit(".", 1)[0]
-    return repo_root / "fixtures" / "transcripts" / f"{stem}.json"
+    return repo_root / "fixtures" / "transcripts" / f"{fixture_stem(fixture_filename)}.json"
 
 def run_fixture(row: dict, cfg: Config, transcriber, out_root: Path) -> dict:
     audio = cfg.repo_root / "fixtures" / row["filename"]
     cache = transcript_cache_path(cfg.repo_root, row["filename"])
     cached_env = json.loads(cache.read_text()) if cache.exists() else None
-    stem = row["filename"].replace("/", "__").rsplit(".", 1)[0]
+    stem = fixture_stem(row["filename"])
     out = process_file(audio, cfg, transcriber, email=False, out_root=out_root / stem,
                        archive="none", vocab_name=row.get("vocab") or None,
                        cached_env=cached_env, repair_enabled=False)

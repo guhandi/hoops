@@ -72,6 +72,8 @@ def aggregate(scores: list[FixtureScore]) -> dict:
         "exact_fraction": sum(s.exact for s in scores) / (len(scores) or 1),
         "gap_mae": (sum(maes) / len(maes)) if maes else None,
         "phantom_on_traps": sum(s.inserted for s in scores if s.traps),
+        "invariant_mismatches": sum(1 for s in scores
+                                    if s.invariants_ok_got != s.invariants_ok_expected),
     }
 
 def score_and_print(cfg: Config) -> int:
@@ -106,4 +108,8 @@ def score_and_print(cfg: Config) -> int:
     ok &= phantom_ok
     print(f"  {'phantom_on_traps':<16}{agg['phantom_on_traps']:>8}   gate 0   "
           f"{'PASS' if phantom_ok else 'FAIL (hard build failure)'}")
+    inv_ok = agg["invariant_mismatches"] == 0
+    ok &= inv_ok
+    print(f"  {'invariant_mismatches':<16}{agg['invariant_mismatches']:>8}   gate 0   "
+          f"{'PASS' if inv_ok else 'FAIL (hard build failure)'}")
     return 0 if ok else 1
