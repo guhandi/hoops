@@ -2,24 +2,22 @@
 
 One-button voice data capture: Apple Shortcut records shot call-outs → iCloud drop folder → Mac pipeline (whisper-1 → isolation-gated parser → invariants → stats → emailed report). Basketball is instance #1 of a generalizable capture pattern.
 
-**Read first:** `README.md` (purpose + usage) · `docs/architecture.md` (how it works, module map, failure handling) · `docs/specs/2026-07-27-hoops-voice-log-design.md` (decisions — supersedes `docs/PRD-hoops-voice-log.md` where they conflict).
+**Read first:** `README.md` (purpose + usage) · `docs/architecture.md` (how it works, module map, failure handling) · `docs/shortcut-setup.md` (phone-side Apple Shortcut setup) · `docs/specs/2026-07-27-hoops-voice-log-design.md` (decisions — supersedes `docs/PRD-hoops-voice-log.md` where they conflict).
 
 ## Current status (2026-07-28)
 
-- P0–P3 built, reviewed, merged to main. 88 tests green (`uv run pytest`).
+- P0–P3 built and merged, plus this branch's work (vocab flip, per-recording sidecar, `--vocab` flag, golden-manifest migration) — 98 tests green (`uv run pytest`).
 - Dev fixtures dev01–dev04 transcribed with real whisper-1; transcripts committed in `fixtures/transcripts/`.
 - The whisper bias prompt is deliberately **transcript-style, not instructions** (`transcribe.py:vocab_prompt`) — an instruction-phrased prompt got echoed over quiet audio as hallucinated vocabulary words (phantom calls). Don't regress this.
-- Vocabulary (owner decision, supersedes PRD §6.3): `make`/`splash` = make, `miss`/`brick` = miss. Lives in `config.yaml`.
+- Vocabulary (owner decision, `docs/specs/2026-07-28-finish-pipeline-design.md` — supersedes the earlier make/splash line above and PRD §6.3): production default is `swish_brick` (`swish` = make, `brick` = miss); a named `make_miss` set also exists. Per-recording override via a `<same-stem>.json` sidecar next to the audio (`{"vocabulary": "make_miss"}` or `{"vocab_map": {...}}`); a malformed sidecar routes to `needs_review/` rather than silently falling back. `hoops process` also takes `--vocab NAME`. All live in `config.yaml`.
 
 ## Pending work
 
-1. Owner labels `expected_calls` for dev01–dev04 in `fixtures/manifest.csv`, then `uv run hoops score` → first accuracy baseline. (dev02 is the phantom-shot stress test — label it carefully.)
-2. `.env` has OPENAI_API_KEY + ANTHROPIC_API_KEY; still missing `GMAIL_APP_PASSWORD` (blocks email).
-3. One real-email smoke test: `uv run hoops process fixtures/dev/dev04.m4a` (no --no-email), then delete the created `sessions/` dir.
-4. `bash scripts/install_launchd.sh` to schedule `hoops poll` every 5 min.
-5. Apple Shortcut: Record Audio → save to `iCloud Drive/Capture/inbox/` as `hoops__YYYYMMDD-HHMMSS.m4a` (local time).
-6. Golden set F01–F10 still to be recorded (PRD §11.1); the §11.2 gates are unevaluated until then. First 14 real sessions = shadow period (eyeball transcript vs shot table).
-7. Verify `config.yaml` timezone (currently America/Los_Angeles).
+1. Run go-live validation (4 emails) per Task 8, then `bash scripts/install_launchd.sh` to schedule `hoops poll` every 5 min.
+2. Owner labels `expected_calls` in the new golden `fixtures/manifest.csv` (dev01–dev04 are folded in as D01–D04), then `uv run hoops score` → first accuracy baseline.
+3. Record fixtures F03, F09, F10 (currently `NOT_RECORDED` in the manifest — the trickiest cases: conversational call words, a deliberately uncalled shot, out-of-breath + trailing silence).
+4. Evaluate the PRD §11.2 gates once F01–F10 are fully recorded and labeled.
+5. First 14 real sessions = shadow period (eyeball transcript vs shot table).
 
 ## Development rules
 
