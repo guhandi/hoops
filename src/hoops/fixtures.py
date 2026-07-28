@@ -23,7 +23,7 @@ def run_fixture(row: dict, cfg: Config, transcriber, out_root: Path) -> dict:
     cached_env = json.loads(cache.read_text()) if cache.exists() else None
     stem = fixture_stem(row["filename"])
     out = process_file(audio, cfg, transcriber, email=False, out_root=out_root / stem,
-                       archive="none", vocab_name=row.get("vocab") or None,
+                       archive="none", vocab_name=row.get("vocabulary") or None,
                        cached_env=cached_env, repair_enabled=False)
     if cached_env is None and out.session_dir and (out.session_dir / "transcript.json").exists():
         cache.parent.mkdir(parents=True, exist_ok=True)
@@ -44,6 +44,8 @@ def run_all(cfg: Config, transcriber, fixtures_dir: Path) -> list[dict]:
         shutil.rmtree(out_root)
     entries = []
     for row in read_manifest(fixtures_dir / "manifest.csv"):
+        if not row.get("filename") or row.get("status", "recorded") != "recorded":
+            continue
         if not (cfg.repo_root / "fixtures" / row["filename"]).exists():
             continue
         entries.append(run_fixture(row, cfg, transcriber, out_root))

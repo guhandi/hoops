@@ -32,7 +32,7 @@ def score_fixture(row: dict, cfg: Config) -> FixtureScore | None:
     if not cache.exists():
         return None
     env = json.loads(cache.read_text())
-    vocab = cfg.vocab(row.get("vocab") or None)
+    vocab = cfg.vocab(row.get("vocabulary") or None)
     parsed = parse_words(words_from_envelope(env), vocab,
                          cfg.isolation_low, cfg.isolation_high)
     live = [c for c in parsed.calls if not c.voided]
@@ -56,7 +56,7 @@ def score_fixture(row: dict, cfg: Config) -> FixtureScore | None:
                         matched=matched, inserted=len(got) - matched,
                         deleted=len(expected) - matched, misclassified=mis,
                         exact=expected == got, gap_mae=gap_mae, traps=traps,
-                        invariants_ok_expected=row.get("expect_invariants_pass", "yes") == "yes",
+                        invariants_ok_expected=row.get("expect_invariants_pass", "TRUE").strip().upper() in ("TRUE", "YES"),
                         invariants_ok_got=inv_got)
 
 def aggregate(scores: list[FixtureScore]) -> dict:
@@ -83,7 +83,7 @@ def score_and_print(cfg: Config) -> int:
         s = score_fixture(r, cfg)
         if s is None:
             continue
-        (gating if r.get("gating", "").strip().lower() == "yes" else info).append(s)
+        (gating if r.get("use_for", "").strip().upper() == "GATE" else info).append(s)
     agg = aggregate(gating) if gating else None
     print(f"{'fixture':<28}{'expected':<10}{'got':<10}exact")
     for s in gating + info:

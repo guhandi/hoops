@@ -3,11 +3,14 @@ inbox: ~/Library/Mobile Documents/com~apple~CloudDocs/Capture/inbox
 sessions_root: sessions
 prefix: hoops
 
-vocab_default: default
+vocab_default: swish_brick
 vocabularies:
-  default:
-    make: [make, splash]
-    miss: [miss, brick]
+  swish_brick:
+    make: [swish, splash, make]
+    miss: [brick, break, miss]
+  make_miss:
+    make: [make]
+    miss: [miss]
 
 isolation:
   low: 0.15

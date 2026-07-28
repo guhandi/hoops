@@ -1,9 +1,10 @@
+import json
 import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 from mutagen.mp4 import MP4
 from . import PARSER_VERSION
-from .config import Config
+from .config import Config, Vocabulary
 from .invariants import check_invariants
 from .parse import parse_words
 from .repair import attempt_repair
@@ -14,6 +15,61 @@ from .session import (session_id_for, session_dir_for, sid_date_and_time,
 from .stats import build_shot_rows, build_session_stats
 from .transcribe import (make_envelope, words_from_envelope, envelope_duration,
                          vocab_prompt)
+
+class SidecarError(ValueError):
+    pass
+
+def _validate_vocab_map(vm) -> None:
+    """Spec: 'never guess'. A sidecar vocab_map must be unambiguous — reject
+    anything that would silently produce a nonsense canonical key or a
+    per-character surface mapping (e.g. a string where a list was expected)."""
+    if not isinstance(vm, dict):
+        raise SidecarError("vocab_map must be a JSON object mapping "
+                            "'make'/'miss' to lists of surface forms")
+    keys = set(vm.keys())
+    required = {"make", "miss"}
+    if keys != required:
+        parts = []
+        missing = required - keys
+        extra = keys - required
+        if missing:
+            parts.append(f"missing {', '.join(sorted(missing))}")
+        if extra:
+            parts.append(f"unknown key(s) {', '.join(sorted(extra))}")
+        raise SidecarError("vocab_map must have exactly the keys 'make' and "
+                           f"'miss' ({'; '.join(parts)})")
+    for canonical, surfaces in vm.items():
+        if not isinstance(surfaces, list) or not surfaces:
+            raise SidecarError(f"vocab_map[{canonical!r}] must be a non-empty "
+                               "list of surface-form strings")
+        for s in surfaces:
+            if not isinstance(s, str) or not s:
+                raise SidecarError(f"vocab_map[{canonical!r}] has a non-string "
+                                   f"or empty surface form: {s!r}")
+
+def _resolve_vocab(path: Path, cfg: Config, vocab_name: str | None):
+    """Returns (vocab, sidecar_path | None). Raises SidecarError on a bad sidecar."""
+    if vocab_name:
+        return cfg.vocab(vocab_name), None
+    sc = path.with_suffix(".json")
+    if not sc.exists():
+        return cfg.vocab(None), None
+    try:
+        data = json.loads(sc.read_text())
+        if not isinstance(data, dict):
+            raise SidecarError("sidecar is not a JSON object")
+        if "vocabulary" in data:
+            try:
+                return cfg.vocab(str(data["vocabulary"])), sc
+            except KeyError:
+                raise SidecarError(f"unknown vocabulary {data['vocabulary']!r} — "
+                                   f"available: {', '.join(sorted(cfg.vocabularies))}")
+        if "vocab_map" in data:
+            _validate_vocab_map(data["vocab_map"])
+            return Vocabulary.from_dict("sidecar", data["vocab_map"]), sc
+        raise SidecarError("sidecar needs a 'vocabulary' or 'vocab_map' key")
+    except (json.JSONDecodeError, AttributeError, TypeError, ValueError) as e:
+        raise e if isinstance(e, SidecarError) else SidecarError(f"unreadable sidecar: {e}")
 
 @dataclass
 class Outcome:
@@ -42,10 +98,21 @@ def process_file(path: Path, cfg: Config, transcriber, *, email: bool,
                  vocab_name: str | None = None, cached_env: dict | None = None,
                  repair_enabled: bool = True,
                  min_duration_override: float | None = None) -> Outcome:
-    vocab = cfg.vocab(vocab_name)
     sid, sid_source = session_id_for(path, cfg.tz)
     root = out_root or cfg.sessions_root
     base = out_root.parent if out_root is not None else cfg.repo_root
+    try:
+        vocab, sidecar = _resolve_vocab(path, cfg, vocab_name)
+    except SidecarError as e:
+        nr = base / "needs_review"
+        nr.mkdir(exist_ok=True)
+        if archive != "none":
+            op = shutil.move if archive == "move" else shutil.copy
+            op(str(path), str(nr / path.name))
+            sc = path.with_suffix(".json")
+            if sc.exists():
+                op(str(sc), str(nr / sc.name))
+        return Outcome(status="needs_review", sid=sid, flags=[f"sidecar: {e}"])
     sdir = session_dir_for(root, sid)
     if sdir.exists():                                   # I7
         return Outcome(status="duplicate", sid=sid, session_dir=sdir)
@@ -107,6 +174,8 @@ def process_file(path: Path, cfg: Config, transcriber, *, email: bool,
         flags.append(f"session audio {dur:.0f}s exceeds {cfg.max_duration_s:.0f}s — forgot to stop?")
     stats["invariants_passed"] = not violations
     stats["session_id_source"] = sid_source
+    stats["vocab_name"] = vocab.name
+    stats["vocab_map"] = vocab.surface_to_canonical
 
     write_shots_csv(sdir, rows)
     write_session_json(sdir, stats)
@@ -126,6 +195,9 @@ def process_file(path: Path, cfg: Config, transcriber, *, email: bool,
         shutil.move(str(path), str(sdir / "audio.m4a"))
     elif archive == "copy":
         shutil.copy(str(path), str(sdir / "audio.m4a"))
+
+    if archive in ("move", "copy") and sidecar is not None and sidecar.exists():
+        (shutil.move if archive == "move" else shutil.copy)(str(sidecar), str(sdir / "vocab.json"))
 
     if email:
         try:
@@ -151,7 +223,17 @@ def _email_needs_review(sdir: Path, sid: str, cfg: Config) -> None:
 
 def replay_session(sdir: Path, cfg: Config, vocab_name: str | None = None) -> Outcome:
     env = read_envelope(sdir)
-    vocab = cfg.vocab(vocab_name)
+    try:
+        old = read_session_json(sdir)
+    except FileNotFoundError:
+        old = {}
+    if vocab_name:
+        vocab = cfg.vocab(vocab_name)
+    elif old.get("vocab_map"):
+        vocab = Vocabulary(name=old.get("vocab_name", "persisted"),
+                           surface_to_canonical=old["vocab_map"])
+    else:
+        vocab = cfg.vocab(None)
     sid = sdir.name.removeprefix("hoops__")
     date_local, time_local = sid_date_and_time(sid)
     words = words_from_envelope(env)
@@ -164,13 +246,10 @@ def replay_session(sdir: Path, cfg: Config, vocab_name: str | None = None) -> Ou
         session_len_s=envelope_duration(env), transcriber=env["model"],
         parser_version=PARSER_VERSION, profanity=cfg.profanity)
     stats["invariants_passed"] = not violations
-    try:
-        old = read_session_json(sdir)
-        stats["quote_of_day"] = old.get("quote_of_day", "")
-        if "session_id_source" in old:
-            stats["session_id_source"] = old["session_id_source"]
-    except FileNotFoundError:
-        pass
+    stats["quote_of_day"] = old.get("quote_of_day", "")
+    if "session_id_source" in old:
+        stats["session_id_source"] = old["session_id_source"]
+    stats["vocab_name"], stats["vocab_map"] = vocab.name, vocab.surface_to_canonical
     flags = [f"{v.id}: {v.message}" for v in violations]
     write_shots_csv(sdir, rows)
     write_session_json(sdir, stats)

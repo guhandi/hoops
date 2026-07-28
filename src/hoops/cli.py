@@ -7,6 +7,8 @@ def build_parser() -> argparse.ArgumentParser:
     sp = sub.add_parser("process", help="Process one audio file end to end")
     sp.add_argument("path")
     sp.add_argument("--no-email", dest="no_email", action="store_true")
+    sp.add_argument("--vocab", default=None,
+                    help="vocabulary name from config.yaml (default: vocab_default)")
 
     sa = sub.add_parser("process-all", help="Process a fixtures dir + gallery")
     sa.add_argument("fixtures_dir")
@@ -36,13 +38,17 @@ def main() -> int:
     from .transcribe import WhisperApiTranscriber
 
     args = build_parser().parse_args()
+    load_dotenv(Path(__file__).resolve().parents[2] / ".env")
     cfg = load_config(Path(__file__).resolve().parents[2] / "config.yaml")
-    load_dotenv(cfg.repo_root / ".env")
     transcriber = WhisperApiTranscriber(cfg.transcriber_model)
 
     if args.command == "process":
+        if args.vocab and args.vocab not in cfg.vocabularies:
+            print(f"unknown vocabulary '{args.vocab}' — available: "
+                  f"{', '.join(sorted(cfg.vocabularies))}")
+            return 2
         out = process_file(Path(args.path).expanduser(), cfg, transcriber,
-                           email=not args.no_email, archive="copy")
+                           email=not args.no_email, archive="copy", vocab_name=args.vocab)
         print(f"{out.sid}: {out.status}" + (f" — {out.session_dir}" if out.session_dir else ""))
         return 0 if out.status in ("ok", "duplicate") else 1
 
@@ -73,6 +79,8 @@ def main() -> int:
     if args.command == "transcribe-fixtures":
         import shutil
         for row in read_manifest(cfg.repo_root / "fixtures" / "manifest.csv"):
+            if not row.get("filename") or row.get("status", "recorded") != "recorded":
+                continue
             if args.only and args.only not in row["filename"]:
                 continue
             cache = transcript_cache_path(cfg.repo_root, row["filename"])

@@ -36,10 +36,12 @@ Basketball is instance #1. The capture pattern (one Shortcut, spoken vocabulary,
 
 | You say | Meaning |
 |---|---|
-| `make` or `splash` | made shot |
-| `miss` or `brick` | missed shot |
+| `swish`, `splash`, or `make` | made shot |
+| `brick`, `break`, or `miss` | missed shot |
 | `scratch that` | void the previous call (misspoke) |
 | `note: <anything>` | free-text note captured verbatim into the dataset |
+
+That's the default `swish_brick` vocabulary; a stricter `make_miss` set (`make`/`miss` only) also ships in `config.yaml`. Either can be overridden per recording with a `<same-stem>.json` sidecar next to the audio (`{"vocabulary": "make_miss"}` or a custom `{"vocab_map": {...}}`), or one-off via `hoops process <path> --vocab NAME`.
 
 Everything else you say — muttering, cussing, commentary — is ignored by the parser (and mined for the report's quote-of-the-day). The key trick is **isolation gating**: a real call-out is an isolated word surrounded by silence; the word "make" inside "come on, make it" sits in continuous speech and is discarded. This is what keeps commentary from creating phantom shots.
 
@@ -58,12 +60,16 @@ Bad sessions never disappear silently: too-short recordings are rejected, sessio
 ```bash
 git clone https://github.com/guhandi/hoops && cd hoops
 uv sync
-cp .env.example .env        # fill: OPENAI_API_KEY, ANTHROPIC_API_KEY, GMAIL_APP_PASSWORD
+cp .env.example .env        # fill: OPENAI_API_KEY, ANTHROPIC_API_KEY, GMAIL_APP_PASSWORD, GMAIL_ADDRESS
 # edit config.yaml if needed: timezone, email address, vocabulary
 bash scripts/install_launchd.sh   # schedules `hoops poll` every 5 minutes
 ```
 
+`GMAIL_ADDRESS` overrides the `email.from`/`email.to` in `config.yaml` — set it if you don't want to edit the YAML directly.
+
 Apple Shortcut: **Record Audio** → save to `iCloud Drive/Capture/inbox/` named `hoops__<YYYYMMDD-HHMMSS>.m4a` (local time). Bind it to the Action Button or a Home Screen icon so capture is one press.
+
+**Troubleshooting:** confirm the poller is alive with `launchctl list com.guhan.hoops` (status must be `0`); logs live in `logs/poll.log`.
 
 ## CLI
 

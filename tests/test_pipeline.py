@@ -8,8 +8,8 @@ from conftest import make_env
 
 pytestmark = pytest.mark.unit
 REPO = Path(__file__).resolve().parents[1]
-GOOD = [("okay", 0.5, 0.8), ("miss", 5.0, 5.3), ("come", 8.0, 8.2), ("on", 8.25, 8.4),
-        ("make", 12.0, 12.3), ("make", 18.0, 18.3), ("make", 24.0, 24.3),
+GOOD = [("okay", 0.5, 0.8), ("brick", 5.0, 5.3), ("come", 8.0, 8.2), ("on", 8.25, 8.4),
+        ("swish", 12.0, 12.3), ("swish", 18.0, 18.3), ("swish", 24.0, 24.3),
         ("note", 27.0, 27.2), ("felt", 27.5, 27.7), ("good", 27.8, 28.0)]
 
 class FakeTranscriber:
@@ -88,7 +88,7 @@ def test_needs_review_respects_out_root(tmp_path, cfg):
     assert not (cfg.repo_root / "needs_review").exists()
 
 def test_invariant_failure_flagged_not_dropped(tmp_path, cfg):
-    env = make_env([("make", 5.0, 5.3), ("miss", 10.0, 10.3)], duration=30.0)
+    env = make_env([("swish", 5.0, 5.3), ("brick", 10.0, 10.3)], duration=30.0)
     out = process_file(audio(tmp_path), cfg, FakeTranscriber(env), email=False,
                        archive="copy", repair_enabled=False)
     assert out.status == "ok"
@@ -105,3 +105,77 @@ def test_replay_rewrites_and_preserves_quote(tmp_path, cfg):
     assert r.status == "ok"
     assert read_session_json(out.session_dir)["quote_of_day"] == "kept quote"
     assert read_session_json(out.session_dir)["shots_to_three"] == 4
+
+def test_sidecar_named_vocab_applies(tmp_path, cfg):
+    f = audio(tmp_path)
+    f.with_suffix(".json").write_text('{"vocabulary": "make_miss"}')
+    env = make_env([("make", 5.0, 5.3), ("miss", 12.0, 12.3)], duration=30.0)
+    out = process_file(f, cfg, FakeTranscriber(env), email=False,
+                       cached_env=env, repair_enabled=False, archive="move")
+    assert out.status == "ok"
+    assert [r["result"] for r in out.rows] == ["make", "miss"]
+    assert (out.session_dir / "vocab.json").exists()
+    assert not f.with_suffix(".json").exists()      # consumed
+
+def test_sidecar_inline_map_applies(tmp_path, cfg):
+    f = audio(tmp_path)
+    f.with_suffix(".json").write_text('{"vocab_map": {"make": ["bucket"], "miss": ["clank"]}}')
+    env = make_env([("bucket", 5.0, 5.3), ("clank", 12.0, 12.3)], duration=30.0)
+    out = process_file(f, cfg, FakeTranscriber(env), email=False,
+                       cached_env=env, repair_enabled=False)
+    assert out.status == "ok"
+    assert [r["result"] for r in out.rows] == ["make", "miss"]
+
+def test_malformed_sidecar_routes_to_needs_review(tmp_path, cfg):
+    f = audio(tmp_path)
+    f.with_suffix(".json").write_text("{not json")
+    out = process_file(f, cfg, FakeTranscriber(make_env([])), email=False,
+                       archive="move")
+    assert out.status == "needs_review"
+    nr = cfg.repo_root / "needs_review"
+    assert (nr / f.name).exists() and (nr / f.with_suffix(".json").name).exists()
+
+def test_sidecar_vocab_map_string_value_rejected(tmp_path, cfg):
+    f = audio(tmp_path)
+    f.with_suffix(".json").write_text('{"vocab_map": {"make": "swish", "miss": ["clank"]}}')
+    out = process_file(f, cfg, FakeTranscriber(make_env([])), email=False, archive="move")
+    assert out.status == "needs_review"
+    assert any("vocab_map" in flag and "make" in flag for flag in out.flags)
+
+def test_sidecar_vocab_map_missing_miss_key_rejected(tmp_path, cfg):
+    f = audio(tmp_path)
+    f.with_suffix(".json").write_text('{"vocab_map": {"make": ["bucket"]}}')
+    out = process_file(f, cfg, FakeTranscriber(make_env([])), email=False, archive="move")
+    assert out.status == "needs_review"
+    assert any("missing" in flag and "miss" in flag for flag in out.flags)
+
+def test_sidecar_vocab_map_bogus_canonical_key_rejected(tmp_path, cfg):
+    f = audio(tmp_path)
+    f.with_suffix(".json").write_text(
+        '{"vocab_map": {"mak": ["bucket"], "miss": ["clank"]}}')
+    out = process_file(f, cfg, FakeTranscriber(make_env([])), email=False, archive="move")
+    assert out.status == "needs_review"
+    assert any("mak" in flag for flag in out.flags)
+
+def test_explicit_vocab_name_beats_sidecar(tmp_path, cfg):
+    f = audio(tmp_path)
+    f.with_suffix(".json").write_text('{"vocab_map": {"make": ["bucket"], "miss": ["clank"]}}')
+    env = make_env([("make", 5.0, 5.3)], duration=30.0)
+    out = process_file(f, cfg, FakeTranscriber(env), email=False,
+                       vocab_name="make_miss", cached_env=env, repair_enabled=False)
+    assert out.status == "ok" and [r["result"] for r in out.rows] == ["make"]
+
+def test_session_json_persists_vocab_and_replay_uses_it(tmp_path, cfg):
+    f = audio(tmp_path)
+    env = make_env([("make", 5.0, 5.3), ("miss", 12.0, 12.3)], duration=30.0)
+    out = process_file(f, cfg, FakeTranscriber(env), email=False,
+                       vocab_name="make_miss", cached_env=env, repair_enabled=False)
+    assert out.status == "ok"
+    stats = read_session_json(out.session_dir)
+    assert stats["vocab_name"] == "make_miss"
+    assert stats["vocab_map"] == {"make": "make", "miss": "miss"}
+    # replay with NO vocab arg must reuse the persisted make_miss mapping,
+    # even though the config default is swish_brick
+    r = replay_session(out.session_dir, cfg)
+    assert [row["result"] for row in r.rows] == ["make", "miss"]
+    assert read_session_json(out.session_dir)["vocab_name"] == "make_miss"

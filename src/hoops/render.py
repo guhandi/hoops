@@ -87,5 +87,6 @@ def render_gallery(entries: list[dict], out_html: Path) -> None:
             f"<div>got: <code>{e(' '.join(en['got']))}</code></div>"
             f"<div>{''.join('<div>⚠ ' + e(f) + '</div>' for f in en['flags'])}</div>"
             f"<div style='color:#666'>{e(en.get('note', ''))}</div></div>")
+    out_html.parent.mkdir(parents=True, exist_ok=True)
     out_html.write_text("<div style='font-family:-apple-system,sans-serif;max-width:800px;"
                         "margin:auto'><h1>Fixture gallery</h1>" + "\n".join(rows_html) + "</div>")

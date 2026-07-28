@@ -8,6 +8,10 @@ from conftest import make_env
 
 pytestmark = pytest.mark.parse
 REPO = Path(__file__).resolve().parents[1]
+NEW_HEADER = ("filename,fixture_id,category,status,vocabulary,duration_s,size_bytes,"
+              "audio_format,conditions,what_it_tests,use_for,timing_ground_truth,"
+              "beep_interval_s,expected_calls,expected_shot_count,expect_invariants_pass,"
+              "contains_correction,contains_note,traps_planted,label_status,notes")
 
 @pytest.fixture
 def sandbox(tmp_path):
@@ -19,12 +23,12 @@ def put_cache(cfg, filename, words):
     p = transcript_cache_path(cfg.repo_root, filename)
     p.write_text(json.dumps(make_env(words, duration=60.0)))
 
-def row(filename, expected, traps="", gating="yes", gaps=""):
+def row(filename, expected, traps="", use_for="GATE", gaps="", expect_invariants_pass="TRUE"):
     return {"filename": filename, "expected_calls": expected, "traps_planted": traps,
-            "expect_invariants_pass": "yes", "vocab": "", "gating": gating,
+            "expect_invariants_pass": expect_invariants_pass, "vocabulary": "", "use_for": use_for,
             "expected_gaps": gaps, "notes": ""}
 
-CLEAN = [("miss", 5.0, 5.3), ("make", 12.0, 12.3), ("make", 18.0, 18.3), ("make", 24.0, 24.3)]
+CLEAN = [("brick", 5.0, 5.3), ("swish", 12.0, 12.3), ("swish", 18.0, 18.3), ("swish", 24.0, 24.3)]
 
 def test_exact_match(sandbox):
     put_cache(sandbox, "f01.m4a", CLEAN)
@@ -43,20 +47,20 @@ def test_gap_mae(sandbox):
     assert s.gap_mae == pytest.approx(0.0)
 
 def test_invariant_mismatch_detected(sandbox):
-    words = [("miss", 5.0, 5.3), ("make", 12.0, 12.3)]      # only 2 live calls -> invariants fail
+    words = [("brick", 5.0, 5.3), ("swish", 12.0, 12.3)]      # only 2 live calls -> invariants fail
     put_cache(sandbox, "f10.m4a", words)
-    s = score_fixture(row("f10.m4a", "miss make"), sandbox)  # row() hardcodes expect_invariants_pass=yes
+    s = score_fixture(row("f10.m4a", "miss make"), sandbox)  # row() hardcodes expect_invariants_pass=TRUE
     assert s.invariants_ok_expected is True and s.invariants_ok_got is False
     agg = aggregate([s])
     assert agg["invariant_mismatches"] == 1
 
 def test_score_and_print_fails_on_invariant_mismatch(sandbox, capsys):
     from hoops.score import score_and_print
-    words = [("miss", 5.0, 5.3), ("make", 12.0, 12.3)]
+    words = [("brick", 5.0, 5.3), ("swish", 12.0, 12.3)]
     put_cache(sandbox, "f10.m4a", words)
     (sandbox.repo_root / "fixtures" / "manifest.csv").write_text(
-        "filename,expected_calls,traps_planted,expect_invariants_pass,vocab,gating,expected_gaps,notes\n"
-        "f10.m4a,miss make,,yes,,yes,,invariant trap\n")
+        NEW_HEADER + "\n"
+        "f10.m4a,F10,fixture,recorded,,,,,x,x,GATE,FALSE,,miss make,,TRUE,,,,LABELED,invariant trap\n")
     rc = score_and_print(sandbox)
     out = capsys.readouterr().out
     assert rc == 1
