@@ -38,8 +38,8 @@ def main() -> int:
     from .transcribe import WhisperApiTranscriber
 
     args = build_parser().parse_args()
+    load_dotenv(Path(__file__).resolve().parents[2] / ".env")
     cfg = load_config(Path(__file__).resolve().parents[2] / "config.yaml")
-    load_dotenv(cfg.repo_root / ".env")
     transcriber = WhisperApiTranscriber(cfg.transcriber_model)
 
     if args.command == "process":
