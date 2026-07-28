@@ -47,9 +47,10 @@ def envelope_duration(env: dict) -> float:
     return float(words[-1]["end"]) if words else 0.0
 
 def vocab_prompt(vocab: Vocabulary) -> str:
+    # Whisper treats the prompt as preceding-transcript context, not instructions —
+    # instruction phrasing gets echoed verbatim over quiet audio as hallucinated words.
     surfaces = sorted(set(vocab.surface_to_canonical))
-    return ("Basketball shooting session. Isolated call-outs of: "
-            + ", ".join(surfaces) + ". Also: scratch that, note.")
+    return ". ".join(surfaces) + ". scratch that. note: legs a bit tired today."
 
 class WhisperApiTranscriber:
     def __init__(self, model: str = "whisper-1"):

@@ -1,0 +1,51 @@
+{
+  "model": "whisper-1",
+  "response": {
+    "duration": 41.4900016784668,
+    "language": "nynorsk",
+    "text": "miss. miss. miss. make. make. make. miss.",
+    "segments": null,
+    "usage": {
+      "seconds": 42.0,
+      "type": "duration"
+    },
+    "words": [
+      {
+        "end": 3.140000104904175,
+        "start": 2.440000057220459,
+        "word": "miss"
+      },
+      {
+        "end": 8.199999809265137,
+        "start": 7.619999885559082,
+        "word": "miss"
+      },
+      {
+        "end": 13.579999923706055,
+        "start": 13.0,
+        "word": "miss"
+      },
+      {
+        "end": 18.65999984741211,
+        "start": 18.639999389648438,
+        "word": "make"
+      },
+      {
+        "end": 25.360000610351562,
+        "start": 23.959999084472656,
+        "word": "make"
+      },
+      {
+        "end": 34.900001525878906,
+        "start": 33.5,
+        "word": "make"
+      },
+      {
+        "end": 39.540000915527344,
+        "start": 38.5,
+        "word": "miss"
+      }
+    ],
+    "task": "transcribe"
+  }
+}

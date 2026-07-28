@@ -1,0 +1,86 @@
+{
+  "model": "whisper-1",
+  "response": {
+    "duration": 89.0199966430664,
+    "language": "nynorsk",
+    "text": "scratch that. miss. make. miss. scratch that. miss. miss. miss. make.  make. make. miss.",
+    "segments": null,
+    "usage": {
+      "seconds": 90.0,
+      "type": "duration"
+    },
+    "words": [
+      {
+        "end": 0.0,
+        "start": 0.0,
+        "word": "scratch"
+      },
+      {
+        "end": 2.0,
+        "start": 0.0,
+        "word": "that"
+      },
+      {
+        "end": 10.5600004196167,
+        "start": 10.039999961853027,
+        "word": "miss"
+      },
+      {
+        "end": 17.860000610351562,
+        "start": 17.0,
+        "word": "make"
+      },
+      {
+        "end": 25.200000762939453,
+        "start": 23.799999237060547,
+        "word": "miss"
+      },
+      {
+        "end": 33.02000045776367,
+        "start": 31.6200008392334,
+        "word": "scratch"
+      },
+      {
+        "end": 34.41999816894531,
+        "start": 33.02000045776367,
+        "word": "that"
+      },
+      {
+        "end": 36.15999984741211,
+        "start": 34.7599983215332,
+        "word": "miss"
+      },
+      {
+        "end": 44.18000030517578,
+        "start": 42.779998779296875,
+        "word": "miss"
+      },
+      {
+        "end": 53.63999938964844,
+        "start": 52.2400016784668,
+        "word": "miss"
+      },
+      {
+        "end": 62.0,
+        "start": 61.20000076293945,
+        "word": "make"
+      },
+      {
+        "end": 73.73999786376953,
+        "start": 73.54000091552734,
+        "word": "make"
+      },
+      {
+        "end": 80.87999725341797,
+        "start": 80.63999938964844,
+        "word": "make"
+      },
+      {
+        "end": 85.54000091552734,
+        "start": 84.80000305175781,
+        "word": "miss"
+      }
+    ],
+    "task": "transcribe"
+  }
+}
