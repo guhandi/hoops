@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 from zoneinfo import ZoneInfo
+import os
 import yaml
 
 @dataclass(frozen=True)
@@ -39,6 +40,12 @@ class Config:
     def vocab(self, name: str | None = None) -> Vocabulary:
         return self.vocabularies[name or self.vocab_default]
 
+def _email_with_env_override(email: dict) -> dict:
+    addr = os.environ.get("GMAIL_ADDRESS", "").strip()
+    if addr:
+        return {**email, "from": addr, "to": addr}
+    return dict(email)
+
 def load_config(path: Path | None = None) -> Config:
     path = Path(path or Path.cwd() / "config.yaml").resolve()
     raw = yaml.safe_load(path.read_text())
@@ -62,7 +69,7 @@ def load_config(path: Path | None = None) -> Config:
         max_gap_s=float(raw["limits"]["max_gap_s"]),
         transcriber_model=raw["transcriber"]["model"],
         llm_model=raw["llm"]["model"],
-        email=raw["email"],
+        email=_email_with_env_override(raw["email"]),
         profanity=[w.lower() for w in raw.get("profanity", [])],
         repo_root=root,
     )

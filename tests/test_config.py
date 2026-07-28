@@ -21,3 +21,15 @@ def test_named_vocab_lookup():
     assert cfg.vocab("default").name == "default"
     with pytest.raises(KeyError):
         cfg.vocab("nope")
+
+def test_gmail_address_env_overrides_from_and_to(monkeypatch):
+    monkeypatch.setenv("GMAIL_ADDRESS", "robot@example.com")
+    cfg = load_config(REPO / "config.yaml")
+    assert cfg.email["from"] == "robot@example.com"
+    assert cfg.email["to"] == "robot@example.com"
+    assert cfg.email["smtp_host"] == "smtp.gmail.com"
+
+def test_no_gmail_address_env_keeps_yaml_values(monkeypatch):
+    monkeypatch.delenv("GMAIL_ADDRESS", raising=False)
+    cfg = load_config(REPO / "config.yaml")
+    assert cfg.email["from"] == "guhandiji@gmail.com"
