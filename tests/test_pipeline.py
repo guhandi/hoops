@@ -135,6 +135,28 @@ def test_malformed_sidecar_routes_to_needs_review(tmp_path, cfg):
     nr = cfg.repo_root / "needs_review"
     assert (nr / f.name).exists() and (nr / f.with_suffix(".json").name).exists()
 
+def test_sidecar_vocab_map_string_value_rejected(tmp_path, cfg):
+    f = audio(tmp_path)
+    f.with_suffix(".json").write_text('{"vocab_map": {"make": "swish", "miss": ["clank"]}}')
+    out = process_file(f, cfg, FakeTranscriber(make_env([])), email=False, archive="move")
+    assert out.status == "needs_review"
+    assert any("vocab_map" in flag and "make" in flag for flag in out.flags)
+
+def test_sidecar_vocab_map_missing_miss_key_rejected(tmp_path, cfg):
+    f = audio(tmp_path)
+    f.with_suffix(".json").write_text('{"vocab_map": {"make": ["bucket"]}}')
+    out = process_file(f, cfg, FakeTranscriber(make_env([])), email=False, archive="move")
+    assert out.status == "needs_review"
+    assert any("missing" in flag and "miss" in flag for flag in out.flags)
+
+def test_sidecar_vocab_map_bogus_canonical_key_rejected(tmp_path, cfg):
+    f = audio(tmp_path)
+    f.with_suffix(".json").write_text(
+        '{"vocab_map": {"mak": ["bucket"], "miss": ["clank"]}}')
+    out = process_file(f, cfg, FakeTranscriber(make_env([])), email=False, archive="move")
+    assert out.status == "needs_review"
+    assert any("mak" in flag for flag in out.flags)
+
 def test_explicit_vocab_name_beats_sidecar(tmp_path, cfg):
     f = audio(tmp_path)
     f.with_suffix(".json").write_text('{"vocab_map": {"make": ["bucket"], "miss": ["clank"]}}')

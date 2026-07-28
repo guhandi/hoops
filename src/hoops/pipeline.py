@@ -19,6 +19,34 @@ from .transcribe import (make_envelope, words_from_envelope, envelope_duration,
 class SidecarError(ValueError):
     pass
 
+def _validate_vocab_map(vm) -> None:
+    """Spec: 'never guess'. A sidecar vocab_map must be unambiguous — reject
+    anything that would silently produce a nonsense canonical key or a
+    per-character surface mapping (e.g. a string where a list was expected)."""
+    if not isinstance(vm, dict):
+        raise SidecarError("vocab_map must be a JSON object mapping "
+                            "'make'/'miss' to lists of surface forms")
+    keys = set(vm.keys())
+    required = {"make", "miss"}
+    if keys != required:
+        parts = []
+        missing = required - keys
+        extra = keys - required
+        if missing:
+            parts.append(f"missing {', '.join(sorted(missing))}")
+        if extra:
+            parts.append(f"unknown key(s) {', '.join(sorted(extra))}")
+        raise SidecarError("vocab_map must have exactly the keys 'make' and "
+                           f"'miss' ({'; '.join(parts)})")
+    for canonical, surfaces in vm.items():
+        if not isinstance(surfaces, list) or not surfaces:
+            raise SidecarError(f"vocab_map[{canonical!r}] must be a non-empty "
+                               "list of surface-form strings")
+        for s in surfaces:
+            if not isinstance(s, str) or not s:
+                raise SidecarError(f"vocab_map[{canonical!r}] has a non-string "
+                                   f"or empty surface form: {s!r}")
+
 def _resolve_vocab(path: Path, cfg: Config, vocab_name: str | None):
     """Returns (vocab, sidecar_path | None). Raises SidecarError on a bad sidecar."""
     if vocab_name:
@@ -37,6 +65,7 @@ def _resolve_vocab(path: Path, cfg: Config, vocab_name: str | None):
                 raise SidecarError(f"unknown vocabulary {data['vocabulary']!r} — "
                                    f"available: {', '.join(sorted(cfg.vocabularies))}")
         if "vocab_map" in data:
+            _validate_vocab_map(data["vocab_map"])
             return Vocabulary.from_dict("sidecar", data["vocab_map"]), sc
         raise SidecarError("sidecar needs a 'vocabulary' or 'vocab_map' key")
     except (json.JSONDecodeError, AttributeError, TypeError, ValueError) as e:
