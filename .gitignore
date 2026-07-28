@@ -1,0 +1,16 @@
+# secrets
+.env
+
+# derived / disposable
+out/
+hoops.db
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+
+# per-session binaries and derived artifacts (text stays committed)
+sessions/**/audio.m4a
+sessions/**/report.html
+sessions/**/strip.png
+sessions/**/pending_email
