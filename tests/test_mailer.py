@@ -28,3 +28,10 @@ def test_build_email_attachments(tmp_path):
             "transcript.txt", "strip.png", "audio.m4a"} <= names
     body = msg.get_body(("html",)).get_content()
     assert "cid:strip" in body
+    # Verify related image part has Content-Disposition: inline
+    for part in msg.walk():
+        if part.get("Content-ID") == "<strip>":
+            assert part.get_content_disposition() == "inline"
+            break
+    else:
+        pytest.fail("Related image part with Content-ID <strip> not found")

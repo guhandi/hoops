@@ -1,7 +1,6 @@
 import mimetypes, os, smtplib
 from datetime import date
 from email.message import EmailMessage
-from email.utils import make_msgid
 from pathlib import Path
 from .config import Config
 from .render import render_report
@@ -29,7 +28,7 @@ def build_email(stats: dict, session_dir: Path, narrative, flags: list[str],
     if strip.exists():
         msg.get_payload()[1].add_related(strip.read_bytes(), maintype="image",
                                          subtype="png", cid="<strip>",
-                                         filename="strip.png")
+                                         disposition="inline")
     for name in ARTIFACTS:
         p = session_dir / name
         if not p.exists():
