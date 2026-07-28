@@ -18,11 +18,30 @@ def main():
     if not sess_rows:
         print("no sessions found"); return
     def create(table, rows):
-        cols = list(rows[0].keys())
-        con.execute(f"CREATE TABLE {table} ({', '.join(c for c in cols)})")
-        con.executemany(f"INSERT INTO {table} VALUES ({', '.join('?' * len(cols))})",
-                        [[json.dumps(r[c]) if isinstance(r.get(c), (dict, list))
-                          else r.get(c) for c in cols] for r in rows])
+        # Build column list as union of keys across all rows, preserving first-seen order
+        cols = []
+        seen = set()
+        for row in rows:
+            for key in row.keys():
+                if key not in seen:
+                    cols.append(key)
+                    seen.add(key)
+        # CREATE TABLE with quoted identifiers
+        col_defs = ', '.join(f'"{c}"' for c in cols)
+        con.execute(f"CREATE TABLE {table} ({col_defs})")
+        # INSERT with r.get(c) to handle missing keys as NULL
+        placeholders = ', '.join('?' * len(cols))
+        values = []
+        for row in rows:
+            row_values = []
+            for col in cols:
+                val = row.get(col)
+                if isinstance(val, (dict, list)):
+                    row_values.append(json.dumps(val))
+                else:
+                    row_values.append(val)
+            values.append(row_values)
+        con.executemany(f"INSERT INTO {table} VALUES ({placeholders})", values)
     create("sessions", sess_rows)
     create("shots", shot_rows)
     con.commit()
