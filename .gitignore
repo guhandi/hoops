@@ -20,3 +20,4 @@ logs/
 .poll_state.json
 .poll.lock
 .superpowers/
+.DS_Store
