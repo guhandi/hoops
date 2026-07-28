@@ -105,3 +105,18 @@ def test_replay_rewrites_and_preserves_quote(tmp_path, cfg):
     assert r.status == "ok"
     assert read_session_json(out.session_dir)["quote_of_day"] == "kept quote"
     assert read_session_json(out.session_dir)["shots_to_three"] == 4
+
+def test_session_json_persists_vocab_and_replay_uses_it(tmp_path, cfg):
+    f = audio(tmp_path)
+    env = make_env([("make", 5.0, 5.3), ("miss", 12.0, 12.3)], duration=30.0)
+    out = process_file(f, cfg, FakeTranscriber(env), email=False,
+                       vocab_name="make_miss", cached_env=env, repair_enabled=False)
+    assert out.status == "ok"
+    stats = read_session_json(out.session_dir)
+    assert stats["vocab_name"] == "make_miss"
+    assert stats["vocab_map"] == {"make": "make", "miss": "miss"}
+    # replay with NO vocab arg must reuse the persisted make_miss mapping,
+    # even though the config default is swish_brick
+    r = replay_session(out.session_dir, cfg)
+    assert [row["result"] for row in r.rows] == ["make", "miss"]
+    assert read_session_json(out.session_dir)["vocab_name"] == "make_miss"

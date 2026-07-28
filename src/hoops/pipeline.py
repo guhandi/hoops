@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from mutagen.mp4 import MP4
 from . import PARSER_VERSION
-from .config import Config
+from .config import Config, Vocabulary
 from .invariants import check_invariants
 from .parse import parse_words
 from .repair import attempt_repair
@@ -107,6 +107,8 @@ def process_file(path: Path, cfg: Config, transcriber, *, email: bool,
         flags.append(f"session audio {dur:.0f}s exceeds {cfg.max_duration_s:.0f}s — forgot to stop?")
     stats["invariants_passed"] = not violations
     stats["session_id_source"] = sid_source
+    stats["vocab_name"] = vocab.name
+    stats["vocab_map"] = vocab.surface_to_canonical
 
     write_shots_csv(sdir, rows)
     write_session_json(sdir, stats)
@@ -151,7 +153,17 @@ def _email_needs_review(sdir: Path, sid: str, cfg: Config) -> None:
 
 def replay_session(sdir: Path, cfg: Config, vocab_name: str | None = None) -> Outcome:
     env = read_envelope(sdir)
-    vocab = cfg.vocab(vocab_name)
+    try:
+        old = read_session_json(sdir)
+    except FileNotFoundError:
+        old = {}
+    if vocab_name:
+        vocab = cfg.vocab(vocab_name)
+    elif old.get("vocab_map"):
+        vocab = Vocabulary(name=old.get("vocab_name", "persisted"),
+                           surface_to_canonical=old["vocab_map"])
+    else:
+        vocab = cfg.vocab(None)
     sid = sdir.name.removeprefix("hoops__")
     date_local, time_local = sid_date_and_time(sid)
     words = words_from_envelope(env)
@@ -164,13 +176,10 @@ def replay_session(sdir: Path, cfg: Config, vocab_name: str | None = None) -> Ou
         session_len_s=envelope_duration(env), transcriber=env["model"],
         parser_version=PARSER_VERSION, profanity=cfg.profanity)
     stats["invariants_passed"] = not violations
-    try:
-        old = read_session_json(sdir)
-        stats["quote_of_day"] = old.get("quote_of_day", "")
-        if "session_id_source" in old:
-            stats["session_id_source"] = old["session_id_source"]
-    except FileNotFoundError:
-        pass
+    stats["quote_of_day"] = old.get("quote_of_day", "")
+    if "session_id_source" in old:
+        stats["session_id_source"] = old["session_id_source"]
+    stats["vocab_name"], stats["vocab_map"] = vocab.name, vocab.surface_to_canonical
     flags = [f"{v.id}: {v.message}" for v in violations]
     write_shots_csv(sdir, rows)
     write_session_json(sdir, stats)
