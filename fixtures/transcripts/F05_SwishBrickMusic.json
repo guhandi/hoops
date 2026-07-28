@@ -1,0 +1,51 @@
+{
+  "model": "whisper-1",
+  "response": {
+    "duration": 58.97999954223633,
+    "language": "english",
+    "text": "break. break. splash. break. splash. break. splash.  ",
+    "segments": null,
+    "usage": {
+      "seconds": 59.0,
+      "type": "duration"
+    },
+    "words": [
+      {
+        "end": 4.699999809265137,
+        "start": 3.299999952316284,
+        "word": "break"
+      },
+      {
+        "end": 9.819999694824219,
+        "start": 9.4399995803833,
+        "word": "break"
+      },
+      {
+        "end": 17.360000610351562,
+        "start": 15.960000038146973,
+        "word": "splash"
+      },
+      {
+        "end": 23.360000610351562,
+        "start": 22.059999465942383,
+        "word": "break"
+      },
+      {
+        "end": 31.899999618530273,
+        "start": 30.5,
+        "word": "splash"
+      },
+      {
+        "end": 40.900001525878906,
+        "start": 39.5,
+        "word": "break"
+      },
+      {
+        "end": 47.86000061035156,
+        "start": 46.459999084472656,
+        "word": "splash"
+      }
+    ],
+    "task": "transcribe"
+  }
+}

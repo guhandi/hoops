@@ -1,0 +1,56 @@
+{
+  "model": "whisper-1",
+  "response": {
+    "duration": 33.54999923706055,
+    "language": "nynorsk",
+    "text": "break.   splash. actually, that was a break. break. ",
+    "segments": null,
+    "usage": {
+      "seconds": 34.0,
+      "type": "duration"
+    },
+    "words": [
+      {
+        "end": 4.900000095367432,
+        "start": 4.360000133514404,
+        "word": "break"
+      },
+      {
+        "end": 19.399999618530273,
+        "start": 18.860000610351562,
+        "word": "splash"
+      },
+      {
+        "end": 19.899999618530273,
+        "start": 19.540000915527344,
+        "word": "actually"
+      },
+      {
+        "end": 20.15999984741211,
+        "start": 20.040000915527344,
+        "word": "that"
+      },
+      {
+        "end": 20.260000228881836,
+        "start": 20.15999984741211,
+        "word": "was"
+      },
+      {
+        "end": 20.440000534057617,
+        "start": 20.260000228881836,
+        "word": "a"
+      },
+      {
+        "end": 20.559999465942383,
+        "start": 20.440000534057617,
+        "word": "break"
+      },
+      {
+        "end": 28.200000762939453,
+        "start": 26.799999237060547,
+        "word": "break"
+      }
+    ],
+    "task": "transcribe"
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "model": "whisper-1",
+  "response": {
+    "duration": 104.62999725341797,
+    "language": "nynorsk",
+    "text": "miss. miss. miss.   make. make. miss. miss. miss. miss. make. miss. miss.   make. make. make.",
+    "segments": null,
+    "usage": {
+      "seconds": 105.0,
+      "type": "duration"
+    },
+    "words": [
+      {
+        "end": 4.300000190734863,
+        "start": 3.5999999046325684,
+        "word": "miss"
+      },
+      {
+        "end": 11.819999694824219,
+        "start": 11.180000305175781,
+        "word": "miss"
+      },
+      {
+        "end": 19.639999389648438,
+        "start": 18.239999771118164,
+        "word": "miss"
+      },
+      {
+        "end": 35.560001373291016,
+        "start": 34.15999984741211,
+        "word": "make"
+      },
+      {
+        "end": 42.0,
+        "start": 41.91999816894531,
+        "word": "make"
+      },
+      {
+        "end": 49.47999954223633,
+        "start": 48.15999984741211,
+        "word": "miss"
+      },
+      {
+        "end": 53.08000183105469,
+        "start": 52.0,
+        "word": "miss"
+      },
+      {
+        "end": 55.459999084472656,
+        "start": 53.08000183105469,
+        "word": "miss"
+      },
+      {
+        "end": 58.86000061035156,
+        "start": 57.459999084472656,
+        "word": "miss"
+      },
+      {
+        "end": 66.22000122070312,
+        "start": 65.80000305175781,
+        "word": "make"
+      },
+      {
+        "end": 74.69999694824219,
+        "start": 74.0,
+        "word": "miss"
+      },
+      {
+        "end": 81.62000274658203,
+        "start": 80.22000122070312,
+        "word": "miss"
+      },
+      {
+        "end": 89.63999938964844,
+        "start": 89.45999908447266,
+        "word": "make"
+      },
+      {
+        "end": 96.83999633789062,
+        "start": 96.13999938964844,
+        "word": "make"
+      },
+      {
+        "end": 101.08000183105469,
+        "start": 100.19999694824219,
+        "word": "make"
+      }
+    ],
+    "task": "transcribe"
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "model": "whisper-1",
+  "response": {
+    "duration": 107.70999908447266,
+    "language": "nynorsk",
+    "text": "scratch that. break.  splash.  break. splash. break. splash. break. break. splash.  splash. splash.",
+    "segments": null,
+    "usage": {
+      "seconds": 108.0,
+      "type": "duration"
+    },
+    "words": [
+      {
+        "end": 0.0,
+        "start": 0.0,
+        "word": "scratch"
+      },
+      {
+        "end": 0.9800000190734863,
+        "start": 0.0,
+        "word": "that"
+      },
+      {
+        "end": 8.020000457763672,
+        "start": 6.619999885559082,
+        "word": "break"
+      },
+      {
+        "end": 28.260000228881836,
+        "start": 26.860000610351562,
+        "word": "splash"
+      },
+      {
+        "end": 39.13999938964844,
+        "start": 37.7400016784668,
+        "word": "break"
+      },
+      {
+        "end": 48.720001220703125,
+        "start": 48.0,
+        "word": "splash"
+      },
+      {
+        "end": 57.060001373291016,
+        "start": 55.65999984741211,
+        "word": "break"
+      },
+      {
+        "end": 63.060001373291016,
+        "start": 61.65999984741211,
+        "word": "splash"
+      },
+      {
+        "end": 70.94000244140625,
+        "start": 70.0,
+        "word": "break"
+      },
+      {
+        "end": 81.27999877929688,
+        "start": 79.87999725341797,
+        "word": "break"
+      },
+      {
+        "end": 88.80000305175781,
+        "start": 87.4000015258789,
+        "word": "splash"
+      },
+      {
+        "end": 104.16000366210938,
+        "start": 102.76000213623047,
+        "word": "splash"
+      },
+      {
+        "end": 107.68000030517578,
+        "start": 106.27999877929688,
+        "word": "splash"
+      }
+    ],
+    "task": "transcribe"
+  }
+}
