@@ -12,6 +12,11 @@ def test_normalize_token():
     assert normalize_token(" Make,") == "make"
     assert normalize_token("BRICK!") == "brick"
 
+def test_normalize_token_with_smart_quotes():
+    # Test with smart quotes: left-double-quote, right-double-quote
+    test_str = "“Make”"  # Left double quote + Make + right double quote
+    assert normalize_token(test_str) == "make"
+
 def test_words_from_envelope_with_segment_confidence():
     env = make_env([(" make", 1.0, 1.4), (" miss", 3.0, 3.4)])
     env["response"]["segments"] = [
@@ -32,6 +37,10 @@ def test_envelope_accessors():
     env = make_env([("a", 0.0, 0.5)], duration=9.9)
     assert envelope_duration(env) == 9.9
     assert envelope_text(env) == "a"
+
+def test_envelope_duration_zero():
+    env = make_env([("a", 0.0, 0.5)], duration=0.0)
+    assert envelope_duration(env) == 0.0
 
 def test_vocab_prompt_mentions_surfaces():
     v = Vocabulary.from_dict("default", {"make": ["make", "splash"], "miss": ["miss", "brick"]})

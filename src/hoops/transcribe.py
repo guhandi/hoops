@@ -5,7 +5,7 @@ from pathlib import Path
 from openai import OpenAI
 from .config import Vocabulary
 
-_PUNCT = string.punctuation + "''""…"
+_PUNCT = string.punctuation + "’‘”“…"
 
 def normalize_token(s: str) -> str:
     return s.strip().strip(_PUNCT).lower()
@@ -41,7 +41,7 @@ def envelope_text(env: dict) -> str:
 
 def envelope_duration(env: dict) -> float:
     resp = env["response"]
-    if resp.get("duration"):
+    if resp.get("duration") is not None:
         return float(resp["duration"])
     words = resp.get("words") or []
     return float(words[-1]["end"]) if words else 0.0
