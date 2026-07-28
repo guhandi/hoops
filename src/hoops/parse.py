@@ -61,7 +61,7 @@ def parse_words(words: list[Word], vocab: Vocabulary,
         canonical = vocab.surface_to_canonical.get(w.text)
         if canonical is None:
             continue
-        iso = _isolation(body, i)
+        iso = _isolation(words, i)
         if iso >= iso_high:
             calls.append(Call(result=canonical, raw_token=w.raw.strip(), t_s=w.start,
                               isolation_s=iso, confidence=w.confidence))

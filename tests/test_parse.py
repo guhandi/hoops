@@ -51,3 +51,23 @@ def test_no_note_returns_none():
 def test_empty_input():
     r = parse([])
     assert r.calls == [] and r.ambiguous == [] and r.note is None
+
+def test_isolation_computed_against_full_word_list_not_truncated():
+    # Regression: "make" (1.0–1.3) immediately before "note" (1.35–1.55) with gap 0.05s
+    # Gap to next word in FULL list is 0.05s, so isolation = min(inf, 0.05) = 0.05 <= 0.15 → discard
+    r = parse(words(("make", 1.0, 1.3), ("note", 1.35, 1.55), ("tired", 1.6, 1.9)))
+    assert r.calls == []
+    assert r.note == "tired"
+
+def test_word_far_from_note_is_accepted():
+    # "make" (1.0–1.3) far from "note" (5.0–5.2) with gap 3.7s
+    # isolation = min(inf, 3.7) = 3.7 >= 0.4 → call
+    r = parse(words(("make", 1.0, 1.3), ("note", 5.0, 5.2), ("tired", 5.5, 5.8)))
+    assert [c.result for c in r.calls] == ["make"]
+    assert r.note == "tired"
+
+def test_bare_note_with_nothing_after_returns_none():
+    # Decision encoding: trailing "note" token with no content after it returns note=None
+    r = parse(words(("make", 1.0, 1.3), ("note", 5.0, 5.2)))
+    assert [c.result for c in r.calls] == ["make"]
+    assert r.note is None
