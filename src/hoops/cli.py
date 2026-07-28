@@ -73,6 +73,8 @@ def main() -> int:
     if args.command == "transcribe-fixtures":
         import shutil
         for row in read_manifest(cfg.repo_root / "fixtures" / "manifest.csv"):
+            if not row.get("filename") or row.get("status", "recorded") != "recorded":
+                continue
             if args.only and args.only not in row["filename"]:
                 continue
             cache = transcript_cache_path(cfg.repo_root, row["filename"])

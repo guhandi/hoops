@@ -8,6 +8,10 @@ from conftest import make_env
 pytestmark = pytest.mark.unit
 REPO = Path(__file__).resolve().parents[1]
 GOOD = [("brick", 5.0, 5.3), ("swish", 12.0, 12.3), ("swish", 18.0, 18.3), ("swish", 24.0, 24.3)]
+NEW_HEADER = ("filename,fixture_id,category,status,vocabulary,duration_s,size_bytes,"
+              "audio_format,conditions,what_it_tests,use_for,timing_ground_truth,"
+              "beep_interval_s,expected_calls,expected_shot_count,expect_invariants_pass,"
+              "contains_correction,contains_note,traps_planted,label_status,notes")
 
 class FakeTranscriber:
     model_id = "fake"
@@ -22,9 +26,17 @@ def sandbox(tmp_path):
     shutil.copy(REPO / "fixtures" / "dev" / "dev03.m4a",
                 tmp_path / "fixtures" / "dev" / "dev01.m4a")
     (tmp_path / "fixtures" / "manifest.csv").write_text(
-        "filename,expected_calls,traps_planted,expect_invariants_pass,vocab,gating,expected_gaps,notes\n"
-        "dev/dev01.m4a,miss make make make,,yes,,no,,smoke\n")
+        NEW_HEADER + "\n"
+        "dev/dev01.m4a,D01,dev,recorded,,,,aac,x,x,regression,FALSE,,"
+        "miss make make make,,TRUE,,,,LABELED,smoke\n")
     return load_config(tmp_path / "config.yaml")
+
+def test_run_all_skips_not_recorded_and_blank_filename(sandbox):
+    (sandbox.repo_root / "fixtures" / "manifest.csv").write_text(
+        NEW_HEADER + "\n"
+        ",F03,fixture,NOT_RECORDED,swish_brick,,,,x,x,GATE,FALSE,,,,TRUE,,,,NOT_RECORDED,missing\n")
+    entries = run_all(sandbox, FakeTranscriber(make_env([])), sandbox.repo_root / "fixtures")
+    assert entries == []
 
 def test_cache_path():
     assert transcript_cache_path(Path("/r"), "dev/dev01.m4a") == \
