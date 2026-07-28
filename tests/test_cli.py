@@ -15,3 +15,9 @@ def test_replay_flags():
     p = build_parser()
     assert p.parse_args(["replay", "--all"]).all is True
     assert p.parse_args(["replay", "20260727-061204"]).sid == "20260727-061204"
+
+def test_process_accepts_vocab_flag():
+    p = build_parser()
+    args = p.parse_args(["process", "some.m4a", "--vocab", "make_miss"])
+    assert args.vocab == "make_miss"
+    assert p.parse_args(["process", "some.m4a"]).vocab is None
