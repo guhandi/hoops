@@ -7,7 +7,7 @@ from conftest import make_env
 
 pytestmark = pytest.mark.unit
 REPO = Path(__file__).resolve().parents[1]
-GOOD = [("miss", 5.0, 5.3), ("make", 12.0, 12.3), ("make", 18.0, 18.3), ("make", 24.0, 24.3)]
+GOOD = [("brick", 5.0, 5.3), ("swish", 12.0, 12.3), ("swish", 18.0, 18.3), ("swish", 24.0, 24.3)]
 
 def old(path):  # push mtime beyond the 60s freshness guard
     ts = time.time() - 120

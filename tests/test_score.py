@@ -24,7 +24,7 @@ def row(filename, expected, traps="", gating="yes", gaps=""):
             "expect_invariants_pass": "yes", "vocab": "", "gating": gating,
             "expected_gaps": gaps, "notes": ""}
 
-CLEAN = [("miss", 5.0, 5.3), ("make", 12.0, 12.3), ("make", 18.0, 18.3), ("make", 24.0, 24.3)]
+CLEAN = [("brick", 5.0, 5.3), ("swish", 12.0, 12.3), ("swish", 18.0, 18.3), ("swish", 24.0, 24.3)]
 
 def test_exact_match(sandbox):
     put_cache(sandbox, "f01.m4a", CLEAN)
@@ -43,7 +43,7 @@ def test_gap_mae(sandbox):
     assert s.gap_mae == pytest.approx(0.0)
 
 def test_invariant_mismatch_detected(sandbox):
-    words = [("miss", 5.0, 5.3), ("make", 12.0, 12.3)]      # only 2 live calls -> invariants fail
+    words = [("brick", 5.0, 5.3), ("swish", 12.0, 12.3)]      # only 2 live calls -> invariants fail
     put_cache(sandbox, "f10.m4a", words)
     s = score_fixture(row("f10.m4a", "miss make"), sandbox)  # row() hardcodes expect_invariants_pass=yes
     assert s.invariants_ok_expected is True and s.invariants_ok_got is False
@@ -52,7 +52,7 @@ def test_invariant_mismatch_detected(sandbox):
 
 def test_score_and_print_fails_on_invariant_mismatch(sandbox, capsys):
     from hoops.score import score_and_print
-    words = [("miss", 5.0, 5.3), ("make", 12.0, 12.3)]
+    words = [("brick", 5.0, 5.3), ("swish", 12.0, 12.3)]
     put_cache(sandbox, "f10.m4a", words)
     (sandbox.repo_root / "fixtures" / "manifest.csv").write_text(
         "filename,expected_calls,traps_planted,expect_invariants_pass,vocab,gating,expected_gaps,notes\n"

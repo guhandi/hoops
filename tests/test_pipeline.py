@@ -8,8 +8,8 @@ from conftest import make_env
 
 pytestmark = pytest.mark.unit
 REPO = Path(__file__).resolve().parents[1]
-GOOD = [("okay", 0.5, 0.8), ("miss", 5.0, 5.3), ("come", 8.0, 8.2), ("on", 8.25, 8.4),
-        ("make", 12.0, 12.3), ("make", 18.0, 18.3), ("make", 24.0, 24.3),
+GOOD = [("okay", 0.5, 0.8), ("brick", 5.0, 5.3), ("come", 8.0, 8.2), ("on", 8.25, 8.4),
+        ("swish", 12.0, 12.3), ("swish", 18.0, 18.3), ("swish", 24.0, 24.3),
         ("note", 27.0, 27.2), ("felt", 27.5, 27.7), ("good", 27.8, 28.0)]
 
 class FakeTranscriber:
@@ -88,7 +88,7 @@ def test_needs_review_respects_out_root(tmp_path, cfg):
     assert not (cfg.repo_root / "needs_review").exists()
 
 def test_invariant_failure_flagged_not_dropped(tmp_path, cfg):
-    env = make_env([("make", 5.0, 5.3), ("miss", 10.0, 10.3)], duration=30.0)
+    env = make_env([("swish", 5.0, 5.3), ("brick", 10.0, 10.3)], duration=30.0)
     out = process_file(audio(tmp_path), cfg, FakeTranscriber(env), email=False,
                        archive="copy", repair_enabled=False)
     assert out.status == "ok"
