@@ -59,3 +59,60 @@ def test_script_backend_failure_is_skip(env, tmp_path):
 def test_registry_has_all_six_backends():
     assert set(rb.BACKENDS) == {"whisper-1", "faster-whisper", "mlx-whisper",
                                 "parakeet-mlx", "whisperx", "crisper-whisper"}
+
+def test_partial_file_cleaned_on_failure(env, tmp_path):
+    """Bug fix: partial file left by crashed script should be cleaned up and not cached next run."""
+    cfg, out_root = env
+    # Script that writes partial JSON then crashes
+    STUB_PARTIAL = """\
+# /// script
+# requires-python = ">=3.10"
+# dependencies = []
+# ///
+import json, sys
+from pathlib import Path
+out = sys.argv[2]
+Path(out).parent.mkdir(parents=True, exist_ok=True)
+Path(out).write_text("{")  # Write invalid partial JSON
+raise RuntimeError('crash after partial write')
+"""
+    rb.BACKENDS["stub"] = {"kind": "script", "script": _write_stub(tmp_path, STUB_PARTIAL)}
+    try:
+        # First run: crash after partial write
+        assert rb.run_one("stub", ROW, cfg, out_root, force=False, timeout=60) == "skip"
+        assert "crash after partial write" in rb.SKIPS[-1]["reason"]
+        # File should have been cleaned up
+        assert not (out_root / "transcripts" / "stub" / "F01.json").exists()
+        # Second run: file doesn't exist, so should try again (not cached)
+        rb.SKIPS.clear()
+        # Replace with a working script
+        rb.BACKENDS["stub"]["script"] = _write_stub(tmp_path, STUB_OK)
+        result = rb.run_one("stub", ROW, cfg, out_root, force=False, timeout=60)
+        assert result == "ok", "Should re-run when partial file is cleaned up"
+        assert (out_root / "transcripts" / "stub" / "F01.json").exists()
+    finally:
+        del rb.BACKENDS["stub"]; rb.SKIPS.clear()
+
+def test_invalid_output_cleaned_on_exit_0(env, tmp_path):
+    """Bug fix: script exiting 0 with invalid JSON should be reported as skip."""
+    cfg, out_root = env
+    # Script that exits 0 but writes invalid JSON
+    STUB_INVALID_JSON = """\
+# /// script
+# requires-python = ">=3.10"
+# dependencies = []
+# ///
+import json, sys
+from pathlib import Path
+out = sys.argv[2]
+Path(out).parent.mkdir(parents=True, exist_ok=True)
+Path(out).write_text('{"not": "valid schema"}')  # Valid JSON but invalid schema
+"""
+    rb.BACKENDS["stub"] = {"kind": "script", "script": _write_stub(tmp_path, STUB_INVALID_JSON)}
+    try:
+        assert rb.run_one("stub", ROW, cfg, out_root, force=False, timeout=60) == "skip"
+        assert rb.SKIPS and "model_id" in rb.SKIPS[-1]["reason"], "Should report schema validation error"
+        # File should be cleaned up
+        assert not (out_root / "transcripts" / "stub" / "F01.json").exists()
+    finally:
+        del rb.BACKENDS["stub"]; rb.SKIPS.clear()

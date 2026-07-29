@@ -44,8 +44,12 @@ def run_one(model: str, row: dict, cfg, out_root: Path, force: bool, timeout: in
             proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
             if proc.returncode != 0 or not out_json.exists():
                 raise RuntimeError(proc.stderr[-500:] or f"exit {proc.returncode}")
+            # Validate output is valid JSON and correct schema
+            from benchmarks.transcribers.base import TranscriptResult
+            TranscriptResult.load(out_json)
         return "ok"
     except Exception as e:  # noqa: BLE001 — any backend failure is a logged skip
+        out_json.unlink(missing_ok=True)  # Clean up any partial/corrupt output
         SKIPS.append({"model": model, "fixture": fid, "reason": repr(e)[:500]})
         return "skip"
 
