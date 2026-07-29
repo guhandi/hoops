@@ -186,6 +186,32 @@ def test_pending_email_marker_kept_on_repeated_failure(cfg, monkeypatch):
     assert poll_once(cfg, None) == []
     assert (sdir / "pending_email").exists()
 
+def test_is_dataless_predicate():
+    from types import SimpleNamespace
+    from hoops.ingest import _is_dataless
+    assert _is_dataless(SimpleNamespace(st_size=100, st_blocks=0))
+    assert not _is_dataless(SimpleNamespace(st_size=100, st_blocks=8))
+    assert not _is_dataless(SimpleNamespace(st_size=0, st_blocks=0))  # empty file must not brctl-loop
+
+def test_dataless_triggers_download_and_skips(cfg, monkeypatch):
+    f = drop(cfg)
+    calls = []
+    monkeypatch.setattr("hoops.ingest._is_dataless", lambda st: True)
+    monkeypatch.setattr("hoops.ingest.subprocess.run", lambda cmd, **k: calls.append(cmd))
+    ready, state = stable_files(cfg.inbox, {}, "hoops")
+    assert ready == []                                   # never process a stub
+    assert calls == [["brctl", "download", str(f)]]
+    assert state[f.name]["size"] == f.stat().st_size     # size remembered while downloading
+
+def test_materialized_file_no_download(cfg, monkeypatch):
+    f = drop(cfg)
+    calls = []
+    monkeypatch.setattr("hoops.ingest.subprocess.run", lambda cmd, **k: calls.append(cmd))
+    _, state = stable_files(cfg.inbox, {}, "hoops")
+    ready, _ = stable_files(cfg.inbox, state, "hoops")
+    assert ready == [f]                                  # normal two-poll flow intact
+    assert calls == []                                   # no brctl for local files
+
 def test_alert_refires_at_multiples_of_three(cfg, monkeypatch):
     class BoomTranscriber:
         model_id = "fake"

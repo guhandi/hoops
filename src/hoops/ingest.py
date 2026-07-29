@@ -3,6 +3,12 @@ from pathlib import Path
 from .config import Config
 from .pipeline import process_file
 
+def _is_dataless(st: os.stat_result) -> bool:
+    # iCloud "Optimize Mac Storage" evicts file content but keeps the entry
+    # under its real name: logical st_size intact, zero blocks on disk.
+    # (st_flags SF_DATALESS also marks these; blocks==0 is the portable signal.)
+    return st.st_size > 0 and st.st_blocks == 0
+
 def stable_files(inbox: Path, state: dict, prefix: str) -> tuple[list[Path], dict]:
     pat = re.compile(rf"^{re.escape(prefix)}__.*\.m4a$")
     new_state = {k: v for k, v in state.items() if k.startswith("_")}
@@ -18,7 +24,10 @@ def stable_files(inbox: Path, state: dict, prefix: str) -> tuple[list[Path], dic
         try:
             st = p.stat()
             size = st.st_size
-            new_state[p.name] = {"size": size}
+            new_state[p.name] = {"size": size}      # remember size even while downloading
+            if _is_dataless(st):
+                subprocess.run(["brctl", "download", str(p)], check=False)
+                continue
             prev = state.get(p.name)
             if prev and prev["size"] == size and time.time() - p.stat().st_mtime > 60:
                 ready.append(p)
