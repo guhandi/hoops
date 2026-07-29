@@ -163,13 +163,15 @@ def test_assemble_metrics_integration():
 
         # F02: Real consensus + bait for isolation split
         # model_a: detects swish (high isolation) and brick (high isolation) - both consensus
-        # model_b: detects same swish and brick, PLUS hallucinated extra "splash" (low isolation) - bait
+        # model_b: detects same swish and brick, PLUS a hallucinated "splash" wedged right next
+        # to a filler word ("uh") so its isolation is genuinely low, unlike the well-separated
+        # real calls. Words are listed in chronological order (detect()'s gap math assumes it).
         f02_a = {
             "model_id": "model_a",
             "fixture": "F02",
             "words": [
-                {"word": "swish", "start": 3.0, "end": 3.4, "confidence": None},  # High isolation
-                {"word": "brick", "start": 15.0, "end": 15.4, "confidence": None},  # High isolation
+                {"word": "swish", "start": 3.0, "end": 3.4, "confidence": None},  # High isolation (11.6)
+                {"word": "brick", "start": 15.0, "end": 15.4, "confidence": None},  # High isolation (11.6)
             ],
             "text": "swish brick",
             "runtime_s": 0.4,
@@ -180,11 +182,12 @@ def test_assemble_metrics_integration():
             "model_id": "model_b",
             "fixture": "F02",
             "words": [
-                {"word": "swish", "start": 3.1, "end": 3.5, "confidence": None},  # High isolation
-                {"word": "brick", "start": 15.1, "end": 15.5, "confidence": None},  # High isolation
-                {"word": "splash", "start": 10.0, "end": 10.4, "confidence": None},  # Hallucinated, low isolation
+                {"word": "swish", "start": 3.1, "end": 3.5, "confidence": None},  # isolation 6.3
+                {"word": "uh", "start": 9.8, "end": 9.9, "confidence": None},  # filler, not a vocab word
+                {"word": "splash", "start": 10.0, "end": 10.4, "confidence": None},  # Hallucinated, isolation 0.1
+                {"word": "brick", "start": 15.1, "end": 15.5, "confidence": None},  # isolation 4.7
             ],
-            "text": "swish splash brick",
+            "text": "swish uh splash brick",
             "runtime_s": 0.45,
             "peak_rss_mb": 108.0,
             "prompt_used": False,
@@ -291,14 +294,20 @@ def test_assemble_metrics_integration():
         assert len(metrics["unknown_vocab"]) > 0, "unknown_vocab must be populated"
         assert any(u["fixture_id"] == "F05" for u in metrics["unknown_vocab"])
 
-        # ===== ASSERTION: Detection counts with ACTUAL VALUES =====
-        # Verify formula: extra = found - matched
-        f01_summary_a = metrics["models"]["model_a"]
-        f01_summary_b = metrics["models"]["model_b"]
-        assert f01_summary_a["detections_found"] >= 1
-        assert f01_summary_a["detections_matched"] >= 1
-        assert f01_summary_a["detections_extra"] == f01_summary_a["detections_found"] - f01_summary_a["detections_matched"]
-        assert f01_summary_b["detections_extra"] == f01_summary_b["detections_found"] - f01_summary_b["detections_matched"]
+        # ===== ASSERTION: Detection counts with ACTUAL VALUES (models summary) =====
+        # These are cumulative across F01, F02, F03, F04, F06 (F05 is skipped as unknown
+        # vocab). Every fixture is fully agreed except F02, where model_b hallucinates
+        # "splash" (1 extra, 2 matched, 3 found) while model_a stays clean (2 matched, 2
+        # found, 0 extra). Since extra is additive per fixture, the aggregate must show
+        # exactly model_a: 0 extra, model_b: 1 extra -- not just a self-consistent formula.
+        model_a_summary = metrics["models"]["model_a"]
+        model_b_summary = metrics["models"]["model_b"]
+        assert model_a_summary["detections_found"] == 9
+        assert model_a_summary["detections_matched"] == 9
+        assert model_a_summary["detections_extra"] == 0, "model_a never hallucinates: extra must be 0"
+        assert model_b_summary["detections_found"] == 6
+        assert model_b_summary["detections_matched"] == 5
+        assert model_b_summary["detections_extra"] == 1, "model_b hallucinated 1 extra call (F02 splash)"
 
         # ===== ASSERTION: F02 hallucination - model_b has extra detection =====
         # model_a: found=2 (swish, brick), matched=2 (both consensus), extra=0
@@ -351,14 +360,16 @@ def test_assemble_metrics_integration():
             assert isinstance(gap_stats["max"], (int, float))
 
         # ===== ASSERTION: Isolation split with REAL threshold/margin values =====
-        # F02 has consensus clusters (high isolation real) and non-consensus (low isolation bait)
-        # Should compute actual threshold
-        assert "isolation" in metrics
+        # F02's consensus detections (swish, brick) sit far from any neighboring word
+        # (isolation 4.7-11.6); the hallucinated "splash" is wedged next to a filler word
+        # (isolation 0.1). recommend_threshold must find a clean, positive-margin split --
+        # asserted unconditionally, no `if` guard, since real/bait are both non-empty here.
         isolation = metrics["isolation"]
-        assert "threshold" in isolation, "F02 should produce threshold (has real + bait)"
-        assert "margin" in isolation, "F02 should produce margin"
-        assert isinstance(isolation["threshold"], (int, float))
-        assert isinstance(isolation["margin"], (int, float))
+        assert isolation["threshold"] == pytest.approx(2.4)
+        assert isolation["margin"] == pytest.approx(4.6)
+        assert isolation["margin"] > 0, "real and bait isolation values must not overlap"
+        assert isolation["real_below"] == 0
+        assert isolation["bait_above"] == 0
 
         # Verify draft_truth.csv
         draft_truth_file = out_root / "draft_truth.csv"
