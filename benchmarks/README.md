@@ -20,8 +20,8 @@ This benchmark measures **timestamp quality** of ASR backends across recorded ho
 - `ffmpeg` on PATH (used by local transcriber scripts for audio decoding)
 
 **Optional (for specific backends):**
-- `HF_TOKEN` in `.env` if using CrisperWhisper backend and you have not yet accepted its license at https://huggingface.co/Vaibhavs10/Crisper-Whisper
-  - First run will prompt you to accept the license in the HF CLI if the token is missing; subsequent runs use the cached model.
+- The `crisper-whisper` backend loads the gated model at https://huggingface.co/nyrahealth/CrisperWhisper. Before running it: accept the license on that model page while logged into your HF account, and set `HF_TOKEN` in `.env` to a token for that account.
+  - The backend runs as a non-interactive subprocess — it cannot prompt you to accept the license. If the license hasn't been accepted or `HF_TOKEN` is missing/invalid, it just fails and gets recorded as a skip in `benchmarks/out/skips.json`.
 
 ---
 
@@ -85,7 +85,9 @@ uv run python benchmarks/report.py
 
 Some backends may fail on certain fixtures (missing library, OOM, timeout, API error, etc.).
 
-If a backend fails on *the first fixture* and has no cached results, it is assumed broken for that model and all remaining fixtures are skipped. Otherwise, individual failures are logged in `benchmarks/out/skips.json` and that fixture is regenerated if you re-run with `--force` or delete the cached transcript.
+If a backend fails on *the first fixture* and has no cached results, it is assumed broken for that model (env-resolve/import failure) and all remaining fixtures are skipped — *unless* that first-fixture failure was a timeout. A timeout proves the environment resolved and the model actually started running (it's just slow relative to `--timeout`), so it does not trigger the model-wide abort; the run continues to the remaining fixtures for that model. Timeout skips are logged with reason `"timeout after Ns"` so they're distinguishable from other failures in `skips.json`. Otherwise, individual failures are logged in `benchmarks/out/skips.json` and that fixture is regenerated if you re-run with `--force` or delete the cached transcript.
+
+Running the benchmark in multiple staged invocations (e.g. one per model, or one per fixture subset) is safe: each run merges its skip entries into the existing `skips.json` rather than overwriting it, replacing only the entries for the (model, fixture) pairs it re-reports.
 
 Always inspect `benchmarks/out/skips.json` before analyzing if you see unexpected model coverage gaps.
 

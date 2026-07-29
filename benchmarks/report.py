@@ -121,7 +121,13 @@ def _summary_table(metrics: dict) -> str:
     if not models:
         return '<p class="muted">No model data.</p>'
 
-    total_fixtures = len(fixtures)
+    # Prefer analyze.py's eligible-fixture total (all recorded manifest rows) over
+    # len(fixtures) (fixtures with >=1 transcript), since the latter inflates coverage
+    # when a fixture is missed by every model. Fall back to the old behavior for
+    # metrics.json produced before n_fixtures_total existed.
+    total_fixtures = metrics.get("n_fixtures_total")
+    if total_fixtures is None:
+        total_fixtures = len(fixtures)
     rows = []
     for model in models:
         data = models_data[model]

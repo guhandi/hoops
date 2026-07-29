@@ -80,6 +80,29 @@ def silence_words(words, silence_start):
     return sum(1 for w in words if w.start >= silence_start)
 
 
+def fixture_duration(row: dict, transcript: TranscriptResult) -> tuple[float | None, bool]:
+    """Duration estimate for a fixture, in seconds.
+
+    Manifest `duration_s` wins when present and parseable. When it's blank/unparseable
+    (e.g. dev fixtures D01-D04, whose duration_s column is empty in the manifest),
+    fall back to the transcript's own last-word end time as an estimate. Returns
+    (duration_or_None, used_fallback).
+    """
+    raw = row.get("duration_s")
+    if raw:
+        try:
+            duration = float(raw)
+            if duration > 0:
+                return duration, False
+        except (ValueError, TypeError):
+            pass
+    if transcript.words:
+        duration = max(w.end for w in transcript.words)
+        if duration > 0:
+            return duration, True
+    return None, False
+
+
 def assemble_metrics(out_root: Path, manifest_rows: list[dict], vocabs: dict[str, dict],
                     vocab_default: str = "swish_brick") -> None:
     """Load all cached transcripts and manifest, compute full metrics.
@@ -90,9 +113,9 @@ def assemble_metrics(out_root: Path, manifest_rows: list[dict], vocabs: dict[str
         vocabs: Dict mapping vocabulary name to surface_to_canonical dict
         vocab_default: Default vocabulary name if fixture specifies none
     """
-    # Load skips
+    # Load skips (real shape on disk is a list of {model, fixture, reason} dicts)
     skips_file = out_root / "skips.json"
-    skips = json.loads(skips_file.read_text()) if skips_file.exists() else {}
+    skips = json.loads(skips_file.read_text()) if skips_file.exists() else []
 
     # Build a map of fixture_id -> row
     manifest_by_fixture = {row["fixture_id"]: row for row in manifest_rows}
@@ -220,20 +243,20 @@ def assemble_metrics(out_root: Path, manifest_rows: list[dict], vocabs: dict[str
         found_count = 0
         matched_count = 0
         extra_count = 0
+        duration_fallback_count = 0
 
         for fixture_id, transcript in transcripts_by_model[model].items():
             row = manifest_by_fixture.get(fixture_id)
             if not row:
                 continue
             runtimes.append(transcript.runtime_s)
-            if row.get("duration_s"):
-                try:
-                    duration = float(row["duration_s"])
-                    rtf = transcript.runtime_s / duration
-                    rtfs.append(rtf)
-                    total_minutes += duration / 60.0
-                except (ValueError, TypeError):
-                    pass
+            duration, used_fallback = fixture_duration(row, transcript)
+            if duration is not None:
+                rtf = transcript.runtime_s / duration
+                rtfs.append(rtf)
+                total_minutes += duration / 60.0
+                if used_fallback:
+                    duration_fallback_count += 1
             if transcript.peak_rss_mb is not None:
                 peak_rss_list.append(transcript.peak_rss_mb)
 
@@ -270,6 +293,7 @@ def assemble_metrics(out_root: Path, manifest_rows: list[dict], vocabs: dict[str
         summary["detections_found"] = found_count
         summary["detections_matched"] = matched_count
         summary["detections_extra"] = extra_count
+        summary["duration_fallback_fixtures"] = duration_fallback_count
 
         models_summary[model] = summary
 
@@ -302,6 +326,16 @@ def assemble_metrics(out_root: Path, manifest_rows: list[dict], vocabs: dict[str
     # Silence metric: placeholder since no recorded fixture has known silence region
     silence_metric = {"status": "pending F10"}
 
+    # Total eligible fixture count for coverage denominators: manifest rows that were
+    # actually recorded (filename present, status == "recorded") — the same criterion
+    # run_benchmark.py uses to decide what to transcribe. Using len(metrics["fixtures"])
+    # instead (fixtures with >=1 transcript) inflates every model's coverage whenever a
+    # fixture is missed by ALL models, since it simply wouldn't appear there.
+    n_fixtures_total = sum(
+        1 for row in manifest_rows
+        if row.get("filename") and row.get("status", "recorded") == "recorded"
+    )
+
     # Assemble output
     metrics_output = {
         "models": models_summary,
@@ -312,6 +346,7 @@ def assemble_metrics(out_root: Path, manifest_rows: list[dict], vocabs: dict[str
         "silence": silence_metric,
         "load_errors": load_errors,
         "unknown_vocab": unknown_vocab_warnings,
+        "n_fixtures_total": n_fixtures_total,
     }
 
     # Write draft_truth.csv

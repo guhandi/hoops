@@ -1,4 +1,4 @@
-import json, sys
+import json, subprocess, sys
 import pytest
 from pathlib import Path
 from benchmarks import run_benchmark as rb
@@ -116,3 +116,124 @@ Path(out).write_text('{"not": "valid schema"}')  # Valid JSON but invalid schema
         assert not (out_root / "transcripts" / "stub" / "F01.json").exists()
     finally:
         del rb.BACKENDS["stub"]; rb.SKIPS.clear()
+
+
+def test_timeout_produces_distinct_skip_reason(env, tmp_path, monkeypatch):
+    """Finding 1(a): a subprocess timeout must be reported with a distinct, greppable
+    reason (f"timeout after {timeout}s"), not the generic repr(e) used for other
+    failures — that's what lets it be told apart from an env-resolve/import failure
+    both when reading skips.json and by the first-fixture abort rule."""
+    cfg, out_root = env
+    rb.BACKENDS["stub"] = {"kind": "script", "script": _write_stub(tmp_path, STUB_OK)}
+
+    def fake_run(cmd, capture_output, text, timeout):
+        raise subprocess.TimeoutExpired(cmd=cmd, timeout=timeout)
+
+    monkeypatch.setattr(rb.subprocess, "run", fake_run)
+    try:
+        assert rb.run_one("stub", ROW, cfg, out_root, force=False, timeout=42) == "skip"
+        assert rb.SKIPS[-1] == {"model": "stub", "fixture": "F01", "reason": "timeout after 42s"}
+        assert not (out_root / "transcripts" / "stub" / "F01.json").exists()
+    finally:
+        del rb.BACKENDS["stub"]; rb.SKIPS.clear()
+
+
+def test_run_model_does_not_abort_on_first_fixture_timeout(monkeypatch):
+    """Finding 1(b): when the FIRST fixture's failure is a timeout, the model-wide
+    abort must NOT fire — a timeout proves the env resolved and the model ran, so the
+    remaining fixtures for that model must still be attempted."""
+    rows = [{"fixture_id": "F01"}, {"fixture_id": "F02"}]
+    calls = []
+
+    def fake_run_one(model, row, cfg, out_root, force, timeout):
+        calls.append(row["fixture_id"])
+        if row["fixture_id"] == "F01":
+            rb.SKIPS.append({"model": model, "fixture": "F01", "reason": f"timeout after {timeout}s"})
+            return "skip"
+        return "ok"
+
+    monkeypatch.setattr(rb, "run_one", fake_run_one)
+    try:
+        counts = rb.run_model("stub", rows, cfg=None, out_root=None, force=False, timeout=42)
+        assert calls == ["F01", "F02"], "second fixture must still be attempted after a first-fixture timeout"
+        assert counts == {"ok": 1, "cached": 0, "skip": 1}
+        # Only the timeout skip should be present -- no "first fixture failed" abort entry.
+        assert rb.SKIPS == [{"model": "stub", "fixture": "F01", "reason": "timeout after 42s"}]
+    finally:
+        rb.SKIPS.clear()
+
+
+def test_run_model_aborts_on_first_fixture_non_timeout_failure(monkeypatch):
+    """The abort rule is still meant for real env-resolve/import failures: a
+    non-timeout failure on the first fixture must still skip the rest of the model."""
+    rows = [{"fixture_id": "F01"}, {"fixture_id": "F02"}]
+    calls = []
+
+    def fake_run_one(model, row, cfg, out_root, force, timeout):
+        calls.append(row["fixture_id"])
+        rb.SKIPS.append({"model": model, "fixture": row["fixture_id"], "reason": "ModuleNotFoundError(...)"})
+        return "skip"
+
+    monkeypatch.setattr(rb, "run_one", fake_run_one)
+    try:
+        counts = rb.run_model("stub", rows, cfg=None, out_root=None, force=False, timeout=42)
+        assert calls == ["F01"], "second fixture must NOT be attempted after a non-timeout first failure"
+        assert counts == {"ok": 0, "cached": 0, "skip": 1}
+        assert rb.SKIPS == [
+            {"model": "stub", "fixture": "F01", "reason": "ModuleNotFoundError(...)"},
+            {"model": "stub", "fixture": "*", "reason": "first fixture failed; skipping model"},
+        ]
+    finally:
+        rb.SKIPS.clear()
+
+
+def test_merge_skips_no_existing_file(tmp_path):
+    new = [{"model": "m1", "fixture": "F01", "reason": "boom"}]
+    assert rb.merge_skips(tmp_path, new) == new
+
+
+def test_merge_skips_preserves_unrelated_entries_and_replaces_matching(tmp_path):
+    """Finding 2: staged invocations (e.g. one per model) must not clobber each other's
+    skip entries. Re-reporting a (model, fixture) pair replaces its old entry; unrelated
+    entries from earlier stages survive."""
+    existing = [
+        {"model": "m1", "fixture": "F01", "reason": "old m1 F01 reason"},
+        {"model": "m2", "fixture": "F01", "reason": "m2 F01 reason (untouched)"},
+    ]
+    (tmp_path / "skips.json").write_text(json.dumps(existing))
+    new = [{"model": "m1", "fixture": "F01", "reason": "new m1 F01 reason"},
+           {"model": "m1", "fixture": "F02", "reason": "m1 F02 reason"}]
+
+    merged = rb.merge_skips(tmp_path, new)
+
+    assert {"model": "m2", "fixture": "F01", "reason": "m2 F01 reason (untouched)"} in merged
+    assert {"model": "m1", "fixture": "F01", "reason": "new m1 F01 reason"} in merged
+    assert {"model": "m1", "fixture": "F01", "reason": "old m1 F01 reason"} not in merged
+    assert {"model": "m1", "fixture": "F02", "reason": "m1 F02 reason"} in merged
+    assert len(merged) == 3
+
+
+def test_merge_skips_tolerates_corrupt_existing_file(tmp_path):
+    (tmp_path / "skips.json").write_text("{not valid json")
+    new = [{"model": "m1", "fixture": "F01", "reason": "boom"}]
+    assert rb.merge_skips(tmp_path, new) == new
+
+
+def test_merge_skips_tolerates_wrong_shape_existing_file(tmp_path):
+    """A pre-fix skips.json could have been written as a dict; tolerate that too."""
+    (tmp_path / "skips.json").write_text(json.dumps({"not": "a list"}))
+    new = [{"model": "m1", "fixture": "F01", "reason": "boom"}]
+    assert rb.merge_skips(tmp_path, new) == new
+
+
+def test_main_warns_on_empty_fixture_filter(monkeypatch, capsys, tmp_path):
+    """Finding 7: a typo'd --fixtures value matching zero manifest rows must print a
+    clear warning instead of silently reporting success."""
+    monkeypatch.setattr(sys, "argv", ["run_benchmark.py", "--models", "whisper-1",
+                                      "--fixtures", "NO_SUCH_FIXTURE_ID"])
+    monkeypatch.setattr(rb, "OUT", tmp_path / "bench_out")
+    monkeypatch.setattr(rb, "run_model", lambda *a, **k: {"ok": 0, "cached": 0, "skip": 0})
+    rb.main()
+    out = capsys.readouterr().out
+    assert "no rows matched" in out
+    assert "NO_SUCH_FIXTURE_ID" in out

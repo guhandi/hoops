@@ -4,7 +4,8 @@ import tempfile
 from pathlib import Path
 from benchmarks.transcribers.base import BWord, TranscriptResult
 from benchmarks.analyze import (detect, gap_stats, cluster, recommend_threshold,
-                                pairwise_agreement, silence_words, assemble_metrics)
+                                pairwise_agreement, silence_words, assemble_metrics,
+                                fixture_duration)
 
 pytestmark = pytest.mark.unit
 V = {"swish": "make", "splash": "make", "brick": "miss", "break": "miss"}
@@ -55,6 +56,48 @@ def test_pairwise_agreement():
 def test_silence_words():
     assert silence_words([W("the", 100.0, 100.3)], 90.0) == 1
     assert silence_words([W("the", 80.0, 80.3)], 90.0) == 0
+
+
+def _transcript(words, runtime_s=1.0):
+    return TranscriptResult(model_id="m", fixture="F", words=words, text="",
+                             runtime_s=runtime_s, peak_rss_mb=None, prompt_used=False)
+
+
+def test_fixture_duration_uses_manifest_when_present():
+    t = _transcript([W("swish", 0.0, 0.3)])
+    duration, used_fallback = fixture_duration({"duration_s": "30.0"}, t)
+    assert duration == pytest.approx(30.0)
+    assert used_fallback is False
+
+
+def test_fixture_duration_falls_back_to_last_word_end_when_blank():
+    """Finding 4: D01-D04 have empty duration_s in the manifest; without a fallback,
+    cost_usd undercounts for whisper-1 and those fixtures' RTF silently drops out."""
+    t = _transcript([W("swish", 0.0, 0.3), W("brick", 10.0, 10.4), W("swish", 25.5, 25.9)])
+    duration, used_fallback = fixture_duration({"duration_s": ""}, t)
+    assert duration == pytest.approx(25.9)
+    assert used_fallback is True
+
+
+def test_fixture_duration_falls_back_when_manifest_value_unparseable():
+    t = _transcript([W("swish", 0.0, 0.3), W("brick", 12.0, 12.4)])
+    duration, used_fallback = fixture_duration({"duration_s": "not-a-number"}, t)
+    assert duration == pytest.approx(12.4)
+    assert used_fallback is True
+
+
+def test_fixture_duration_falls_back_when_manifest_value_non_positive():
+    t = _transcript([W("swish", 0.0, 0.3), W("brick", 8.0, 8.4)])
+    duration, used_fallback = fixture_duration({"duration_s": "0"}, t)
+    assert duration == pytest.approx(8.4)
+    assert used_fallback is True
+
+
+def test_fixture_duration_none_when_no_manifest_value_and_no_words():
+    t = _transcript([])
+    duration, used_fallback = fixture_duration({"duration_s": ""}, t)
+    assert duration is None
+    assert used_fallback is False
 
 
 def test_assemble_metrics_integration():
@@ -376,3 +419,123 @@ def test_assemble_metrics_integration():
         assert draft_truth_file.exists()
         draft_truth_lines = draft_truth_file.read_text().strip().split("\n")
         assert draft_truth_lines[0] == "fixture_id,draft_expected_calls,disagreements"
+
+
+def test_duration_fallback_counted_in_model_summary_and_cost():
+    """Finding 4 (integration): a fixture with blank manifest duration_s (like the real
+    D01-D04 dev fixtures) must still contribute to RTF/cost via the transcript-derived
+    fallback duration, and the fallback usage must be surfaced per model."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmpdir = Path(tmpdir)
+        out_root = tmpdir / "out"
+        (out_root / "transcripts" / "whisper-1").mkdir(parents=True)
+
+        manifest_rows = [
+            {"fixture_id": "F01", "filename": "F01.wav", "status": "recorded",
+             "vocabulary": "swish_brick", "duration_s": "30.0",
+             "timing_ground_truth": "FALSE", "beep_interval_s": "", "expected_calls": ""},
+            {"fixture_id": "D01", "filename": "dev/dev01.m4a", "status": "recorded",
+             "vocabulary": "make_miss", "duration_s": "",
+             "timing_ground_truth": "FALSE", "beep_interval_s": "", "expected_calls": ""},
+        ]
+        vocabs = {
+            "swish_brick": {"swish": "make", "splash": "make", "brick": "miss", "break": "miss"},
+            "make_miss": {"make": "make", "miss": "miss"},
+        }
+
+        f01 = {"model_id": "whisper-1", "fixture": "F01",
+               "words": [{"word": "swish", "start": 5.0, "end": 5.4, "confidence": None}],
+               "text": "swish", "runtime_s": 3.0, "peak_rss_mb": None, "prompt_used": True}
+        d01 = {"model_id": "whisper-1", "fixture": "D01",
+               "words": [{"word": "make", "start": 29.5, "end": 30.0, "confidence": None}],
+               "text": "make", "runtime_s": 3.0, "peak_rss_mb": None, "prompt_used": True}
+        (out_root / "transcripts" / "whisper-1" / "F01.json").write_text(json.dumps(f01))
+        (out_root / "transcripts" / "whisper-1" / "D01.json").write_text(json.dumps(d01))
+        (out_root / "skips.json").write_text(json.dumps([]))
+
+        assemble_metrics(out_root=out_root, manifest_rows=manifest_rows, vocabs=vocabs,
+                          vocab_default="swish_brick")
+
+        metrics = json.loads((out_root / "metrics.json").read_text())
+        summary = metrics["models"]["whisper-1"]
+
+        # D01's duration_s is blank -> its 30.0s duration comes entirely from the
+        # transcript's last-word end (29.5-30.0), so exactly 1 fixture used the fallback.
+        assert summary["duration_fallback_fixtures"] == 1
+        # total_minutes = 30.0/60 (F01, manifest) + 30.0/60 (D01, fallback) = 1.0 minute
+        assert summary["cost_usd"] == pytest.approx(0.006)
+        # rtf = 3.0/30.0 = 0.1 for both fixtures
+        assert summary["rtf_mean"] == pytest.approx(0.1)
+        assert summary["rtf_median"] == pytest.approx(0.1)
+
+
+def test_n_fixtures_total_counts_only_recorded_rows_with_filename():
+    """Finding 6: n_fixtures_total must reflect the eligible (recorded, has-audio)
+    manifest rows -- the same criterion run_benchmark.py uses to pick what to
+    transcribe -- not just fixtures that happen to have a transcript already."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmpdir = Path(tmpdir)
+        out_root = tmpdir / "out"
+        (out_root / "transcripts" / "whisper-1").mkdir(parents=True)
+
+        manifest_rows = [
+            {"fixture_id": "F01", "filename": "F01.wav", "status": "recorded",
+             "vocabulary": "swish_brick", "duration_s": "30.0",
+             "timing_ground_truth": "FALSE", "beep_interval_s": "", "expected_calls": ""},
+            {"fixture_id": "D01", "filename": "dev/dev01.m4a", "status": "recorded",
+             "vocabulary": "make_miss", "duration_s": "",
+             "timing_ground_truth": "FALSE", "beep_interval_s": "", "expected_calls": ""},
+            # No "status" key at all -> defaults to "recorded" (matches hoops/fixtures.py
+            # convention row.get("status", "recorded")); still eligible.
+            {"fixture_id": "D02", "filename": "dev/dev02.m4a",
+             "vocabulary": "make_miss", "duration_s": "",
+             "timing_ground_truth": "FALSE", "beep_interval_s": "", "expected_calls": ""},
+            # NOT_RECORDED placeholder row (like real F09/F10 in the manifest): no audio,
+            # must not count toward the eligible total.
+            {"fixture_id": "F09", "filename": "", "status": "NOT_RECORDED",
+             "vocabulary": "swish_brick", "duration_s": "",
+             "timing_ground_truth": "FALSE", "beep_interval_s": "", "expected_calls": ""},
+        ]
+        vocabs = {
+            "swish_brick": {"swish": "make", "splash": "make", "brick": "miss", "break": "miss"},
+            "make_miss": {"make": "make", "miss": "miss"},
+        }
+        f01 = {"model_id": "whisper-1", "fixture": "F01",
+               "words": [{"word": "swish", "start": 5.0, "end": 5.4, "confidence": None}],
+               "text": "swish", "runtime_s": 3.0, "peak_rss_mb": None, "prompt_used": True}
+        (out_root / "transcripts" / "whisper-1" / "F01.json").write_text(json.dumps(f01))
+        (out_root / "skips.json").write_text(json.dumps([]))
+
+        assemble_metrics(out_root=out_root, manifest_rows=manifest_rows, vocabs=vocabs,
+                          vocab_default="swish_brick")
+
+        metrics = json.loads((out_root / "metrics.json").read_text())
+        # F01, D01, D02 are recorded-with-filename; F09 (NOT_RECORDED, no filename) is not.
+        assert metrics["n_fixtures_total"] == 3
+
+
+def test_missing_skips_file_defaults_to_empty_list():
+    """Finding 5: skips.json's real shape on disk is a list, not a dict -- the
+    missing-file fallback must match that shape."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmpdir = Path(tmpdir)
+        out_root = tmpdir / "out"
+        (out_root / "transcripts" / "model_a").mkdir(parents=True)
+
+        manifest_rows = [
+            {"fixture_id": "F01", "filename": "F01.wav", "status": "recorded",
+             "vocabulary": "swish_brick", "duration_s": "30.0",
+             "timing_ground_truth": "FALSE", "beep_interval_s": "", "expected_calls": ""},
+        ]
+        vocabs = {"swish_brick": {"swish": "make", "splash": "make", "brick": "miss", "break": "miss"}}
+        f01 = {"model_id": "model_a", "fixture": "F01",
+               "words": [{"word": "swish", "start": 5.0, "end": 5.4, "confidence": None}],
+               "text": "swish", "runtime_s": 1.0, "peak_rss_mb": None, "prompt_used": False}
+        (out_root / "transcripts" / "model_a" / "F01.json").write_text(json.dumps(f01))
+        # Deliberately do NOT create out_root/skips.json.
+
+        assemble_metrics(out_root=out_root, manifest_rows=manifest_rows, vocabs=vocabs,
+                          vocab_default="swish_brick")
+
+        metrics = json.loads((out_root / "metrics.json").read_text())
+        assert metrics["skips"] == []

@@ -227,3 +227,26 @@ def test_assemble_metrics_integration_feeds_report():
         assert "crisper-whisper" in html_out  # skips footer
         low = html_out.lower()
         assert "cdn" not in low and 'src="http' not in low and 'href="http' not in low
+
+
+def test_coverage_uses_n_fixtures_total_when_present():
+    """Finding 6: len(metrics["fixtures"]) only counts fixtures with >=1 transcript, so
+    a fixture missed by EVERY model never appears there and silently inflates every
+    model's coverage fraction/label. n_fixtures_total (surfaced by analyze.py) is the
+    correct denominator."""
+    metrics = {**METRICS, "n_fixtures_total": 5}
+    html_out = render(metrics, DRAFT_TRUTH_ROWS)
+    # Both model_a and model_b appear in all 3 fixtures present in METRICS["fixtures"],
+    # so against the true total of 5 the coverage label must read 3/5, not 3/3.
+    assert "3/5" in html_out
+    assert "3/3" not in html_out
+
+
+def test_coverage_falls_back_to_len_fixtures_when_n_fixtures_total_absent():
+    """metrics.json produced before n_fixtures_total existed must still render a
+    sensible (if under-informed) coverage fraction rather than crashing."""
+    metrics = {k: v for k, v in METRICS.items() if k != "n_fixtures_total"}
+    assert "n_fixtures_total" not in metrics
+    html_out = render(metrics, DRAFT_TRUTH_ROWS)
+    # Old behavior: denominator is len(metrics["fixtures"]) == 3 (F01, F03, F06).
+    assert "3/3" in html_out
