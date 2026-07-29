@@ -2,7 +2,7 @@
 .env
 
 # derived / disposable
-out/
+/out/
 hoops.db
 __pycache__/
 *.pyc
@@ -21,3 +21,7 @@ logs/
 .poll.lock
 .superpowers/
 .DS_Store
+
+# benchmark outputs (transcripts are committed, metrics/report/skips regenerated)
+benchmarks/out/*
+!benchmarks/out/transcripts/
