@@ -134,13 +134,11 @@ def assemble_metrics(out_root: Path, manifest_rows: list[dict], vocabs: dict[str
 
         # Load transcripts for this fixture from all models
         dets_by_model = {}
-        transcripts_for_fixture = {}
         for model in models:
             if fixture_id in transcripts_by_model.get(model, {}):
                 transcript = transcripts_by_model[model][fixture_id]
                 dets = detect(transcript.words, surface_to_canonical)
                 dets_by_model[model] = dets
-                transcripts_for_fixture[model] = transcript
 
         # Skip if no transcripts for this fixture
         if not dets_by_model:
@@ -170,18 +168,24 @@ def assemble_metrics(out_root: Path, manifest_rows: list[dict], vocabs: dict[str
             "disagreements": disagreements_str,
         })
 
-        # Detection accuracy: sequence match of canonicals
+        # Determine reference sequence for accuracy
         expected_calls_str = row.get("expected_calls", "").strip()
         has_expected = expected_calls_str and expected_calls_str != "NEEDS_LABELING"
         if has_expected:
-            # Mode A: match against expected_calls
-            expected_seq = expected_calls_str.split()
-            accuracy = 1.0 if expected_seq == consensus_canonicals else 0.0
+            reference_seq = expected_calls_str.split()
             accuracy_mode = "expected"
         else:
-            # Mode B: match against consensus (assume consensus is ground truth)
-            accuracy = 1.0
+            reference_seq = consensus_canonicals
             accuracy_mode = "consensus"
+
+        # Per-model accuracy: compare each model's detected sequence to reference
+        per_model_accuracy = {}
+        for model, dets in dets_by_model.items():
+            # Get this model's canonical sequence in time order
+            model_canonicals = [d["canonical"] for d in sorted(dets, key=lambda d: d["mid"])]
+            # Sequence match
+            accuracy = 1.0 if model_canonicals == reference_seq else 0.0
+            per_model_accuracy[model] = accuracy
 
         # Gap stats for beep fixtures
         beep_fixture = row.get("timing_ground_truth", "").upper() in ("TRUE", "YES")
@@ -201,18 +205,21 @@ def assemble_metrics(out_root: Path, manifest_rows: list[dict], vocabs: dict[str
         metrics_by_fixture[fixture_id] = {
             "detections_by_model": {model: dets for model, dets in dets_by_model.items()},
             "clusters": clusters,
-            "accuracy": accuracy,
             "accuracy_mode": accuracy_mode,
+            "per_model_accuracy": per_model_accuracy,
             "gap_stats": gap_stats_by_model,
         }
 
-    # Compute per-model summary stats
+    # Compute per-model summary stats and detection counts
     models_summary = {}
     for model in models:
         runtimes = []
         rtfs = []
         peak_rss_list = []
         total_minutes = 0
+        found_count = 0
+        matched_count = 0
+        extra_count = 0
 
         for fixture_id, transcript in transcripts_by_model[model].items():
             row = manifest_by_fixture.get(fixture_id)
@@ -230,6 +237,25 @@ def assemble_metrics(out_root: Path, manifest_rows: list[dict], vocabs: dict[str
             if transcript.peak_rss_mb is not None:
                 peak_rss_list.append(transcript.peak_rss_mb)
 
+            # Count detections for this fixture and model
+            if fixture_id in metrics_by_fixture:
+                dets = metrics_by_fixture[fixture_id]["detections_by_model"].get(model, [])
+                found_count += len(dets)
+                clusters = metrics_by_fixture[fixture_id]["clusters"]
+                # Count matched: detections that belong to a consensus cluster
+                for c in clusters:
+                    if c["consensus"] and model in c["models"]:
+                        matched_count += 1
+                # Count extra: detections not in any consensus cluster
+                for d in dets:
+                    in_consensus = False
+                    for c in clusters:
+                        if c["consensus"] and model in c["models"] and d in c["models"][model].values():
+                            in_consensus = True
+                            break
+                    if not in_consensus:
+                        extra_count += 1
+
         summary = {}
         if runtimes:
             summary["runtime_mean"] = round(statistics.mean(runtimes), 3)
@@ -244,6 +270,11 @@ def assemble_metrics(out_root: Path, manifest_rows: list[dict], vocabs: dict[str
         if model == "whisper-1" and total_minutes > 0:
             summary["cost_usd"] = round(0.006 * total_minutes, 3)
 
+        # Add detection counts
+        summary["detections_found"] = found_count
+        summary["detections_matched"] = matched_count
+        summary["detections_extra"] = extra_count
+
         models_summary[model] = summary
 
     # Compute pairwise agreement over all fixtures' clusters combined
@@ -256,14 +287,13 @@ def assemble_metrics(out_root: Path, manifest_rows: list[dict], vocabs: dict[str
     if f02_row and "F02" in metrics_by_fixture:
         f02_metrics = metrics_by_fixture["F02"]
         f02_clusters = f02_metrics["clusters"]
-        # Real: detections within window of a consensus cluster of same canonical
-        # Bait: the rest
+        # Real: detections in consensus clusters of same canonical
+        # Bait: detections outside consensus clusters (isolation-based filtering)
         real = []
         bait = []
-        window = 0.75
         for c in f02_clusters:
             if c["consensus"]:
-                # All detections in this cluster
+                # All detections in this consensus cluster
                 for d in c["models"].values():
                     real.append(d["isolation"])
             else:
