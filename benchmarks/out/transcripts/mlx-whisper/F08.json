@@ -1,0 +1,64 @@
+{
+ "model_id": "mlx-whisper-large-v3",
+ "fixture": "F08",
+ "words": [
+  {
+   "word": "break.",
+   "start": 4.06,
+   "end": 4.64,
+   "confidence": 0.09259033203125
+  },
+  {
+   "word": "splash.",
+   "start": 11.06,
+   "end": 11.64,
+   "confidence": 0.11920166015625
+  },
+  {
+   "word": "splash.",
+   "start": 18.46,
+   "end": 19.04,
+   "confidence": 0.76171875
+  },
+  {
+   "word": "actually",
+   "start": 19.32,
+   "end": 19.72,
+   "confidence": 0.396240234375
+  },
+  {
+   "word": "that",
+   "start": 19.72,
+   "end": 20.02,
+   "confidence": 0.58837890625
+  },
+  {
+   "word": "was",
+   "start": 20.02,
+   "end": 20.18,
+   "confidence": 0.99365234375
+  },
+  {
+   "word": "a",
+   "start": 20.18,
+   "end": 20.2,
+   "confidence": 0.99267578125
+  },
+  {
+   "word": "break.",
+   "start": 20.2,
+   "end": 20.42,
+   "confidence": 0.91552734375
+  },
+  {
+   "word": "splash.",
+   "start": 30.0,
+   "end": 30.98,
+   "confidence": 0.1890869140625
+  }
+ ],
+ "text": "break. splash. splash. actually that was a break. splash.",
+ "runtime_s": 13.496030458016321,
+ "peak_rss_mb": 1794.310144,
+ "prompt_used": true
+}

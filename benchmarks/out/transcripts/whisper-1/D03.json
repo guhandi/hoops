@@ -1,0 +1,52 @@
+{
+ "model_id": "whisper-1",
+ "fixture": "D03",
+ "words": [
+  {
+   "word": "miss",
+   "start": 2.440000057220459,
+   "end": 3.140000104904175,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 7.619999885559082,
+   "end": 8.199999809265137,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 13.0,
+   "end": 13.579999923706055,
+   "confidence": null
+  },
+  {
+   "word": "make",
+   "start": 18.639999389648438,
+   "end": 18.65999984741211,
+   "confidence": null
+  },
+  {
+   "word": "make",
+   "start": 23.959999084472656,
+   "end": 25.360000610351562,
+   "confidence": null
+  },
+  {
+   "word": "make",
+   "start": 33.5,
+   "end": 34.900001525878906,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 38.5,
+   "end": 39.540000915527344,
+   "confidence": null
+  }
+ ],
+ "text": "miss. miss. miss. make. make. make. miss.",
+ "runtime_s": 3.11151562500163,
+ "peak_rss_mb": null,
+ "prompt_used": true
+}

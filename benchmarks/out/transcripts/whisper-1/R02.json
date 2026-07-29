@@ -1,0 +1,70 @@
+{
+ "model_id": "whisper-1",
+ "fixture": "R02",
+ "words": [
+  {
+   "word": "make",
+   "start": 13.119999885559082,
+   "end": 14.520000457763672,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 14.539999961853027,
+   "end": 14.5600004196167,
+   "confidence": null
+  },
+  {
+   "word": "make",
+   "start": 17.0,
+   "end": 17.780000686645508,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 23.780000686645508,
+   "end": 25.18000030517578,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 43.400001525878906,
+   "end": 44.79999923706055,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 52.279998779296875,
+   "end": 53.0,
+   "confidence": null
+  },
+  {
+   "word": "make",
+   "start": 61.20000076293945,
+   "end": 62.599998474121094,
+   "confidence": null
+  },
+  {
+   "word": "make",
+   "start": 73.54000091552734,
+   "end": 73.73999786376953,
+   "confidence": null
+  },
+  {
+   "word": "make",
+   "start": 80.63999938964844,
+   "end": 80.87999725341797,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 84.80000305175781,
+   "end": 85.54000091552734,
+   "confidence": null
+  }
+ ],
+ "text": "make. miss. make. miss.   miss. miss. make.  make. make. miss.",
+ "runtime_s": 3.5069734590069856,
+ "peak_rss_mb": null,
+ "prompt_used": true
+}

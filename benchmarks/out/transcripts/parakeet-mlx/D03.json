@@ -1,0 +1,52 @@
+{
+ "model_id": "parakeet-tdt-0.6b-mlx",
+ "fixture": "D03",
+ "words": [
+  {
+   "word": "Miss",
+   "start": 3.04,
+   "end": 3.6,
+   "confidence": null
+  },
+  {
+   "word": "Miss",
+   "start": 6.8,
+   "end": 7.28,
+   "confidence": null
+  },
+  {
+   "word": "Miss",
+   "start": 12.32,
+   "end": 12.88,
+   "confidence": null
+  },
+  {
+   "word": "Make",
+   "start": 18.24,
+   "end": 18.88,
+   "confidence": null
+  },
+  {
+   "word": "Make",
+   "start": 24.96,
+   "end": 25.52,
+   "confidence": null
+  },
+  {
+   "word": "Make",
+   "start": 32.72,
+   "end": 33.36,
+   "confidence": null
+  },
+  {
+   "word": "Miss",
+   "start": 39.12,
+   "end": 39.6,
+   "confidence": null
+  }
+ ],
+ "text": "Miss Miss Miss Make Make Make Miss",
+ "runtime_s": 3.7075012080022134,
+ "peak_rss_mb": 870.465536,
+ "prompt_used": false
+}

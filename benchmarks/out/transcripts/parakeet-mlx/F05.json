@@ -1,0 +1,334 @@
+{
+ "model_id": "parakeet-tdt-0.6b-mlx",
+ "fixture": "F05",
+ "words": [
+  {
+   "word": "Brick",
+   "start": 4.16,
+   "end": 4.8,
+   "confidence": null
+  },
+  {
+   "word": "Break",
+   "start": 8.8,
+   "end": 9.44,
+   "confidence": null
+  },
+  {
+   "word": "Walking",
+   "start": 10.4,
+   "end": 10.96,
+   "confidence": null
+  },
+  {
+   "word": "on",
+   "start": 10.96,
+   "end": 11.2,
+   "confidence": null
+  },
+  {
+   "word": "the",
+   "start": 11.2,
+   "end": 11.36,
+   "confidence": null
+  },
+  {
+   "word": "dream",
+   "start": 11.36,
+   "end": 12.0,
+   "confidence": null
+  },
+  {
+   "word": "Hopping",
+   "start": 14.08,
+   "end": 14.56,
+   "confidence": null
+  },
+  {
+   "word": "lights",
+   "start": 14.72,
+   "end": 15.04,
+   "confidence": null
+  },
+  {
+   "word": "blood",
+   "start": 15.28,
+   "end": 15.6,
+   "confidence": null
+  },
+  {
+   "word": "Splash",
+   "start": 16.88,
+   "end": 17.52,
+   "confidence": null
+  },
+  {
+   "word": "Talking",
+   "start": 18.0,
+   "end": 18.48,
+   "confidence": null
+  },
+  {
+   "word": "to",
+   "start": 18.48,
+   "end": 18.8,
+   "confidence": null
+  },
+  {
+   "word": "myself",
+   "start": 18.8,
+   "end": 19.44,
+   "confidence": null
+  },
+  {
+   "word": "We",
+   "start": 21.76,
+   "end": 21.84,
+   "confidence": null
+  },
+  {
+   "word": "are",
+   "start": 22.0,
+   "end": 22.08,
+   "confidence": null
+  },
+  {
+   "word": "still",
+   "start": 22.24,
+   "end": 22.32,
+   "confidence": null
+  },
+  {
+   "word": "together",
+   "start": 22.56,
+   "end": 22.96,
+   "confidence": null
+  },
+  {
+   "word": "We",
+   "start": 25.6,
+   "end": 25.92,
+   "confidence": null
+  },
+  {
+   "word": "are",
+   "start": 25.92,
+   "end": 26.16,
+   "confidence": null
+  },
+  {
+   "word": "always",
+   "start": 26.16,
+   "end": 26.48,
+   "confidence": null
+  },
+  {
+   "word": "running",
+   "start": 26.48,
+   "end": 26.96,
+   "confidence": null
+  },
+  {
+   "word": "for",
+   "start": 26.96,
+   "end": 27.2,
+   "confidence": null
+  },
+  {
+   "word": "the",
+   "start": 27.2,
+   "end": 27.36,
+   "confidence": null
+  },
+  {
+   "word": "thrill",
+   "start": 27.36,
+   "end": 27.68,
+   "confidence": null
+  },
+  {
+   "word": "of",
+   "start": 27.76,
+   "end": 27.92,
+   "confidence": null
+  },
+  {
+   "word": "it",
+   "start": 27.92,
+   "end": 28.08,
+   "confidence": null
+  },
+  {
+   "word": "Thrill",
+   "start": 28.4,
+   "end": 28.64,
+   "confidence": null
+  },
+  {
+   "word": "of",
+   "start": 28.72,
+   "end": 28.88,
+   "confidence": null
+  },
+  {
+   "word": "it",
+   "start": 28.88,
+   "end": 29.12,
+   "confidence": null
+  },
+  {
+   "word": "Always",
+   "start": 29.44,
+   "end": 29.76,
+   "confidence": null
+  },
+  {
+   "word": "pushing",
+   "start": 29.76,
+   "end": 30.32,
+   "confidence": null
+  },
+  {
+   "word": "up",
+   "start": 30.32,
+   "end": 30.48,
+   "confidence": null
+  },
+  {
+   "word": "the",
+   "start": 30.64,
+   "end": 30.8,
+   "confidence": null
+  },
+  {
+   "word": "real",
+   "start": 30.8,
+   "end": 30.88,
+   "confidence": null
+  },
+  {
+   "word": "self",
+   "start": 31.12,
+   "end": 31.28,
+   "confidence": null
+  },
+  {
+   "word": "of",
+   "start": 32.56,
+   "end": 32.64,
+   "confidence": null
+  },
+  {
+   "word": "it",
+   "start": 32.64,
+   "end": 32.8,
+   "confidence": null
+  },
+  {
+   "word": "All",
+   "start": 33.12,
+   "end": 33.28,
+   "confidence": null
+  },
+  {
+   "word": "at",
+   "start": 33.44,
+   "end": 33.6,
+   "confidence": null
+  },
+  {
+   "word": "all",
+   "start": 33.6,
+   "end": 33.68,
+   "confidence": null
+  },
+  {
+   "word": "and",
+   "start": 33.92,
+   "end": 34.08,
+   "confidence": null
+  },
+  {
+   "word": "all",
+   "start": 34.16,
+   "end": 34.32,
+   "confidence": null
+  },
+  {
+   "word": "we",
+   "start": 34.48,
+   "end": 34.64,
+   "confidence": null
+  },
+  {
+   "word": "are",
+   "start": 34.64,
+   "end": 34.8,
+   "confidence": null
+  },
+  {
+   "word": "calling",
+   "start": 35.04,
+   "end": 35.52,
+   "confidence": null
+  },
+  {
+   "word": "out",
+   "start": 35.52,
+   "end": 35.68,
+   "confidence": null
+  },
+  {
+   "word": "not",
+   "start": 35.92,
+   "end": 36.0,
+   "confidence": null
+  },
+  {
+   "word": "together",
+   "start": 36.24,
+   "end": 36.72,
+   "confidence": null
+  },
+  {
+   "word": "Never",
+   "start": 37.04,
+   "end": 37.36,
+   "confidence": null
+  },
+  {
+   "word": "looking",
+   "start": 37.36,
+   "end": 37.76,
+   "confidence": null
+  },
+  {
+   "word": "down",
+   "start": 37.92,
+   "end": 38.08,
+   "confidence": null
+  },
+  {
+   "word": "Splash",
+   "start": 47.36,
+   "end": 48.0,
+   "confidence": null
+  },
+  {
+   "word": "Splash",
+   "start": 52.16,
+   "end": 52.88,
+   "confidence": null
+  },
+  {
+   "word": "Splash",
+   "start": 56.16,
+   "end": 56.8,
+   "confidence": null
+  }
+ ],
+ "text": "Brick Break Walking on the dream Hopping lights blood Splash Talking to myself We are still together We are always running for the thrill of it Thrill of it Always pushing up the real self of it All at all and all we are calling out not together Never looking down Splash Splash Splash",
+ "runtime_s": 4.255836791009642,
+ "peak_rss_mb": 583.532544,
+ "prompt_used": false
+}

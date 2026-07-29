@@ -1,0 +1,46 @@
+{
+ "model_id": "whisperx-large-v3-int8",
+ "fixture": "D02",
+ "words": [
+  {
+   "word": "shooting",
+   "start": 1.35,
+   "end": 1.61,
+   "confidence": 0.244
+  },
+  {
+   "word": "my",
+   "start": 1.65,
+   "end": 2.211,
+   "confidence": 0.91
+  },
+  {
+   "word": "basketball",
+   "start": 2.291,
+   "end": 2.691,
+   "confidence": 0.422
+  },
+  {
+   "word": "shots.",
+   "start": 2.711,
+   "end": 3.072,
+   "confidence": 0.588
+  },
+  {
+   "word": "thank",
+   "start": 76.812,
+   "end": 77.002,
+   "confidence": 0.432
+  },
+  {
+   "word": "you.",
+   "start": 77.023,
+   "end": 77.234,
+   "confidence": 0.333
+  }
+ ],
+ "text": "shooting my basketball shots. thank you.",
+ "runtime_s": 51.52040199999465,
+ "peak_rss_mb": 2548.36736,
+ "prompt_used": true
+}

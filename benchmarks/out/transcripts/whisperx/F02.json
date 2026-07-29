@@ -1,0 +1,28 @@
+{
+ "model_id": "whisperx-large-v3-int8",
+ "fixture": "F02",
+ "words": [
+  {
+   "word": "so",
+   "start": 13.932,
+   "end": 14.073,
+   "confidence": 0.907
+  },
+  {
+   "word": "much",
+   "start": 14.114,
+   "end": 14.275,
+   "confidence": 0.768
+  },
+  {
+   "word": "better.",
+   "start": 14.335,
+   "end": 14.577,
+   "confidence": 0.606
+  }
+ ],
+ "text": "so much better.",
+ "runtime_s": 28.861503958003595,
+ "peak_rss_mb": 2675.277824,
+ "prompt_used": true
+}

@@ -1,0 +1,220 @@
+{
+ "model_id": "mlx-whisper-large-v3",
+ "fixture": "D04",
+ "words": [
+  {
+   "word": "make.",
+   "start": 1.98,
+   "end": 3.38,
+   "confidence": 0.00238800048828125
+  },
+  {
+   "word": "miss.",
+   "start": 9.34,
+   "end": 10.74,
+   "confidence": 0.311279296875
+  },
+  {
+   "word": "miss.",
+   "start": 17.24,
+   "end": 18.64,
+   "confidence": 0.97998046875
+  },
+  {
+   "word": "miss.",
+   "start": 21.3,
+   "end": 22.7,
+   "confidence": 0.99365234375
+  },
+  {
+   "word": "miss.",
+   "start": 25.06,
+   "end": 26.46,
+   "confidence": 0.0068511962890625
+  },
+  {
+   "word": "miss.",
+   "start": 35.06,
+   "end": 35.76,
+   "confidence": 0.00281524658203125
+  },
+  {
+   "word": "make.",
+   "start": 40.7,
+   "end": 41.46,
+   "confidence": 0.79638671875
+  },
+  {
+   "word": "miss.",
+   "start": 48.5,
+   "end": 49.2,
+   "confidence": 0.9541015625
+  },
+  {
+   "word": "miss.",
+   "start": 49.2,
+   "end": 49.36,
+   "confidence": 0.00015556812286376953
+  },
+  {
+   "word": "miss.",
+   "start": 52.06,
+   "end": 52.76,
+   "confidence": 0.9423828125
+  },
+  {
+   "word": "miss.",
+   "start": 56.14,
+   "end": 56.84,
+   "confidence": 0.935546875
+  },
+  {
+   "word": "make.",
+   "start": 64.92,
+   "end": 65.62,
+   "confidence": 0.75732421875
+  },
+  {
+   "word": "make.",
+   "start": 65.62,
+   "end": 65.84,
+   "confidence": 0.00864410400390625
+  },
+  {
+   "word": "miss.",
+   "start": 73.04,
+   "end": 74.42,
+   "confidence": 0.599609375
+  },
+  {
+   "word": "miss.",
+   "start": 80.22,
+   "end": 81.6,
+   "confidence": 0.80810546875
+  },
+  {
+   "word": "miss.",
+   "start": 84.14,
+   "end": 85.52,
+   "confidence": 0.41796875
+  },
+  {
+   "word": "make.",
+   "start": 87.98,
+   "end": 89.36,
+   "confidence": 0.97119140625
+  },
+  {
+   "word": "make.",
+   "start": 91.26,
+   "end": 91.95,
+   "confidence": 0.384033203125
+  },
+  {
+   "word": "make.",
+   "start": 92.64,
+   "end": 93.28,
+   "confidence": 0.330810546875
+  },
+  {
+   "word": "sig",
+   "start": 96.36,
+   "end": 96.6,
+   "confidence": 4.410743713378906e-06
+  },
+  {
+   "word": "sig",
+   "start": 96.6,
+   "end": 96.82,
+   "confidence": 1.1682510375976562e-05
+  },
+  {
+   "word": "sig",
+   "start": 96.82,
+   "end": 96.94,
+   "confidence": 0.515625
+  },
+  {
+   "word": "sig",
+   "start": 96.94,
+   "end": 97.2,
+   "confidence": 0.7958984375
+  },
+  {
+   "word": "sig",
+   "start": 97.2,
+   "end": 97.46,
+   "confidence": 0.8349609375
+  },
+  {
+   "word": "sig",
+   "start": 97.46,
+   "end": 97.56,
+   "confidence": 0.849609375
+  },
+  {
+   "word": "sig",
+   "start": 100.74,
+   "end": 100.98,
+   "confidence": 0.87109375
+  },
+  {
+   "word": "sig",
+   "start": 100.98,
+   "end": 101.0,
+   "confidence": 0.87451171875
+  },
+  {
+   "word": "sig",
+   "start": 101.0,
+   "end": 101.08,
+   "confidence": 0.875
+  },
+  {
+   "word": "sig",
+   "start": 101.08,
+   "end": 101.2,
+   "confidence": 0.87353515625
+  },
+  {
+   "word": "sig",
+   "start": 101.2,
+   "end": 101.24,
+   "confidence": 0.87060546875
+  },
+  {
+   "word": "sig",
+   "start": 101.24,
+   "end": 101.44,
+   "confidence": 0.8681640625
+  },
+  {
+   "word": "sig",
+   "start": 101.44,
+   "end": 101.48,
+   "confidence": 0.865234375
+  },
+  {
+   "word": "sig",
+   "start": 101.48,
+   "end": 101.54,
+   "confidence": 0.86083984375
+  },
+  {
+   "word": "sig",
+   "start": 101.54,
+   "end": 101.58,
+   "confidence": 0.857421875
+  },
+  {
+   "word": "sig",
+   "start": 101.58,
+   "end": 101.94,
+   "confidence": 0.84814453125
+  }
+ ],
+ "text": "make. miss. miss. miss. miss. miss. make. miss. miss. miss. miss. make. make. miss. miss. miss. make. make. make. sig sig sig sig sig sig sig sig sig sig sig sig sig sig sig sig",
+ "runtime_s": 381.2901619169861,
+ "peak_rss_mb": 1958.346752,
+ "prompt_used": true
+}

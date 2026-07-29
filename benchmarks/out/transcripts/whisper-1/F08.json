@@ -1,0 +1,64 @@
+{
+ "model_id": "whisper-1",
+ "fixture": "F08",
+ "words": [
+  {
+   "word": "break",
+   "start": 7.139999866485596,
+   "end": 7.739999771118164,
+   "confidence": null
+  },
+  {
+   "word": "splash",
+   "start": 12.020000457763672,
+   "end": 12.020000457763672,
+   "confidence": null
+  },
+  {
+   "word": "splash",
+   "start": 18.799999237060547,
+   "end": 19.399999618530273,
+   "confidence": null
+  },
+  {
+   "word": "actually",
+   "start": 19.540000915527344,
+   "end": 19.920000076293945,
+   "confidence": null
+  },
+  {
+   "word": "that",
+   "start": 20.040000915527344,
+   "end": 20.18000030517578,
+   "confidence": null
+  },
+  {
+   "word": "was",
+   "start": 20.18000030517578,
+   "end": 20.260000228881836,
+   "confidence": null
+  },
+  {
+   "word": "a",
+   "start": 20.260000228881836,
+   "end": 20.479999542236328,
+   "confidence": null
+  },
+  {
+   "word": "brick",
+   "start": 20.479999542236328,
+   "end": 20.540000915527344,
+   "confidence": null
+  },
+  {
+   "word": "splash",
+   "start": 30.0,
+   "end": 31.399999618530273,
+   "confidence": null
+  }
+ ],
+ "text": "break. splash. splash. actually, that was a brick. splash.",
+ "runtime_s": 2.881961582985241,
+ "peak_rss_mb": null,
+ "prompt_used": true
+}

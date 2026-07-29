@@ -1,0 +1,76 @@
+{
+ "model_id": "mlx-whisper-large-v3",
+ "fixture": "F05",
+ "words": [
+  {
+   "word": "break.",
+   "start": 3.0,
+   "end": 4.4,
+   "confidence": 0.294921875
+  },
+  {
+   "word": "break.",
+   "start": 7.56,
+   "end": 8.96,
+   "confidence": 0.7373046875
+  },
+  {
+   "word": "splash.",
+   "start": 15.62,
+   "end": 17.02,
+   "confidence": 0.50830078125
+  },
+  {
+   "word": "break.",
+   "start": 20.54,
+   "end": 21.94,
+   "confidence": 0.962890625
+  },
+  {
+   "word": "break.",
+   "start": 21.94,
+   "end": 23.16,
+   "confidence": 0.1766357421875
+  },
+  {
+   "word": "splash.",
+   "start": 30.84,
+   "end": 31.54,
+   "confidence": 0.1126708984375
+  },
+  {
+   "word": "break.",
+   "start": 36.92,
+   "end": 38.32,
+   "confidence": 0.95849609375
+  },
+  {
+   "word": "splash.",
+   "start": 46.78,
+   "end": 47.48,
+   "confidence": 0.91015625
+  },
+  {
+   "word": "splash.",
+   "start": 47.48,
+   "end": 47.74,
+   "confidence": 0.0220489501953125
+  },
+  {
+   "word": "splash.",
+   "start": 51.7,
+   "end": 52.32,
+   "confidence": 0.76904296875
+  },
+  {
+   "word": "splash.",
+   "start": 55.52,
+   "end": 56.14,
+   "confidence": 0.95263671875
+  }
+ ],
+ "text": "break. break. splash. break. break. splash. break. splash. splash. splash. splash.",
+ "runtime_s": 131.38061325001763,
+ "peak_rss_mb": 2061.84448,
+ "prompt_used": true
+}

@@ -1,0 +1,16 @@
+{
+ "model_id": "whisperx-large-v3-int8",
+ "fixture": "F01",
+ "words": [
+  {
+   "word": "splash.",
+   "start": 86.421,
+   "end": 86.981,
+   "confidence": 0.864
+  }
+ ],
+ "text": "splash.",
+ "runtime_s": 34.467290958040394,
+ "peak_rss_mb": 2529.918976,
+ "prompt_used": true
+}

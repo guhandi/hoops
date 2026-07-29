@@ -1,0 +1,70 @@
+{
+ "model_id": "parakeet-tdt-0.6b-mlx",
+ "fixture": "F08",
+ "words": [
+  {
+   "word": "Break",
+   "start": 4.48,
+   "end": 5.12,
+   "confidence": null
+  },
+  {
+   "word": "Splash",
+   "start": 11.52,
+   "end": 12.32,
+   "confidence": null
+  },
+  {
+   "word": "Splash.",
+   "start": 18.96,
+   "end": 19.52,
+   "confidence": null
+  },
+  {
+   "word": "I",
+   "start": 19.52,
+   "end": 19.6,
+   "confidence": null
+  },
+  {
+   "word": "actually",
+   "start": 19.76,
+   "end": 19.84,
+   "confidence": null
+  },
+  {
+   "word": "that",
+   "start": 20.0,
+   "end": 20.16,
+   "confidence": null
+  },
+  {
+   "word": "was",
+   "start": 20.16,
+   "end": 20.24,
+   "confidence": null
+  },
+  {
+   "word": "a",
+   "start": 20.24,
+   "end": 20.4,
+   "confidence": null
+  },
+  {
+   "word": "brick",
+   "start": 20.4,
+   "end": 20.88,
+   "confidence": null
+  },
+  {
+   "word": "Splash",
+   "start": 30.72,
+   "end": 31.44,
+   "confidence": null
+  }
+ ],
+ "text": "Break Splash Splash. I actually that was a brick Splash",
+ "runtime_s": 3.6727769169956446,
+ "peak_rss_mb": 791.478272,
+ "prompt_used": false
+}

@@ -1,0 +1,220 @@
+{
+ "model_id": "parakeet-tdt-0.6b-mlx",
+ "fixture": "D02",
+ "words": [
+  {
+   "word": "Shooting",
+   "start": 1.28,
+   "end": 1.84,
+   "confidence": null
+  },
+  {
+   "word": "my",
+   "start": 1.84,
+   "end": 2.16,
+   "confidence": null
+  },
+  {
+   "word": "basketball",
+   "start": 2.16,
+   "end": 2.8,
+   "confidence": null
+  },
+  {
+   "word": "shots",
+   "start": 2.8,
+   "end": 3.68,
+   "confidence": null
+  },
+  {
+   "word": "make",
+   "start": 5.92,
+   "end": 6.24,
+   "confidence": null
+  },
+  {
+   "word": "it",
+   "start": 22.16,
+   "end": 22.24,
+   "confidence": null
+  },
+  {
+   "word": "tok",
+   "start": 24.56,
+   "end": 24.88,
+   "confidence": null
+  },
+  {
+   "word": "it.",
+   "start": 24.96,
+   "end": 25.2,
+   "confidence": null
+  },
+  {
+   "word": "Fuck,",
+   "start": 25.2,
+   "end": 25.52,
+   "confidence": null
+  },
+  {
+   "word": "miss.",
+   "start": 25.52,
+   "end": 26.64,
+   "confidence": null
+  },
+  {
+   "word": "Make",
+   "start": 35.04,
+   "end": 35.44,
+   "confidence": null
+  },
+  {
+   "word": "miss,",
+   "start": 52.8,
+   "end": 53.28,
+   "confidence": null
+  },
+  {
+   "word": "but",
+   "start": 53.28,
+   "end": 53.44,
+   "confidence": null
+  },
+  {
+   "word": "I",
+   "start": 53.44,
+   "end": 53.52,
+   "confidence": null
+  },
+  {
+   "word": "was",
+   "start": 53.52,
+   "end": 53.6,
+   "confidence": null
+  },
+  {
+   "word": "getting",
+   "start": 53.68,
+   "end": 53.76,
+   "confidence": null
+  },
+  {
+   "word": "away",
+   "start": 54.0,
+   "end": 54.16,
+   "confidence": null
+  },
+  {
+   "word": "there.",
+   "start": 54.32,
+   "end": 55.12,
+   "confidence": null
+  },
+  {
+   "word": "I'll",
+   "start": 56.72,
+   "end": 56.88,
+   "confidence": null
+  },
+  {
+   "word": "smith",
+   "start": 57.04,
+   "end": 57.36,
+   "confidence": null
+  },
+  {
+   "word": "too,",
+   "start": 57.44,
+   "end": 57.68,
+   "confidence": null
+  },
+  {
+   "word": "not",
+   "start": 57.76,
+   "end": 57.84,
+   "confidence": null
+  },
+  {
+   "word": "a",
+   "start": 57.92,
+   "end": 58.0,
+   "confidence": null
+  },
+  {
+   "word": "bad",
+   "start": 58.0,
+   "end": 58.24,
+   "confidence": null
+  },
+  {
+   "word": "shot.",
+   "start": 58.24,
+   "end": 59.36,
+   "confidence": null
+  },
+  {
+   "word": "Miss",
+   "start": 63.28,
+   "end": 63.76,
+   "confidence": null
+  },
+  {
+   "word": "Miss",
+   "start": 73.68,
+   "end": 74.24,
+   "confidence": null
+  },
+  {
+   "word": "Make",
+   "start": 76.8,
+   "end": 77.44,
+   "confidence": null
+  },
+  {
+   "word": "Miss",
+   "start": 83.2,
+   "end": 83.76,
+   "confidence": null
+  },
+  {
+   "word": "Make",
+   "start": 93.12,
+   "end": 93.68,
+   "confidence": null
+  },
+  {
+   "word": "I",
+   "start": 98.48,
+   "end": 98.56,
+   "confidence": null
+  },
+  {
+   "word": "guess",
+   "start": 98.72,
+   "end": 98.88,
+   "confidence": null
+  },
+  {
+   "word": "I'll",
+   "start": 98.96,
+   "end": 99.2,
+   "confidence": null
+  },
+  {
+   "word": "stop",
+   "start": 99.2,
+   "end": 99.44,
+   "confidence": null
+  },
+  {
+   "word": "there.",
+   "start": 99.44,
+   "end": 107.12,
+   "confidence": null
+  }
+ ],
+ "text": "Shooting my basketball shots make it tok it. Fuck, miss. Make miss, but I was getting away there. I'll smith too, not a bad shot. Miss Miss Make Miss Make I guess I'll stop there.",
+ "runtime_s": 5.2618464170373045,
+ "peak_rss_mb": 388.612096,
+ "prompt_used": false
+}

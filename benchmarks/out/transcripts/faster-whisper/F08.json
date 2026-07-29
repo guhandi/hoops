@@ -1,0 +1,64 @@
+{
+ "model_id": "faster-whisper-large-v3-int8",
+ "fixture": "F08",
+ "words": [
+  {
+   "word": "break.",
+   "start": 4.02,
+   "end": 4.64,
+   "confidence": 0.10612841695547104
+  },
+  {
+   "word": "splash.",
+   "start": 11.0,
+   "end": 11.62,
+   "confidence": 0.11290150880813599
+  },
+  {
+   "word": "splash.",
+   "start": 18.4,
+   "end": 19.02,
+   "confidence": 0.7341516017913818
+  },
+  {
+   "word": "actually",
+   "start": 19.32,
+   "end": 19.72,
+   "confidence": 0.4163934886455536
+  },
+  {
+   "word": "that",
+   "start": 19.72,
+   "end": 20.04,
+   "confidence": 0.5926076173782349
+  },
+  {
+   "word": "was",
+   "start": 20.04,
+   "end": 20.18,
+   "confidence": 0.9936723709106445
+  },
+  {
+   "word": "a",
+   "start": 20.18,
+   "end": 20.2,
+   "confidence": 0.9928787350654602
+  },
+  {
+   "word": "break.",
+   "start": 20.2,
+   "end": 20.42,
+   "confidence": 0.9173278212547302
+  },
+  {
+   "word": "splash.",
+   "start": 30.0,
+   "end": 30.98,
+   "confidence": 0.3091317415237427
+  }
+ ],
+ "text": "break. splash. splash. actually that was a break. splash.",
+ "runtime_s": 381.3109910839994,
+ "peak_rss_mb": 1546.272768,
+ "prompt_used": true
+}

@@ -1,0 +1,280 @@
+{
+ "model_id": "whisper-1",
+ "fixture": "D02",
+ "words": [
+  {
+   "word": "shooting",
+   "start": 0.8999999761581421,
+   "end": 1.600000023841858,
+   "confidence": null
+  },
+  {
+   "word": "my",
+   "start": 1.600000023841858,
+   "end": 2.299999952316284,
+   "confidence": null
+  },
+  {
+   "word": "basketball",
+   "start": 2.299999952316284,
+   "end": 2.7200000286102295,
+   "confidence": null
+  },
+  {
+   "word": "shots",
+   "start": 2.7200000286102295,
+   "end": 3.4200000762939453,
+   "confidence": null
+  },
+  {
+   "word": "make",
+   "start": 5.800000190734863,
+   "end": 6.5,
+   "confidence": null
+  },
+  {
+   "word": "make",
+   "start": 12.020000457763672,
+   "end": 13.020000457763672,
+   "confidence": null
+  },
+  {
+   "word": "make",
+   "start": 18.799999237060547,
+   "end": 19.5,
+   "confidence": null
+  },
+  {
+   "word": "what",
+   "start": 21.920000076293945,
+   "end": 22.020000457763672,
+   "confidence": null
+  },
+  {
+   "word": "the",
+   "start": 22.020000457763672,
+   "end": 22.360000610351562,
+   "confidence": null
+  },
+  {
+   "word": "hell",
+   "start": 22.360000610351562,
+   "end": 22.6200008392334,
+   "confidence": null
+  },
+  {
+   "word": "is",
+   "start": 22.6200008392334,
+   "end": 22.65999984741211,
+   "confidence": null
+  },
+  {
+   "word": "going",
+   "start": 22.65999984741211,
+   "end": 24.0,
+   "confidence": null
+  },
+  {
+   "word": "on",
+   "start": 24.0,
+   "end": 24.0,
+   "confidence": null
+  },
+  {
+   "word": "I",
+   "start": 24.700000762939453,
+   "end": 25.020000457763672,
+   "confidence": null
+  },
+  {
+   "word": "totally",
+   "start": 25.020000457763672,
+   "end": 25.020000457763672,
+   "confidence": null
+  },
+  {
+   "word": "fucked",
+   "start": 25.020000457763672,
+   "end": 25.459999084472656,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 25.459999084472656,
+   "end": 25.940000534057617,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 34.880001068115234,
+   "end": 35.63999938964844,
+   "confidence": null
+  },
+  {
+   "word": "oh",
+   "start": 38.34000015258789,
+   "end": 39.099998474121094,
+   "confidence": null
+  },
+  {
+   "word": "shit",
+   "start": 39.099998474121094,
+   "end": 39.86000061035156,
+   "confidence": null
+  },
+  {
+   "word": "make",
+   "start": 43.86000061035156,
+   "end": 44.41999816894531,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 52.119998931884766,
+   "end": 52.880001068115234,
+   "confidence": null
+  },
+  {
+   "word": "but",
+   "start": 53.31999969482422,
+   "end": 53.47999954223633,
+   "confidence": null
+  },
+  {
+   "word": "I",
+   "start": 53.47999954223633,
+   "end": 53.599998474121094,
+   "confidence": null
+  },
+  {
+   "word": "was",
+   "start": 53.599998474121094,
+   "end": 53.880001068115234,
+   "confidence": null
+  },
+  {
+   "word": "getting",
+   "start": 53.880001068115234,
+   "end": 53.900001525878906,
+   "confidence": null
+  },
+  {
+   "word": "away",
+   "start": 53.900001525878906,
+   "end": 54.15999984741211,
+   "confidence": null
+  },
+  {
+   "word": "there",
+   "start": 54.15999984741211,
+   "end": 55.31999969482422,
+   "confidence": null
+  },
+  {
+   "word": "close",
+   "start": 56.70000076293945,
+   "end": 57.08000183105469,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 57.08000183105469,
+   "end": 57.31999969482422,
+   "confidence": null
+  },
+  {
+   "word": "too",
+   "start": 57.31999969482422,
+   "end": 57.68000030517578,
+   "confidence": null
+  },
+  {
+   "word": "not",
+   "start": 57.79999923706055,
+   "end": 58.02000045776367,
+   "confidence": null
+  },
+  {
+   "word": "a",
+   "start": 58.02000045776367,
+   "end": 58.02000045776367,
+   "confidence": null
+  },
+  {
+   "word": "bad",
+   "start": 58.02000045776367,
+   "end": 58.2599983215332,
+   "confidence": null
+  },
+  {
+   "word": "shot",
+   "start": 58.2599983215332,
+   "end": 58.52000045776367,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 64.76000213623047,
+   "end": 66.16000366210938,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 74.69999694824219,
+   "end": 74.73999786376953,
+   "confidence": null
+  },
+  {
+   "word": "make",
+   "start": 76.9800033569336,
+   "end": 77.19999694824219,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 82.23999786376953,
+   "end": 83.63999938964844,
+   "confidence": null
+  },
+  {
+   "word": "make",
+   "start": 92.62000274658203,
+   "end": 93.4000015258789,
+   "confidence": null
+  },
+  {
+   "word": "I",
+   "start": 94.62000274658203,
+   "end": 94.73999786376953,
+   "confidence": null
+  },
+  {
+   "word": "guess",
+   "start": 94.73999786376953,
+   "end": 95.0,
+   "confidence": null
+  },
+  {
+   "word": "I'll",
+   "start": 95.0,
+   "end": 95.0999984741211,
+   "confidence": null
+  },
+  {
+   "word": "stop",
+   "start": 95.0999984741211,
+   "end": 95.23999786376953,
+   "confidence": null
+  },
+  {
+   "word": "there",
+   "start": 95.23999786376953,
+   "end": 95.76000213623047,
+   "confidence": null
+  }
+ ],
+ "text": "shooting my basketball shots. make. make. make. what the hell is going on? I totally fucked miss. miss.  oh shit. make. miss, but I was getting away there. close miss too, not a bad shot. miss. miss. make. miss.  make. I guess I'll stop there.",
+ "runtime_s": 3.0894807089935057,
+ "peak_rss_mb": null,
+ "prompt_used": true
+}

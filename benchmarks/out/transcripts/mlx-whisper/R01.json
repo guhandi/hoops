@@ -1,0 +1,1672 @@
+{
+ "model_id": "mlx-whisper-large-v3",
+ "fixture": "R01",
+ "words": [
+  {
+   "word": "shooting",
+   "start": 1.02,
+   "end": 1.48,
+   "confidence": 0.185546875
+  },
+  {
+   "word": "my",
+   "start": 1.48,
+   "end": 1.74,
+   "confidence": 0.994140625
+  },
+  {
+   "word": "basketball",
+   "start": 1.74,
+   "end": 2.46,
+   "confidence": 0.7802734375
+  },
+  {
+   "word": "shots.",
+   "start": 2.46,
+   "end": 2.94,
+   "confidence": 0.99462890625
+  },
+  {
+   "word": "make.",
+   "start": 5.64,
+   "end": 6.1,
+   "confidence": 0.250244140625
+  },
+  {
+   "word": "make.",
+   "start": 12.02,
+   "end": 12.48,
+   "confidence": 0.82568359375
+  },
+  {
+   "word": "make.",
+   "start": 18.66,
+   "end": 19.12,
+   "confidence": 0.8916015625
+  },
+  {
+   "word": "hold",
+   "start": 21.36,
+   "end": 21.82,
+   "confidence": 0.442138671875
+  },
+  {
+   "word": "on,",
+   "start": 21.82,
+   "end": 21.94,
+   "confidence": 0.91845703125
+  },
+  {
+   "word": "I'm",
+   "start": 21.94,
+   "end": 22.1,
+   "confidence": 0.54931640625
+  },
+  {
+   "word": "doing",
+   "start": 22.1,
+   "end": 22.14,
+   "confidence": 0.482177734375
+  },
+  {
+   "word": "hella",
+   "start": 22.14,
+   "end": 22.36,
+   "confidence": 0.55517578125
+  },
+  {
+   "word": "good",
+   "start": 22.36,
+   "end": 22.62,
+   "confidence": 0.392333984375
+  },
+  {
+   "word": "now.",
+   "start": 22.62,
+   "end": 22.94,
+   "confidence": 0.2005615234375
+  },
+  {
+   "word": "alright,",
+   "start": 23.92,
+   "end": 24.38,
+   "confidence": 0.2783203125
+  },
+  {
+   "word": "I'm",
+   "start": 24.4,
+   "end": 24.52,
+   "confidence": 0.447509765625
+  },
+  {
+   "word": "telling",
+   "start": 24.52,
+   "end": 24.74,
+   "confidence": 0.11236572265625
+  },
+  {
+   "word": "you",
+   "start": 24.74,
+   "end": 24.9,
+   "confidence": 0.90185546875
+  },
+  {
+   "word": "to",
+   "start": 24.9,
+   "end": 24.98,
+   "confidence": 0.7275390625
+  },
+  {
+   "word": "get",
+   "start": 24.98,
+   "end": 25.12,
+   "confidence": 0.471923828125
+  },
+  {
+   "word": "fucked,",
+   "start": 25.12,
+   "end": 25.24,
+   "confidence": 0.61083984375
+  },
+  {
+   "word": "miss.",
+   "start": 25.3,
+   "end": 25.52,
+   "confidence": 0.1728515625
+  },
+  {
+   "word": "make.",
+   "start": 34.7,
+   "end": 35.22,
+   "confidence": 0.051239013671875
+  },
+  {
+   "word": "make.",
+   "start": 35.72,
+   "end": 36.24,
+   "confidence": 0.0906982421875
+  },
+  {
+   "word": "oh,",
+   "start": 36.24,
+   "end": 36.24,
+   "confidence": 0.00243377685546875
+  },
+  {
+   "word": "shit.",
+   "start": 36.24,
+   "end": 36.52,
+   "confidence": 0.050628662109375
+  },
+  {
+   "word": "make.",
+   "start": 43.58,
+   "end": 44.1,
+   "confidence": 0.4775390625
+  },
+  {
+   "word": "that's",
+   "start": 46.18,
+   "end": 46.7,
+   "confidence": 0.280029296875
+  },
+  {
+   "word": "a",
+   "start": 46.7,
+   "end": 46.7,
+   "confidence": 0.51904296875
+  },
+  {
+   "word": "great",
+   "start": 46.7,
+   "end": 46.96,
+   "confidence": 0.227294921875
+  },
+  {
+   "word": "miss.",
+   "start": 46.96,
+   "end": 47.3,
+   "confidence": 0.0751953125
+  },
+  {
+   "word": "miss,",
+   "start": 52.22,
+   "end": 52.74,
+   "confidence": 0.1976318359375
+  },
+  {
+   "word": "but",
+   "start": 53.04,
+   "end": 53.36,
+   "confidence": 0.970703125
+  },
+  {
+   "word": "I",
+   "start": 53.36,
+   "end": 53.48,
+   "confidence": 0.61865234375
+  },
+  {
+   "word": "was",
+   "start": 53.48,
+   "end": 53.58,
+   "confidence": 0.9765625
+  },
+  {
+   "word": "getting",
+   "start": 53.58,
+   "end": 53.74,
+   "confidence": 0.44921875
+  },
+  {
+   "word": "away",
+   "start": 53.74,
+   "end": 54.0,
+   "confidence": 0.900390625
+  },
+  {
+   "word": "there.",
+   "start": 54.0,
+   "end": 54.22,
+   "confidence": 0.951171875
+  },
+  {
+   "word": "that's",
+   "start": 55.26,
+   "end": 55.78,
+   "confidence": 0.50341796875
+  },
+  {
+   "word": "what",
+   "start": 55.78,
+   "end": 55.86,
+   "confidence": 0.32373046875
+  },
+  {
+   "word": "it",
+   "start": 55.86,
+   "end": 56.0,
+   "confidence": 0.34228515625
+  },
+  {
+   "word": "was.",
+   "start": 56.0,
+   "end": 56.18,
+   "confidence": 0.7275390625
+  },
+  {
+   "word": "close",
+   "start": 56.4,
+   "end": 56.92,
+   "confidence": 0.277587890625
+  },
+  {
+   "word": "miss",
+   "start": 56.92,
+   "end": 57.16,
+   "confidence": 0.85791015625
+  },
+  {
+   "word": "too,",
+   "start": 57.16,
+   "end": 57.44,
+   "confidence": 0.498779296875
+  },
+  {
+   "word": "not",
+   "start": 57.56,
+   "end": 57.74,
+   "confidence": 0.92041015625
+  },
+  {
+   "word": "a",
+   "start": 57.74,
+   "end": 57.9,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "bad",
+   "start": 57.9,
+   "end": 58.06,
+   "confidence": 0.97802734375
+  },
+  {
+   "word": "shot.",
+   "start": 58.06,
+   "end": 58.3,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "follow",
+   "start": 63.12,
+   "end": 63.96,
+   "confidence": 3.814697265625e-06
+  },
+  {
+   "word": "follow",
+   "start": 63.96,
+   "end": 64.18,
+   "confidence": 0.005466461181640625
+  },
+  {
+   "word": "follow",
+   "start": 64.18,
+   "end": 66.58,
+   "confidence": 0.66064453125
+  },
+  {
+   "word": "follow",
+   "start": 66.58,
+   "end": 67.68,
+   "confidence": 0.64892578125
+  },
+  {
+   "word": "follow",
+   "start": 67.68,
+   "end": 68.1,
+   "confidence": 0.705078125
+  },
+  {
+   "word": "follow",
+   "start": 68.1,
+   "end": 68.1,
+   "confidence": 0.8037109375
+  },
+  {
+   "word": "follow",
+   "start": 68.1,
+   "end": 68.16,
+   "confidence": 0.86083984375
+  },
+  {
+   "word": "follow",
+   "start": 68.16,
+   "end": 74.64,
+   "confidence": 0.888671875
+  },
+  {
+   "word": "follow",
+   "start": 74.64,
+   "end": 74.64,
+   "confidence": 0.900390625
+  },
+  {
+   "word": "follow",
+   "start": 74.64,
+   "end": 77.12,
+   "confidence": 0.90576171875
+  },
+  {
+   "word": "follow",
+   "start": 77.12,
+   "end": 77.12,
+   "confidence": 0.90869140625
+  },
+  {
+   "word": "follow",
+   "start": 77.12,
+   "end": 77.12,
+   "confidence": 0.908203125
+  },
+  {
+   "word": "follow",
+   "start": 77.12,
+   "end": 77.12,
+   "confidence": 0.90771484375
+  },
+  {
+   "word": "follow",
+   "start": 77.12,
+   "end": 77.12,
+   "confidence": 0.90869140625
+  },
+  {
+   "word": "follow",
+   "start": 77.12,
+   "end": 77.12,
+   "confidence": 0.90869140625
+  },
+  {
+   "word": "follow",
+   "start": 77.12,
+   "end": 77.12,
+   "confidence": 0.908203125
+  },
+  {
+   "word": "follow",
+   "start": 77.12,
+   "end": 77.12,
+   "confidence": 0.9072265625
+  },
+  {
+   "word": "follow",
+   "start": 77.12,
+   "end": 77.12,
+   "confidence": 0.908203125
+  },
+  {
+   "word": "follow",
+   "start": 77.12,
+   "end": 77.12,
+   "confidence": 0.908203125
+  },
+  {
+   "word": "follow",
+   "start": 77.12,
+   "end": 77.12,
+   "confidence": 0.91064453125
+  },
+  {
+   "word": "follow",
+   "start": 77.12,
+   "end": 77.12,
+   "confidence": 0.90966796875
+  },
+  {
+   "word": "follow",
+   "start": 77.12,
+   "end": 77.12,
+   "confidence": 0.91259765625
+  },
+  {
+   "word": "follow",
+   "start": 77.12,
+   "end": 77.12,
+   "confidence": 0.91259765625
+  },
+  {
+   "word": "follow",
+   "start": 77.12,
+   "end": 77.12,
+   "confidence": 0.9150390625
+  },
+  {
+   "word": "follow",
+   "start": 77.12,
+   "end": 77.12,
+   "confidence": 0.91650390625
+  },
+  {
+   "word": "follow",
+   "start": 77.12,
+   "end": 77.12,
+   "confidence": 0.9169921875
+  },
+  {
+   "word": "follow",
+   "start": 77.12,
+   "end": 77.12,
+   "confidence": 0.91845703125
+  },
+  {
+   "word": "follow",
+   "start": 77.12,
+   "end": 77.12,
+   "confidence": 0.919921875
+  },
+  {
+   "word": "follow",
+   "start": 77.12,
+   "end": 77.12,
+   "confidence": 0.919921875
+  },
+  {
+   "word": "follow",
+   "start": 77.12,
+   "end": 77.6,
+   "confidence": 0.9208984375
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.921875
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.921875
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.92333984375
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.9248046875
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.92431640625
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.92529296875
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.92431640625
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.9248046875
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.92578125
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.92626953125
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.92626953125
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.927734375
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.92724609375
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.92724609375
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.92822265625
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.92822265625
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.9296875
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.92822265625
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.93017578125
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.92919921875
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.9306640625
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.9296875
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.9306640625
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.93017578125
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.93017578125
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 77.6,
+   "confidence": 0.9306640625
+  },
+  {
+   "word": "follow",
+   "start": 77.6,
+   "end": 82.8,
+   "confidence": 0.9306640625
+  },
+  {
+   "word": "follow",
+   "start": 82.8,
+   "end": 82.8,
+   "confidence": 0.93017578125
+  },
+  {
+   "word": "follow",
+   "start": 82.8,
+   "end": 82.8,
+   "confidence": 0.9306640625
+  },
+  {
+   "word": "follow",
+   "start": 82.8,
+   "end": 82.8,
+   "confidence": 0.9306640625
+  },
+  {
+   "word": "follow",
+   "start": 82.8,
+   "end": 82.8,
+   "confidence": 0.9306640625
+  },
+  {
+   "word": "follow",
+   "start": 82.8,
+   "end": 82.8,
+   "confidence": 0.93115234375
+  },
+  {
+   "word": "follow",
+   "start": 82.8,
+   "end": 82.8,
+   "confidence": 0.931640625
+  },
+  {
+   "word": "follow",
+   "start": 82.8,
+   "end": 82.8,
+   "confidence": 0.93115234375
+  },
+  {
+   "word": "follow",
+   "start": 82.8,
+   "end": 82.8,
+   "confidence": 0.931640625
+  },
+  {
+   "word": "follow",
+   "start": 82.8,
+   "end": 82.8,
+   "confidence": 0.931640625
+  },
+  {
+   "word": "follow",
+   "start": 82.8,
+   "end": 82.84,
+   "confidence": 0.93212890625
+  },
+  {
+   "word": "follow",
+   "start": 82.84,
+   "end": 82.84,
+   "confidence": 0.93115234375
+  },
+  {
+   "word": "follow",
+   "start": 82.84,
+   "end": 82.84,
+   "confidence": 0.9306640625
+  },
+  {
+   "word": "follow",
+   "start": 82.84,
+   "end": 82.84,
+   "confidence": 0.93017578125
+  },
+  {
+   "word": "follow",
+   "start": 82.84,
+   "end": 82.84,
+   "confidence": 0.93115234375
+  },
+  {
+   "word": "follow",
+   "start": 82.84,
+   "end": 82.84,
+   "confidence": 0.93017578125
+  },
+  {
+   "word": "follow",
+   "start": 82.84,
+   "end": 82.84,
+   "confidence": 0.93017578125
+  },
+  {
+   "word": "follow",
+   "start": 82.84,
+   "end": 82.9,
+   "confidence": 0.93115234375
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.93115234375
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.931640625
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.9306640625
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.93017578125
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.93115234375
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.9296875
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.92919921875
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.9287109375
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.9287109375
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.9296875
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.9287109375
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.92822265625
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.92822265625
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.9287109375
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.9267578125
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.9267578125
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.927734375
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.92724609375
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.92724609375
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.92578125
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.92431640625
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.92626953125
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.9248046875
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.92529296875
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.923828125
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 82.9,
+   "confidence": 0.9228515625
+  },
+  {
+   "word": "follow",
+   "start": 82.9,
+   "end": 83.12,
+   "confidence": 0.92236328125
+  },
+  {
+   "word": "follow",
+   "start": 83.12,
+   "end": 83.5,
+   "confidence": 0.921875
+  },
+  {
+   "word": "follow",
+   "start": 83.5,
+   "end": 83.68,
+   "confidence": 0.92333984375
+  },
+  {
+   "word": "follow",
+   "start": 83.68,
+   "end": 83.68,
+   "confidence": 0.921875
+  },
+  {
+   "word": "follow",
+   "start": 83.68,
+   "end": 83.68,
+   "confidence": 0.9208984375
+  },
+  {
+   "word": "follow",
+   "start": 83.68,
+   "end": 83.68,
+   "confidence": 0.92138671875
+  },
+  {
+   "word": "follow",
+   "start": 83.68,
+   "end": 83.68,
+   "confidence": 0.919921875
+  },
+  {
+   "word": "follow",
+   "start": 83.68,
+   "end": 83.68,
+   "confidence": 0.919921875
+  },
+  {
+   "word": "follow",
+   "start": 83.68,
+   "end": 83.68,
+   "confidence": 0.91796875
+  },
+  {
+   "word": "follow",
+   "start": 83.68,
+   "end": 83.68,
+   "confidence": 0.919921875
+  },
+  {
+   "word": "follow",
+   "start": 83.68,
+   "end": 83.68,
+   "confidence": 0.91796875
+  },
+  {
+   "word": "follow",
+   "start": 83.68,
+   "end": 83.68,
+   "confidence": 0.91796875
+  },
+  {
+   "word": "follow",
+   "start": 83.68,
+   "end": 83.68,
+   "confidence": 0.91650390625
+  },
+  {
+   "word": "follow",
+   "start": 83.68,
+   "end": 88.5,
+   "confidence": 0.9169921875
+  },
+  {
+   "word": "follow",
+   "start": 88.5,
+   "end": 88.5,
+   "confidence": 0.916015625
+  },
+  {
+   "word": "follow",
+   "start": 88.5,
+   "end": 88.5,
+   "confidence": 0.91650390625
+  },
+  {
+   "word": "follow",
+   "start": 88.5,
+   "end": 88.5,
+   "confidence": 0.9169921875
+  },
+  {
+   "word": "follow",
+   "start": 88.5,
+   "end": 88.5,
+   "confidence": 0.91552734375
+  },
+  {
+   "word": "follow",
+   "start": 88.5,
+   "end": 88.5,
+   "confidence": 0.9140625
+  },
+  {
+   "word": "follow",
+   "start": 88.5,
+   "end": 88.5,
+   "confidence": 0.9140625
+  },
+  {
+   "word": "follow",
+   "start": 88.5,
+   "end": 89.94,
+   "confidence": 0.912109375
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.91162109375
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.91064453125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.91064453125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.90966796875
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.90869140625
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.908203125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.90673828125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.90771484375
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.90576171875
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.90625
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.9052734375
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.904296875
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.90185546875
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.9013671875
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.89990234375
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.89990234375
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.89990234375
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.89794921875
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.89794921875
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.896484375
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.8935546875
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.89501953125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.890625
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.89111328125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.88916015625
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.8876953125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.88525390625
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.884765625
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.88427734375
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.88232421875
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.88232421875
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.87939453125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.87548828125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.87548828125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.87548828125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.87158203125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.8681640625
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.8681640625
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.86669921875
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.86328125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.8603515625
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.859375
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.85888671875
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.85693359375
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.853515625
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.8505859375
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.84814453125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.84619140625
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.84423828125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.8388671875
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.8349609375
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.83251953125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.83056640625
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.82666015625
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.8232421875
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.82080078125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.81689453125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.81005859375
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.8125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.8046875
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.7998046875
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.79833984375
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.79345703125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.7900390625
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.78564453125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.77880859375
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.77685546875
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.77294921875
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.7666015625
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.76025390625
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.75244140625
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.74609375
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.744140625
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.7373046875
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.728515625
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.724609375
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.7158203125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.70849609375
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.705078125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.69580078125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.69384765625
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.67919921875
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.67919921875
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.671875
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.6669921875
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.658203125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.646484375
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.6455078125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.63427734375
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.6298828125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.6259765625
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.611328125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.60009765625
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.59619140625
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.5908203125
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.94,
+   "confidence": 0.58349609375
+  },
+  {
+   "word": "follow",
+   "start": 89.94,
+   "end": 89.96,
+   "confidence": 0.57568359375
+  },
+  {
+   "word": "follow",
+   "start": 89.96,
+   "end": 89.96,
+   "confidence": 0.5615234375
+  },
+  {
+   "word": "follow",
+   "start": 89.96,
+   "end": 89.96,
+   "confidence": 0.56103515625
+  },
+  {
+   "word": "follow",
+   "start": 89.96,
+   "end": 89.96,
+   "confidence": 0.5439453125
+  },
+  {
+   "word": "follow",
+   "start": 89.96,
+   "end": 89.96,
+   "confidence": 0.54638671875
+  },
+  {
+   "word": "follow",
+   "start": 89.96,
+   "end": 89.98,
+   "confidence": 0.541015625
+  },
+  {
+   "word": "I",
+   "start": 92.22,
+   "end": 92.9,
+   "confidence": 0.2144775390625
+  },
+  {
+   "word": "guess",
+   "start": 92.9,
+   "end": 93.32,
+   "confidence": 0.419677734375
+  },
+  {
+   "word": "I'll",
+   "start": 93.32,
+   "end": 94.92,
+   "confidence": 0.9306640625
+  },
+  {
+   "word": "stop",
+   "start": 94.92,
+   "end": 95.02,
+   "confidence": 0.99560546875
+  },
+  {
+   "word": "there.",
+   "start": 95.02,
+   "end": 95.28,
+   "confidence": 0.99609375
+  }
+ ],
+ "text": "shooting my basketball shots. make. make. make. hold on, I'm doing hella good now. alright, I'm telling you to get fucked, miss. make. make. oh, shit. make. that's a great miss. miss, but I was getting away there. that's what it was. close miss too, not a bad shot. follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow follow I guess I'll stop there.",
+ "runtime_s": 1016.1538730410102,
+ "peak_rss_mb": 1431.30624,
+ "prompt_used": true
+}

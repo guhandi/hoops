@@ -1,0 +1,556 @@
+{
+ "model_id": "mlx-whisper-large-v3",
+ "fixture": "F04",
+ "words": [
+  {
+   "word": "its",
+   "start": 6.24,
+   "end": 6.72,
+   "confidence": 2.3365020751953125e-05
+  },
+  {
+   "word": "so",
+   "start": 6.72,
+   "end": 7.2,
+   "confidence": 0.0026454925537109375
+  },
+  {
+   "word": "dark",
+   "start": 7.2,
+   "end": 7.2,
+   "confidence": 0.01253509521484375
+  },
+  {
+   "word": "its",
+   "start": 7.2,
+   "end": 7.86,
+   "confidence": 0.00930023193359375
+  },
+  {
+   "word": "so",
+   "start": 7.86,
+   "end": 8.86,
+   "confidence": 0.28369140625
+  },
+  {
+   "word": "dark",
+   "start": 8.86,
+   "end": 9.1,
+   "confidence": 0.79150390625
+  },
+  {
+   "word": "its",
+   "start": 9.1,
+   "end": 9.36,
+   "confidence": 0.046875
+  },
+  {
+   "word": "so",
+   "start": 9.36,
+   "end": 9.52,
+   "confidence": 0.86328125
+  },
+  {
+   "word": "dark",
+   "start": 9.52,
+   "end": 11.26,
+   "confidence": 0.9873046875
+  },
+  {
+   "word": "its",
+   "start": 11.26,
+   "end": 11.26,
+   "confidence": 0.10943603515625
+  },
+  {
+   "word": "so",
+   "start": 11.26,
+   "end": 11.8,
+   "confidence": 0.95458984375
+  },
+  {
+   "word": "dark",
+   "start": 11.8,
+   "end": 12.64,
+   "confidence": 0.9912109375
+  },
+  {
+   "word": "its",
+   "start": 12.64,
+   "end": 12.76,
+   "confidence": 0.297119140625
+  },
+  {
+   "word": "so",
+   "start": 12.76,
+   "end": 18.3,
+   "confidence": 0.982421875
+  },
+  {
+   "word": "dark",
+   "start": 18.3,
+   "end": 18.32,
+   "confidence": 0.99169921875
+  },
+  {
+   "word": "its",
+   "start": 18.32,
+   "end": 18.32,
+   "confidence": 0.52392578125
+  },
+  {
+   "word": "so",
+   "start": 18.32,
+   "end": 18.32,
+   "confidence": 0.990234375
+  },
+  {
+   "word": "dark",
+   "start": 18.32,
+   "end": 18.46,
+   "confidence": 0.99169921875
+  },
+  {
+   "word": "its",
+   "start": 18.46,
+   "end": 18.64,
+   "confidence": 0.63671875
+  },
+  {
+   "word": "so",
+   "start": 18.64,
+   "end": 18.64,
+   "confidence": 0.9931640625
+  },
+  {
+   "word": "dark",
+   "start": 18.64,
+   "end": 18.64,
+   "confidence": 0.9912109375
+  },
+  {
+   "word": "its",
+   "start": 18.64,
+   "end": 18.64,
+   "confidence": 0.74169921875
+  },
+  {
+   "word": "so",
+   "start": 18.64,
+   "end": 18.64,
+   "confidence": 0.99609375
+  },
+  {
+   "word": "dark",
+   "start": 18.64,
+   "end": 18.64,
+   "confidence": 0.9912109375
+  },
+  {
+   "word": "its",
+   "start": 18.64,
+   "end": 18.96,
+   "confidence": 0.7490234375
+  },
+  {
+   "word": "so",
+   "start": 18.96,
+   "end": 18.96,
+   "confidence": 0.99560546875
+  },
+  {
+   "word": "dark",
+   "start": 18.96,
+   "end": 18.96,
+   "confidence": 0.9912109375
+  },
+  {
+   "word": "its",
+   "start": 18.96,
+   "end": 18.96,
+   "confidence": 0.7568359375
+  },
+  {
+   "word": "so",
+   "start": 18.96,
+   "end": 19.66,
+   "confidence": 0.99560546875
+  },
+  {
+   "word": "dark",
+   "start": 19.66,
+   "end": 19.66,
+   "confidence": 0.99072265625
+  },
+  {
+   "word": "its",
+   "start": 19.66,
+   "end": 19.72,
+   "confidence": 0.763671875
+  },
+  {
+   "word": "so",
+   "start": 19.72,
+   "end": 19.78,
+   "confidence": 0.99560546875
+  },
+  {
+   "word": "dark",
+   "start": 19.78,
+   "end": 19.8,
+   "confidence": 0.99072265625
+  },
+  {
+   "word": "its",
+   "start": 19.8,
+   "end": 20.74,
+   "confidence": 0.77294921875
+  },
+  {
+   "word": "so",
+   "start": 20.74,
+   "end": 20.76,
+   "confidence": 0.99560546875
+  },
+  {
+   "word": "dark",
+   "start": 20.76,
+   "end": 21.62,
+   "confidence": 0.990234375
+  },
+  {
+   "word": "its",
+   "start": 21.62,
+   "end": 21.76,
+   "confidence": 0.78173828125
+  },
+  {
+   "word": "so",
+   "start": 21.76,
+   "end": 21.76,
+   "confidence": 0.99560546875
+  },
+  {
+   "word": "dark",
+   "start": 21.76,
+   "end": 21.96,
+   "confidence": 0.990234375
+  },
+  {
+   "word": "its",
+   "start": 21.96,
+   "end": 22.02,
+   "confidence": 0.78955078125
+  },
+  {
+   "word": "so",
+   "start": 22.02,
+   "end": 22.3,
+   "confidence": 0.99560546875
+  },
+  {
+   "word": "dark",
+   "start": 22.3,
+   "end": 22.9,
+   "confidence": 0.990234375
+  },
+  {
+   "word": "its",
+   "start": 22.9,
+   "end": 22.9,
+   "confidence": 0.796875
+  },
+  {
+   "word": "so",
+   "start": 22.9,
+   "end": 22.9,
+   "confidence": 0.99560546875
+  },
+  {
+   "word": "dark",
+   "start": 22.9,
+   "end": 22.98,
+   "confidence": 0.98974609375
+  },
+  {
+   "word": "its",
+   "start": 22.98,
+   "end": 23.1,
+   "confidence": 0.8056640625
+  },
+  {
+   "word": "so",
+   "start": 23.1,
+   "end": 23.54,
+   "confidence": 0.99560546875
+  },
+  {
+   "word": "dark",
+   "start": 23.54,
+   "end": 23.86,
+   "confidence": 0.98974609375
+  },
+  {
+   "word": "its",
+   "start": 23.86,
+   "end": 23.96,
+   "confidence": 0.8125
+  },
+  {
+   "word": "so",
+   "start": 23.96,
+   "end": 24.12,
+   "confidence": 0.99560546875
+  },
+  {
+   "word": "dark",
+   "start": 24.12,
+   "end": 24.12,
+   "confidence": 0.9892578125
+  },
+  {
+   "word": "its",
+   "start": 24.12,
+   "end": 24.12,
+   "confidence": 0.86083984375
+  },
+  {
+   "word": "so",
+   "start": 24.12,
+   "end": 24.2,
+   "confidence": 0.99462890625
+  },
+  {
+   "word": "dark",
+   "start": 24.2,
+   "end": 24.38,
+   "confidence": 0.98779296875
+  },
+  {
+   "word": "its",
+   "start": 24.38,
+   "end": 24.6,
+   "confidence": 0.86328125
+  },
+  {
+   "word": "so",
+   "start": 24.6,
+   "end": 24.6,
+   "confidence": 0.99462890625
+  },
+  {
+   "word": "dark",
+   "start": 24.6,
+   "end": 24.6,
+   "confidence": 0.98779296875
+  },
+  {
+   "word": "its",
+   "start": 25.4,
+   "end": 25.88,
+   "confidence": 0.87060546875
+  },
+  {
+   "word": "so",
+   "start": 25.88,
+   "end": 25.88,
+   "confidence": 0.994140625
+  },
+  {
+   "word": "dark",
+   "start": 25.88,
+   "end": 25.88,
+   "confidence": 0.9873046875
+  },
+  {
+   "word": "its",
+   "start": 25.88,
+   "end": 25.88,
+   "confidence": 0.8740234375
+  },
+  {
+   "word": "so",
+   "start": 25.88,
+   "end": 25.88,
+   "confidence": 0.994140625
+  },
+  {
+   "word": "dark",
+   "start": 25.88,
+   "end": 25.88,
+   "confidence": 0.98681640625
+  },
+  {
+   "word": "its",
+   "start": 25.88,
+   "end": 25.88,
+   "confidence": 0.89208984375
+  },
+  {
+   "word": "so",
+   "start": 25.88,
+   "end": 25.88,
+   "confidence": 0.9912109375
+  },
+  {
+   "word": "dark",
+   "start": 25.88,
+   "end": 25.88,
+   "confidence": 0.98486328125
+  },
+  {
+   "word": "its",
+   "start": 25.88,
+   "end": 25.88,
+   "confidence": 0.89453125
+  },
+  {
+   "word": "so",
+   "start": 25.88,
+   "end": 25.98,
+   "confidence": 0.99072265625
+  },
+  {
+   "word": "dark",
+   "start": 25.98,
+   "end": 25.98,
+   "confidence": 0.984375
+  },
+  {
+   "word": "its",
+   "start": 26.52,
+   "end": 27.0,
+   "confidence": 0.89501953125
+  },
+  {
+   "word": "so",
+   "start": 27.0,
+   "end": 27.26,
+   "confidence": 0.99072265625
+  },
+  {
+   "word": "dark",
+   "start": 27.26,
+   "end": 27.26,
+   "confidence": 0.984375
+  },
+  {
+   "word": "its",
+   "start": 27.26,
+   "end": 27.32,
+   "confidence": 0.89599609375
+  },
+  {
+   "word": "so",
+   "start": 27.32,
+   "end": 27.32,
+   "confidence": 0.990234375
+  },
+  {
+   "word": "dark",
+   "start": 27.32,
+   "end": 27.32,
+   "confidence": 0.984375
+  },
+  {
+   "word": "its",
+   "start": 27.32,
+   "end": 27.48,
+   "confidence": 0.8994140625
+  },
+  {
+   "word": "so",
+   "start": 27.48,
+   "end": 27.86,
+   "confidence": 0.9892578125
+  },
+  {
+   "word": "dark",
+   "start": 27.86,
+   "end": 27.98,
+   "confidence": 0.9833984375
+  },
+  {
+   "word": "its",
+   "start": 27.98,
+   "end": 28.28,
+   "confidence": 0.900390625
+  },
+  {
+   "word": "so",
+   "start": 28.28,
+   "end": 29.98,
+   "confidence": 0.9892578125
+  },
+  {
+   "word": "dark",
+   "start": 29.98,
+   "end": 29.98,
+   "confidence": 0.9833984375
+  },
+  {
+   "word": "break",
+   "start": 37.56,
+   "end": 38.96,
+   "confidence": 0.0833740234375
+  },
+  {
+   "word": "splash",
+   "start": 46.76,
+   "end": 48.16,
+   "confidence": 0.46044921875
+  },
+  {
+   "word": "break",
+   "start": 51.82,
+   "end": 53.22,
+   "confidence": 0.96533203125
+  },
+  {
+   "word": "splash",
+   "start": 60.44,
+   "end": 61.84,
+   "confidence": 0.0400390625
+  },
+  {
+   "word": "break",
+   "start": 67.48,
+   "end": 68.88,
+   "confidence": 0.7001953125
+  },
+  {
+   "word": "break",
+   "start": 79.54,
+   "end": 80.94,
+   "confidence": 0.84375
+  },
+  {
+   "word": "splash",
+   "start": 87.58,
+   "end": 88.28,
+   "confidence": 0.97705078125
+  },
+  {
+   "word": "splash",
+   "start": 88.28,
+   "end": 88.62,
+   "confidence": 0.08953857421875
+  },
+  {
+   "word": "splash",
+   "start": 95.78,
+   "end": 96.48,
+   "confidence": 0.94677734375
+  },
+  {
+   "word": "splash",
+   "start": 103.0,
+   "end": 103.7,
+   "confidence": 0.97802734375
+  }
+ ],
+ "text": "its so dark its so dark its so dark its so dark its so dark its so dark its so dark its so dark its so dark its so dark its so dark its so dark its so dark its so dark its so dark its so dark its so dark its so dark its so dark its so dark its so dark its so dark its so dark its so dark its so dark its so dark its so dark break splash break splash break break splash splash splash splash",
+ "runtime_s": 184.49228004101315,
+ "peak_rss_mb": 1810.497536,
+ "prompt_used": true
+}

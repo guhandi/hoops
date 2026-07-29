@@ -1,0 +1,58 @@
+{
+ "model_id": "whisperx-large-v3-int8",
+ "fixture": "R01",
+ "words": [
+  {
+   "word": "shooting",
+   "start": 1.35,
+   "end": 1.61,
+   "confidence": 0.244
+  },
+  {
+   "word": "my",
+   "start": 1.65,
+   "end": 2.211,
+   "confidence": 0.91
+  },
+  {
+   "word": "basketball",
+   "start": 2.291,
+   "end": 2.691,
+   "confidence": 0.422
+  },
+  {
+   "word": "shots.",
+   "start": 2.711,
+   "end": 3.132,
+   "confidence": 0.732
+  },
+  {
+   "word": "make.",
+   "start": 5.414,
+   "end": 5.875,
+   "confidence": 0.76
+  },
+  {
+   "word": "make.",
+   "start": 5.995,
+   "end": 6.295,
+   "confidence": 0.888
+  },
+  {
+   "word": "make.",
+   "start": 12.382,
+   "end": 12.782,
+   "confidence": 0.887
+  },
+  {
+   "word": "make.",
+   "start": 76.812,
+   "end": 77.044,
+   "confidence": 0.66
+  }
+ ],
+ "text": "shooting my basketball shots. make. make. make. make.",
+ "runtime_s": 159.8480260000215,
+ "peak_rss_mb": 1557.151744,
+ "prompt_used": true
+}

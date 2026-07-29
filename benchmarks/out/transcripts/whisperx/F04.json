@@ -1,0 +1,9 @@
+{
+ "model_id": "whisperx-large-v3-int8",
+ "fixture": "F04",
+ "words": [],
+ "text": "",
+ "runtime_s": 24.489584832976107,
+ "peak_rss_mb": 2558.345216,
+ "prompt_used": true
+}

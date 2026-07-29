@@ -1,0 +1,94 @@
+{
+ "model_id": "parakeet-tdt-0.6b-mlx",
+ "fixture": "F07",
+ "words": [
+  {
+   "word": "Make",
+   "start": 3.28,
+   "end": 3.84,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 10.56,
+   "end": 11.12,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 18.4,
+   "end": 18.96,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 26.16,
+   "end": 26.72,
+   "confidence": null
+  },
+  {
+   "word": "make",
+   "start": 36.24,
+   "end": 36.56,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 49.04,
+   "end": 49.68,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 52.64,
+   "end": 53.2,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 56.72,
+   "end": 57.36,
+   "confidence": null
+  },
+  {
+   "word": "make",
+   "start": 65.52,
+   "end": 65.76,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 74.24,
+   "end": 74.8,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 81.12,
+   "end": 81.68,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 85.36,
+   "end": 85.92,
+   "confidence": null
+  },
+  {
+   "word": "make",
+   "start": 89.2,
+   "end": 89.44,
+   "confidence": null
+  },
+  {
+   "word": "make",
+   "start": 100.72,
+   "end": 100.96,
+   "confidence": null
+  }
+ ],
+ "text": "Make miss miss miss make miss miss miss make miss miss miss make make",
+ "runtime_s": 5.323832749971189,
+ "peak_rss_mb": 536.510464,
+ "prompt_used": false
+}

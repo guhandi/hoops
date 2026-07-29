@@ -1,0 +1,58 @@
+{
+ "model_id": "mlx-whisper-large-v3",
+ "fixture": "F07b",
+ "words": [
+  {
+   "word": "miss.",
+   "start": 1.9,
+   "end": 3.3,
+   "confidence": 0.1328125
+  },
+  {
+   "word": "miss.",
+   "start": 5.54,
+   "end": 6.94,
+   "confidence": 0.56787109375
+  },
+  {
+   "word": "miss.",
+   "start": 10.98,
+   "end": 12.38,
+   "confidence": 0.826171875
+  },
+  {
+   "word": "make.",
+   "start": 17.02,
+   "end": 18.42,
+   "confidence": 0.80517578125
+  },
+  {
+   "word": "make.",
+   "start": 23.64,
+   "end": 25.04,
+   "confidence": 0.97412109375
+  },
+  {
+   "word": "make.",
+   "start": 25.04,
+   "end": 25.3,
+   "confidence": 0.1630859375
+  },
+  {
+   "word": "make.",
+   "start": 32.12,
+   "end": 32.78,
+   "confidence": 0.39404296875
+  },
+  {
+   "word": "miss.",
+   "start": 38.6,
+   "end": 39.26,
+   "confidence": 0.246337890625
+  }
+ ],
+ "text": "miss. miss. miss. make. make. make. make. miss.",
+ "runtime_s": 14.373837957973592,
+ "peak_rss_mb": 1737.60512,
+ "prompt_used": true
+}

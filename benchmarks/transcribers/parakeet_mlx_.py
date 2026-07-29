@@ -22,15 +22,30 @@ def run(audio: str, out: str, prompt: str, fixture: str) -> None:
     t0 = time.monotonic()
     model = from_pretrained("mlx-community/parakeet-tdt-0.6b-v2")
     result = model.transcribe(audio)
-    # AlignedResult: sentences -> tokens with .text/.start/.end (verify against the
-    # installed parakeet-mlx version's README if attribute names changed).
+    # AlignedResult: sentences -> tokens with .text/.start/.end. Tokens are SUBWORD
+    # units ("B","re","ak" for "Break"); a leading space/▁ marks a word start. Merge
+    # tokens into words so downstream vocab matching sees "Break", not fragments.
     words = []
+    cur = None
     for sent in result.sentences:
         for tok in sent.tokens:
-            t = tok.text.strip()
-            if t:
-                words.append({"word": t, "start": round(float(tok.start), 3),
-                              "end": round(float(tok.end), 3), "confidence": None})
+            raw = tok.text
+            t = raw.replace("▁", " ").strip()
+            if not t:
+                continue
+            if cur is None or raw.startswith((" ", "▁")):
+                if cur:
+                    words.append(cur)
+                cur = {"word": t, "start": round(float(tok.start), 3),
+                       "end": round(float(tok.end), 3), "confidence": None}
+            else:
+                cur["word"] += t
+                cur["end"] = round(float(tok.end), 3)
+        if cur:  # sentence boundary always ends the current word
+            words.append(cur)
+            cur = None
+    if cur:
+        words.append(cur)
     d = result_dict(fixture, words, result.text.strip(), time.monotonic() - t0, False)
     Path(out).parent.mkdir(parents=True, exist_ok=True)
     Path(out).write_text(json.dumps(d, indent=1))

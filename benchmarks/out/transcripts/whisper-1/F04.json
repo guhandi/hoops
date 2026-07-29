@@ -1,0 +1,82 @@
+{
+ "model_id": "whisper-1",
+ "fixture": "F04",
+ "words": [
+  {
+   "word": "brick",
+   "start": 7.380000114440918,
+   "end": 8.779999732971191,
+   "confidence": null
+  },
+  {
+   "word": "splash",
+   "start": 17.940000534057617,
+   "end": 18.639999389648438,
+   "confidence": null
+  },
+  {
+   "word": "splash",
+   "start": 27.540000915527344,
+   "end": 28.239999771118164,
+   "confidence": null
+  },
+  {
+   "word": "splash",
+   "start": 49.13999938964844,
+   "end": 50.540000915527344,
+   "confidence": null
+  },
+  {
+   "word": "break",
+   "start": 56.86000061035156,
+   "end": 57.08000183105469,
+   "confidence": null
+  },
+  {
+   "word": "break",
+   "start": 58.58000183105469,
+   "end": 59.97999954223633,
+   "confidence": null
+  },
+  {
+   "word": "splash",
+   "start": 61.65999984741211,
+   "end": 63.060001373291016,
+   "confidence": null
+  },
+  {
+   "word": "break",
+   "start": 70.0,
+   "end": 70.95999908447266,
+   "confidence": null
+  },
+  {
+   "word": "break",
+   "start": 80.5,
+   "end": 81.26000213623047,
+   "confidence": null
+  },
+  {
+   "word": "splash",
+   "start": 88.0,
+   "end": 88.69999694824219,
+   "confidence": null
+  },
+  {
+   "word": "splash",
+   "start": 95.76000213623047,
+   "end": 97.16000366210938,
+   "confidence": null
+  },
+  {
+   "word": "splash",
+   "start": 106.27999877929688,
+   "end": 107.68000030517578,
+   "confidence": null
+  }
+ ],
+ "text": " brick. splash. splash. splash. break. break.  splash. break. break. splash. splash.  splash.",
+ "runtime_s": 10.389383542002179,
+ "peak_rss_mb": null,
+ "prompt_used": true
+}

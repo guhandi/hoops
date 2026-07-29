@@ -1,0 +1,52 @@
+{
+ "model_id": "whisperx-large-v3-int8",
+ "fixture": "F08",
+ "words": [
+  {
+   "word": "splash.",
+   "start": 19.083,
+   "end": 19.623,
+   "confidence": 0.622
+  },
+  {
+   "word": "actually",
+   "start": 19.684,
+   "end": 20.004,
+   "confidence": 0.364
+  },
+  {
+   "word": "that",
+   "start": 20.024,
+   "end": 20.124,
+   "confidence": 0.533
+  },
+  {
+   "word": "was",
+   "start": 20.144,
+   "end": 20.224,
+   "confidence": 0.252
+  },
+  {
+   "word": "a",
+   "start": 20.264,
+   "end": 20.304,
+   "confidence": 0.615
+  },
+  {
+   "word": "brick.",
+   "start": 20.324,
+   "end": 20.584,
+   "confidence": 0.84
+  },
+  {
+   "word": "splash.",
+   "start": 30.794,
+   "end": 31.174,
+   "confidence": 0.909
+  }
+ ],
+ "text": "splash. actually that was a brick. splash.",
+ "runtime_s": 39.0533938339795,
+ "peak_rss_mb": 2471.706624,
+ "prompt_used": true
+}

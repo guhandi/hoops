@@ -1,0 +1,64 @@
+{
+ "model_id": "whisper-1",
+ "fixture": "F05",
+ "words": [
+  {
+   "word": "break",
+   "start": 3.299999952316284,
+   "end": 4.699999809265137,
+   "confidence": null
+  },
+  {
+   "word": "break",
+   "start": 9.4399995803833,
+   "end": 9.819999694824219,
+   "confidence": null
+  },
+  {
+   "word": "splash",
+   "start": 15.960000038146973,
+   "end": 17.360000610351562,
+   "confidence": null
+  },
+  {
+   "word": "break",
+   "start": 22.059999465942383,
+   "end": 23.360000610351562,
+   "confidence": null
+  },
+  {
+   "word": "splash",
+   "start": 32.099998474121094,
+   "end": 33.5,
+   "confidence": null
+  },
+  {
+   "word": "break",
+   "start": 40.0,
+   "end": 40.779998779296875,
+   "confidence": null
+  },
+  {
+   "word": "splash",
+   "start": 47.540000915527344,
+   "end": 47.880001068115234,
+   "confidence": null
+  },
+  {
+   "word": "splash",
+   "start": 52.65999984741211,
+   "end": 52.68000030517578,
+   "confidence": null
+  },
+  {
+   "word": "splash",
+   "start": 56.31999969482422,
+   "end": 56.5,
+   "confidence": null
+  }
+ ],
+ "text": "break. break. splash. break. splash. break. splash. splash. splash.",
+ "runtime_s": 2.4534851250064094,
+ "peak_rss_mb": null,
+ "prompt_used": true
+}

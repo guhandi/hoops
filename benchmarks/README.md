@@ -59,7 +59,7 @@ F08 is the shortest fixture (33.6s). On first run, this downloads the CT2 large-
 Load cached transcripts, compute detection metrics, and write ground-truth for labeling.
 
 ```bash
-uv run python benchmarks/analyze.py
+uv run python -m benchmarks.analyze
 ```
 
 **Output:**
@@ -73,7 +73,7 @@ uv run python benchmarks/analyze.py
 Generate an interactive HTML report.
 
 ```bash
-uv run python benchmarks/report.py
+uv run python -m benchmarks.report
 ```
 
 **Output:**

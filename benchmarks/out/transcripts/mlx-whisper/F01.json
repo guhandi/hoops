@@ -1,0 +1,118 @@
+{
+ "model_id": "mlx-whisper-large-v3",
+ "fixture": "F01",
+ "words": [
+  {
+   "word": "brick.",
+   "start": 0.0,
+   "end": 2.58,
+   "confidence": 0.03143310546875
+  },
+  {
+   "word": "brick.",
+   "start": 10.0,
+   "end": 11.4,
+   "confidence": 0.78369140625
+  },
+  {
+   "word": "brick.",
+   "start": 19.16,
+   "end": 20.56,
+   "confidence": 0.9482421875
+  },
+  {
+   "word": "brick.",
+   "start": 20.56,
+   "end": 20.88,
+   "confidence": 0.01473236083984375
+  },
+  {
+   "word": "brick.",
+   "start": 28.88,
+   "end": 30.28,
+   "confidence": 0.7783203125
+  },
+  {
+   "word": "brick.",
+   "start": 36.0,
+   "end": 36.7,
+   "confidence": 0.95703125
+  },
+  {
+   "word": "splash.",
+   "start": 40.56,
+   "end": 41.3,
+   "confidence": 0.2291259765625
+  },
+  {
+   "word": "splash.",
+   "start": 46.16,
+   "end": 47.56,
+   "confidence": 0.9658203125
+  },
+  {
+   "word": "brick.",
+   "start": 51.64,
+   "end": 53.04,
+   "confidence": 0.0046234130859375
+  },
+  {
+   "word": "brick.",
+   "start": 56.96,
+   "end": 58.36,
+   "confidence": 0.580078125
+  },
+  {
+   "word": "splash.",
+   "start": 65.98,
+   "end": 67.38,
+   "confidence": 0.475341796875
+  },
+  {
+   "word": "brick.",
+   "start": 70.94,
+   "end": 72.34,
+   "confidence": 0.96044921875
+  },
+  {
+   "word": "splash.",
+   "start": 75.42,
+   "end": 76.12,
+   "confidence": 0.2034912109375
+  },
+  {
+   "word": "splash.",
+   "start": 76.12,
+   "end": 77.08,
+   "confidence": 0.52392578125
+  },
+  {
+   "word": "splash.",
+   "start": 80.12,
+   "end": 80.94,
+   "confidence": 0.82373046875
+  },
+  {
+   "word": "splash.",
+   "start": 85.06,
+   "end": 86.46,
+   "confidence": 0.96044921875
+  },
+  {
+   "word": "splash.",
+   "start": 86.46,
+   "end": 86.7,
+   "confidence": 0.0634765625
+  },
+  {
+   "word": "splash.",
+   "start": 88.3,
+   "end": 88.82,
+   "confidence": 0.0022335052490234375
+  }
+ ],
+ "text": "brick. brick. brick. brick. brick. brick. splash. splash. brick. brick. splash. brick. splash. splash. splash. splash. splash. splash.",
+ "runtime_s": 113.60683762500412,
+ "peak_rss_mb": 1611.546624,
+ "prompt_used": true
+}

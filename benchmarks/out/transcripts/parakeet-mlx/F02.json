@@ -1,0 +1,730 @@
+{
+ "model_id": "parakeet-tdt-0.6b-mlx",
+ "fixture": "F02",
+ "words": [
+  {
+   "word": "Alright,",
+   "start": 0.16,
+   "end": 0.48,
+   "confidence": null
+  },
+  {
+   "word": "let's",
+   "start": 0.48,
+   "end": 0.64,
+   "confidence": null
+  },
+  {
+   "word": "go.",
+   "start": 0.64,
+   "end": 0.88,
+   "confidence": null
+  },
+  {
+   "word": "FO2",
+   "start": 0.88,
+   "end": 1.52,
+   "confidence": null
+  },
+  {
+   "word": "time.",
+   "start": 1.68,
+   "end": 2.16,
+   "confidence": null
+  },
+  {
+   "word": "Let's",
+   "start": 2.16,
+   "end": 2.48,
+   "confidence": null
+  },
+  {
+   "word": "go.",
+   "start": 2.48,
+   "end": 2.64,
+   "confidence": null
+  },
+  {
+   "word": "First",
+   "start": 3.2,
+   "end": 3.52,
+   "confidence": null
+  },
+  {
+   "word": "shot,",
+   "start": 3.52,
+   "end": 4.0,
+   "confidence": null
+  },
+  {
+   "word": "brick.",
+   "start": 4.0,
+   "end": 4.8,
+   "confidence": null
+  },
+  {
+   "word": "Damn",
+   "start": 4.8,
+   "end": 5.12,
+   "confidence": null
+  },
+  {
+   "word": "it.",
+   "start": 5.12,
+   "end": 5.76,
+   "confidence": null
+  },
+  {
+   "word": "That",
+   "start": 5.76,
+   "end": 6.0,
+   "confidence": null
+  },
+  {
+   "word": "was",
+   "start": 6.0,
+   "end": 6.24,
+   "confidence": null
+  },
+  {
+   "word": "ass.",
+   "start": 6.24,
+   "end": 7.12,
+   "confidence": null
+  },
+  {
+   "word": "Let's",
+   "start": 7.12,
+   "end": 7.36,
+   "confidence": null
+  },
+  {
+   "word": "go.",
+   "start": 7.44,
+   "end": 7.92,
+   "confidence": null
+  },
+  {
+   "word": "Second",
+   "start": 8.08,
+   "end": 8.32,
+   "confidence": null
+  },
+  {
+   "word": "shot,",
+   "start": 8.32,
+   "end": 8.72,
+   "confidence": null
+  },
+  {
+   "word": "also,",
+   "start": 8.72,
+   "end": 9.04,
+   "confidence": null
+  },
+  {
+   "word": "brick.",
+   "start": 9.04,
+   "end": 10.08,
+   "confidence": null
+  },
+  {
+   "word": "Ah,",
+   "start": 11.04,
+   "end": 11.36,
+   "confidence": null
+  },
+  {
+   "word": "man,",
+   "start": 11.36,
+   "end": 11.68,
+   "confidence": null
+  },
+  {
+   "word": "I'm",
+   "start": 11.68,
+   "end": 11.92,
+   "confidence": null
+  },
+  {
+   "word": "actually",
+   "start": 11.92,
+   "end": 12.24,
+   "confidence": null
+  },
+  {
+   "word": "so",
+   "start": 12.24,
+   "end": 12.4,
+   "confidence": null
+  },
+  {
+   "word": "bad",
+   "start": 12.4,
+   "end": 12.64,
+   "confidence": null
+  },
+  {
+   "word": "at",
+   "start": 12.64,
+   "end": 12.8,
+   "confidence": null
+  },
+  {
+   "word": "this.",
+   "start": 12.8,
+   "end": 13.04,
+   "confidence": null
+  },
+  {
+   "word": "I",
+   "start": 13.04,
+   "end": 13.2,
+   "confidence": null
+  },
+  {
+   "word": "just",
+   "start": 13.2,
+   "end": 13.36,
+   "confidence": null
+  },
+  {
+   "word": "need",
+   "start": 13.36,
+   "end": 13.52,
+   "confidence": null
+  },
+  {
+   "word": "to",
+   "start": 13.52,
+   "end": 13.6,
+   "confidence": null
+  },
+  {
+   "word": "be",
+   "start": 13.6,
+   "end": 13.84,
+   "confidence": null
+  },
+  {
+   "word": "so",
+   "start": 13.84,
+   "end": 14.08,
+   "confidence": null
+  },
+  {
+   "word": "much",
+   "start": 14.08,
+   "end": 14.4,
+   "confidence": null
+  },
+  {
+   "word": "better.",
+   "start": 14.4,
+   "end": 14.8,
+   "confidence": null
+  },
+  {
+   "word": "Should",
+   "start": 14.88,
+   "end": 15.04,
+   "confidence": null
+  },
+  {
+   "word": "be",
+   "start": 15.12,
+   "end": 15.2,
+   "confidence": null
+  },
+  {
+   "word": "making",
+   "start": 15.2,
+   "end": 15.52,
+   "confidence": null
+  },
+  {
+   "word": "all",
+   "start": 15.52,
+   "end": 15.76,
+   "confidence": null
+  },
+  {
+   "word": "of",
+   "start": 15.76,
+   "end": 16.08,
+   "confidence": null
+  },
+  {
+   "word": "these.",
+   "start": 16.08,
+   "end": 16.64,
+   "confidence": null
+  },
+  {
+   "word": "Brick.",
+   "start": 17.92,
+   "end": 19.2,
+   "confidence": null
+  },
+  {
+   "word": "Ah,",
+   "start": 19.84,
+   "end": 20.4,
+   "confidence": null
+  },
+  {
+   "word": "so",
+   "start": 20.4,
+   "end": 20.72,
+   "confidence": null
+  },
+  {
+   "word": "bad.",
+   "start": 20.72,
+   "end": 21.68,
+   "confidence": null
+  },
+  {
+   "word": "Brick.",
+   "start": 22.32,
+   "end": 23.04,
+   "confidence": null
+  },
+  {
+   "word": "Not",
+   "start": 23.04,
+   "end": 23.2,
+   "confidence": null
+  },
+  {
+   "word": "even",
+   "start": 23.28,
+   "end": 23.52,
+   "confidence": null
+  },
+  {
+   "word": "kind",
+   "start": 23.52,
+   "end": 23.68,
+   "confidence": null
+  },
+  {
+   "word": "of",
+   "start": 23.68,
+   "end": 23.84,
+   "confidence": null
+  },
+  {
+   "word": "close",
+   "start": 23.84,
+   "end": 24.08,
+   "confidence": null
+  },
+  {
+   "word": "there.",
+   "start": 24.24,
+   "end": 24.56,
+   "confidence": null
+  },
+  {
+   "word": "Come",
+   "start": 24.56,
+   "end": 24.64,
+   "confidence": null
+  },
+  {
+   "word": "on,",
+   "start": 24.64,
+   "end": 24.8,
+   "confidence": null
+  },
+  {
+   "word": "need",
+   "start": 24.88,
+   "end": 24.96,
+   "confidence": null
+  },
+  {
+   "word": "to",
+   "start": 24.96,
+   "end": 25.04,
+   "confidence": null
+  },
+  {
+   "word": "lock",
+   "start": 25.12,
+   "end": 25.36,
+   "confidence": null
+  },
+  {
+   "word": "in.",
+   "start": 25.36,
+   "end": 25.68,
+   "confidence": null
+  },
+  {
+   "word": "Come",
+   "start": 25.68,
+   "end": 25.92,
+   "confidence": null
+  },
+  {
+   "word": "on.",
+   "start": 25.92,
+   "end": 26.48,
+   "confidence": null
+  },
+  {
+   "word": "There",
+   "start": 26.96,
+   "end": 27.12,
+   "confidence": null
+  },
+  {
+   "word": "we",
+   "start": 27.2,
+   "end": 27.28,
+   "confidence": null
+  },
+  {
+   "word": "go.",
+   "start": 27.28,
+   "end": 27.76,
+   "confidence": null
+  },
+  {
+   "word": "Splash.",
+   "start": 27.76,
+   "end": 29.04,
+   "confidence": null
+  },
+  {
+   "word": "Not",
+   "start": 29.04,
+   "end": 29.36,
+   "confidence": null
+  },
+  {
+   "word": "bad.",
+   "start": 29.36,
+   "end": 30.32,
+   "confidence": null
+  },
+  {
+   "word": "Not",
+   "start": 30.64,
+   "end": 31.12,
+   "confidence": null
+  },
+  {
+   "word": "too",
+   "start": 31.12,
+   "end": 31.44,
+   "confidence": null
+  },
+  {
+   "word": "bad.",
+   "start": 31.44,
+   "end": 32.32,
+   "confidence": null
+  },
+  {
+   "word": "Oh,",
+   "start": 34.88,
+   "end": 35.12,
+   "confidence": null
+  },
+  {
+   "word": "splash.",
+   "start": 35.28,
+   "end": 35.76,
+   "confidence": null
+  },
+  {
+   "word": "Now",
+   "start": 35.76,
+   "end": 35.84,
+   "confidence": null
+  },
+  {
+   "word": "we're",
+   "start": 35.92,
+   "end": 36.08,
+   "confidence": null
+  },
+  {
+   "word": "heating",
+   "start": 36.08,
+   "end": 36.24,
+   "confidence": null
+  },
+  {
+   "word": "up.",
+   "start": 36.4,
+   "end": 36.8,
+   "confidence": null
+  },
+  {
+   "word": "Now",
+   "start": 36.8,
+   "end": 36.96,
+   "confidence": null
+  },
+  {
+   "word": "we're",
+   "start": 37.04,
+   "end": 37.2,
+   "confidence": null
+  },
+  {
+   "word": "heating.",
+   "start": 37.2,
+   "end": 37.92,
+   "confidence": null
+  },
+  {
+   "word": "That's",
+   "start": 37.92,
+   "end": 38.16,
+   "confidence": null
+  },
+  {
+   "word": "what",
+   "start": 38.16,
+   "end": 38.24,
+   "confidence": null
+  },
+  {
+   "word": "I'm",
+   "start": 38.24,
+   "end": 38.48,
+   "confidence": null
+  },
+  {
+   "word": "talking",
+   "start": 38.48,
+   "end": 39.04,
+   "confidence": null
+  },
+  {
+   "word": "about.",
+   "start": 39.04,
+   "end": 39.68,
+   "confidence": null
+  },
+  {
+   "word": "Just",
+   "start": 39.68,
+   "end": 39.84,
+   "confidence": null
+  },
+  {
+   "word": "gotta",
+   "start": 39.92,
+   "end": 40.16,
+   "confidence": null
+  },
+  {
+   "word": "feel",
+   "start": 40.24,
+   "end": 40.4,
+   "confidence": null
+  },
+  {
+   "word": "the",
+   "start": 40.4,
+   "end": 40.48,
+   "confidence": null
+  },
+  {
+   "word": "rhythm,",
+   "start": 40.48,
+   "end": 40.88,
+   "confidence": null
+  },
+  {
+   "word": "you",
+   "start": 40.88,
+   "end": 40.96,
+   "confidence": null
+  },
+  {
+   "word": "know,",
+   "start": 40.96,
+   "end": 41.2,
+   "confidence": null
+  },
+  {
+   "word": "sometimes.",
+   "start": 41.2,
+   "end": 41.68,
+   "confidence": null
+  },
+  {
+   "word": "Just",
+   "start": 41.68,
+   "end": 41.84,
+   "confidence": null
+  },
+  {
+   "word": "gotta",
+   "start": 41.84,
+   "end": 42.16,
+   "confidence": null
+  },
+  {
+   "word": "freaking",
+   "start": 42.16,
+   "end": 42.48,
+   "confidence": null
+  },
+  {
+   "word": "feel",
+   "start": 42.64,
+   "end": 42.96,
+   "confidence": null
+  },
+  {
+   "word": "it.",
+   "start": 42.96,
+   "end": 43.6,
+   "confidence": null
+  },
+  {
+   "word": "Splash,",
+   "start": 43.6,
+   "end": 44.24,
+   "confidence": null
+  },
+  {
+   "word": "let's",
+   "start": 44.24,
+   "end": 44.4,
+   "confidence": null
+  },
+  {
+   "word": "freaking",
+   "start": 44.4,
+   "end": 44.64,
+   "confidence": null
+  },
+  {
+   "word": "go.",
+   "start": 44.8,
+   "end": 45.04,
+   "confidence": null
+  },
+  {
+   "word": "It's",
+   "start": 45.04,
+   "end": 45.28,
+   "confidence": null
+  },
+  {
+   "word": "three",
+   "start": 45.28,
+   "end": 45.36,
+   "confidence": null
+  },
+  {
+   "word": "in",
+   "start": 45.52,
+   "end": 45.6,
+   "confidence": null
+  },
+  {
+   "word": "a",
+   "start": 45.6,
+   "end": 45.68,
+   "confidence": null
+  },
+  {
+   "word": "row.",
+   "start": 45.68,
+   "end": 46.32,
+   "confidence": null
+  },
+  {
+   "word": "No,",
+   "start": 46.32,
+   "end": 46.48,
+   "confidence": null
+  },
+  {
+   "word": "I'm",
+   "start": 46.56,
+   "end": 46.72,
+   "confidence": null
+  },
+  {
+   "word": "gonna",
+   "start": 46.72,
+   "end": 46.8,
+   "confidence": null
+  },
+  {
+   "word": "keep",
+   "start": 46.88,
+   "end": 47.04,
+   "confidence": null
+  },
+  {
+   "word": "shooting",
+   "start": 47.04,
+   "end": 47.28,
+   "confidence": null
+  },
+  {
+   "word": "because",
+   "start": 47.36,
+   "end": 47.44,
+   "confidence": null
+  },
+  {
+   "word": "I'm",
+   "start": 47.52,
+   "end": 47.68,
+   "confidence": null
+  },
+  {
+   "word": "feeling",
+   "start": 47.68,
+   "end": 48.08,
+   "confidence": null
+  },
+  {
+   "word": "good.",
+   "start": 48.08,
+   "end": 48.72,
+   "confidence": null
+  },
+  {
+   "word": "Come",
+   "start": 48.88,
+   "end": 49.04,
+   "confidence": null
+  },
+  {
+   "word": "on,",
+   "start": 49.04,
+   "end": 49.36,
+   "confidence": null
+  },
+  {
+   "word": "okay.",
+   "start": 49.36,
+   "end": 49.76,
+   "confidence": null
+  },
+  {
+   "word": "Brick.",
+   "start": 49.76,
+   "end": 50.64,
+   "confidence": null
+  }
+ ],
+ "text": "Alright, let's go. FO2 time. Let's go. First shot, brick. Damn it. That was ass. Let's go. Second shot, also, brick. Ah, man, I'm actually so bad at this. I just need to be so much better. Should be making all of these. Brick. Ah, so bad. Brick. Not even kind of close there. Come on, need to lock in. Come on. There we go. Splash. Not bad. Not too bad. Oh, splash. Now we're heating up. Now we're heating. That's what I'm talking about. Just gotta feel the rhythm, you know, sometimes. Just gotta freaking feel it. Splash, let's freaking go. It's three in a row. No, I'm gonna keep shooting because I'm feeling good. Come on, okay. Brick.",
+ "runtime_s": 4.048190083994996,
+ "peak_rss_mb": 734.265344,
+ "prompt_used": false
+}

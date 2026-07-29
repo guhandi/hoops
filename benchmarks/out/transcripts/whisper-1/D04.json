@@ -1,0 +1,100 @@
+{
+ "model_id": "whisper-1",
+ "fixture": "D04",
+ "words": [
+  {
+   "word": "miss",
+   "start": 3.5999999046325684,
+   "end": 4.300000190734863,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 11.180000305175781,
+   "end": 11.819999694824219,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 18.239999771118164,
+   "end": 19.639999389648438,
+   "confidence": null
+  },
+  {
+   "word": "make",
+   "start": 34.15999984741211,
+   "end": 35.560001373291016,
+   "confidence": null
+  },
+  {
+   "word": "make",
+   "start": 41.91999816894531,
+   "end": 42.0,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 48.15999984741211,
+   "end": 49.47999954223633,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 52.0,
+   "end": 53.08000183105469,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 53.08000183105469,
+   "end": 55.459999084472656,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 57.459999084472656,
+   "end": 58.86000061035156,
+   "confidence": null
+  },
+  {
+   "word": "make",
+   "start": 65.80000305175781,
+   "end": 66.22000122070312,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 74.0,
+   "end": 74.69999694824219,
+   "confidence": null
+  },
+  {
+   "word": "miss",
+   "start": 80.22000122070312,
+   "end": 81.62000274658203,
+   "confidence": null
+  },
+  {
+   "word": "make",
+   "start": 89.45999908447266,
+   "end": 89.63999938964844,
+   "confidence": null
+  },
+  {
+   "word": "make",
+   "start": 96.13999938964844,
+   "end": 96.83999633789062,
+   "confidence": null
+  },
+  {
+   "word": "make",
+   "start": 100.19999694824219,
+   "end": 101.08000183105469,
+   "confidence": null
+  }
+ ],
+ "text": "miss. miss. miss.   make. make. miss. miss. miss. miss. make. miss. miss.   make. make. make.",
+ "runtime_s": 2.8182965830201283,
+ "peak_rss_mb": null,
+ "prompt_used": true
+}

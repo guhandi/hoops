@@ -1,0 +1,16 @@
+{
+ "model_id": "whisperx-large-v3-int8",
+ "fixture": "D03",
+ "words": [
+  {
+   "word": "make.",
+   "start": 32.819,
+   "end": 33.027,
+   "confidence": 0.66
+  }
+ ],
+ "text": "make.",
+ "runtime_s": 72.60320591699565,
+ "peak_rss_mb": 1818.755072,
+ "prompt_used": true
+}

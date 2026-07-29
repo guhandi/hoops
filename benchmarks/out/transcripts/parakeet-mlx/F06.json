@@ -1,0 +1,100 @@
+{
+ "model_id": "parakeet-tdt-0.6b-mlx",
+ "fixture": "F06",
+ "words": [
+  {
+   "word": "Brick",
+   "start": 3.36,
+   "end": 4.24,
+   "confidence": null
+  },
+  {
+   "word": "Brick",
+   "start": 11.28,
+   "end": 12.16,
+   "confidence": null
+  },
+  {
+   "word": "Splash",
+   "start": 22.48,
+   "end": 23.44,
+   "confidence": null
+  },
+  {
+   "word": "Splash",
+   "start": 28.56,
+   "end": 29.6,
+   "confidence": null
+  },
+  {
+   "word": "Splash",
+   "start": 34.72,
+   "end": 35.84,
+   "confidence": null
+  },
+  {
+   "word": "Break",
+   "start": 40.64,
+   "end": 41.52,
+   "confidence": null
+  },
+  {
+   "word": "Break",
+   "start": 57.12,
+   "end": 58.0,
+   "confidence": null
+  },
+  {
+   "word": "Splash",
+   "start": 66.88,
+   "end": 67.76,
+   "confidence": null
+  },
+  {
+   "word": "Break",
+   "start": 74.72,
+   "end": 75.52,
+   "confidence": null
+  },
+  {
+   "word": "Splash",
+   "start": 85.12,
+   "end": 86.08,
+   "confidence": null
+  },
+  {
+   "word": "Splash",
+   "start": 91.84,
+   "end": 92.72,
+   "confidence": null
+  },
+  {
+   "word": "Splash",
+   "start": 99.76,
+   "end": 100.8,
+   "confidence": null
+  },
+  {
+   "word": "Splash",
+   "start": 107.12,
+   "end": 108.16,
+   "confidence": null
+  },
+  {
+   "word": "Splash",
+   "start": 114.72,
+   "end": 115.6,
+   "confidence": null
+  },
+  {
+   "word": "Brick",
+   "start": 123.2,
+   "end": 123.84,
+   "confidence": null
+  }
+ ],
+ "text": "Brick Brick Splash Splash Splash Break Break Splash Break Splash Splash Splash Splash Splash Brick",
+ "runtime_s": 4.9447992910281755,
+ "peak_rss_mb": 383.172608,
+ "prompt_used": false
+}

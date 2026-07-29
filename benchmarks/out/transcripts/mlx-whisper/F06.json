@@ -1,0 +1,1420 @@
+{
+ "model_id": "mlx-whisper-large-v3",
+ "fixture": "F06",
+ "words": [
+  {
+   "word": "a",
+   "start": 0.0,
+   "end": 0.02,
+   "confidence": 0.0012044906616210938
+  },
+  {
+   "word": "little",
+   "start": 0.02,
+   "end": 6.28,
+   "confidence": 0.0136260986328125
+  },
+  {
+   "word": "sick",
+   "start": 6.28,
+   "end": 6.28,
+   "confidence": 0.00017881393432617188
+  },
+  {
+   "word": "a",
+   "start": 6.28,
+   "end": 6.28,
+   "confidence": 0.007472991943359375
+  },
+  {
+   "word": "little",
+   "start": 6.28,
+   "end": 6.28,
+   "confidence": 0.8212890625
+  },
+  {
+   "word": "sick",
+   "start": 6.28,
+   "end": 7.14,
+   "confidence": 0.405029296875
+  },
+  {
+   "word": "a",
+   "start": 7.14,
+   "end": 8.86,
+   "confidence": 0.12335205078125
+  },
+  {
+   "word": "little",
+   "start": 8.86,
+   "end": 9.36,
+   "confidence": 0.8818359375
+  },
+  {
+   "word": "sick",
+   "start": 9.36,
+   "end": 10.82,
+   "confidence": 0.95654296875
+  },
+  {
+   "word": "a",
+   "start": 10.82,
+   "end": 10.82,
+   "confidence": 0.3671875
+  },
+  {
+   "word": "little",
+   "start": 10.82,
+   "end": 11.44,
+   "confidence": 0.9453125
+  },
+  {
+   "word": "sick",
+   "start": 11.44,
+   "end": 11.68,
+   "confidence": 0.98779296875
+  },
+  {
+   "word": "a",
+   "start": 11.68,
+   "end": 11.68,
+   "confidence": 0.6650390625
+  },
+  {
+   "word": "little",
+   "start": 11.68,
+   "end": 11.68,
+   "confidence": 0.9736328125
+  },
+  {
+   "word": "sick",
+   "start": 11.68,
+   "end": 13.8,
+   "confidence": 0.99169921875
+  },
+  {
+   "word": "a",
+   "start": 13.8,
+   "end": 13.96,
+   "confidence": 0.80712890625
+  },
+  {
+   "word": "little",
+   "start": 13.96,
+   "end": 13.96,
+   "confidence": 0.98291015625
+  },
+  {
+   "word": "sick",
+   "start": 13.96,
+   "end": 13.98,
+   "confidence": 0.99365234375
+  },
+  {
+   "word": "a",
+   "start": 13.98,
+   "end": 13.98,
+   "confidence": 0.8515625
+  },
+  {
+   "word": "little",
+   "start": 13.98,
+   "end": 13.98,
+   "confidence": 0.98876953125
+  },
+  {
+   "word": "sick",
+   "start": 13.98,
+   "end": 13.98,
+   "confidence": 0.99462890625
+  },
+  {
+   "word": "a",
+   "start": 13.98,
+   "end": 13.98,
+   "confidence": 0.88134765625
+  },
+  {
+   "word": "little",
+   "start": 13.98,
+   "end": 13.98,
+   "confidence": 0.99169921875
+  },
+  {
+   "word": "sick",
+   "start": 13.98,
+   "end": 14.2,
+   "confidence": 0.99658203125
+  },
+  {
+   "word": "a",
+   "start": 14.2,
+   "end": 14.68,
+   "confidence": 0.90087890625
+  },
+  {
+   "word": "little",
+   "start": 14.68,
+   "end": 14.8,
+   "confidence": 0.9931640625
+  },
+  {
+   "word": "sick",
+   "start": 14.8,
+   "end": 15.94,
+   "confidence": 0.9970703125
+  },
+  {
+   "word": "a",
+   "start": 15.94,
+   "end": 16.02,
+   "confidence": 0.9111328125
+  },
+  {
+   "word": "little",
+   "start": 16.02,
+   "end": 16.26,
+   "confidence": 0.994140625
+  },
+  {
+   "word": "sick",
+   "start": 16.26,
+   "end": 18.62,
+   "confidence": 0.9970703125
+  },
+  {
+   "word": "a",
+   "start": 18.62,
+   "end": 18.74,
+   "confidence": 0.91845703125
+  },
+  {
+   "word": "little",
+   "start": 18.74,
+   "end": 19.4,
+   "confidence": 0.99462890625
+  },
+  {
+   "word": "sick",
+   "start": 19.4,
+   "end": 21.58,
+   "confidence": 0.9970703125
+  },
+  {
+   "word": "a",
+   "start": 21.58,
+   "end": 21.58,
+   "confidence": 0.92431640625
+  },
+  {
+   "word": "little",
+   "start": 21.58,
+   "end": 21.8,
+   "confidence": 0.9951171875
+  },
+  {
+   "word": "sick",
+   "start": 21.8,
+   "end": 22.24,
+   "confidence": 0.9970703125
+  },
+  {
+   "word": "a",
+   "start": 22.24,
+   "end": 22.24,
+   "confidence": 0.92919921875
+  },
+  {
+   "word": "little",
+   "start": 22.24,
+   "end": 22.54,
+   "confidence": 0.99560546875
+  },
+  {
+   "word": "sick",
+   "start": 22.54,
+   "end": 22.54,
+   "confidence": 0.9970703125
+  },
+  {
+   "word": "a",
+   "start": 22.54,
+   "end": 22.66,
+   "confidence": 0.93310546875
+  },
+  {
+   "word": "little",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99609375
+  },
+  {
+   "word": "sick",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.9365234375
+  },
+  {
+   "word": "little",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99609375
+  },
+  {
+   "word": "sick",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.939453125
+  },
+  {
+   "word": "little",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99658203125
+  },
+  {
+   "word": "sick",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.94140625
+  },
+  {
+   "word": "little",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.9970703125
+  },
+  {
+   "word": "sick",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.94287109375
+  },
+  {
+   "word": "little",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.9970703125
+  },
+  {
+   "word": "sick",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.9453125
+  },
+  {
+   "word": "little",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.9970703125
+  },
+  {
+   "word": "sick",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.94677734375
+  },
+  {
+   "word": "little",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.9970703125
+  },
+  {
+   "word": "sick",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.94873046875
+  },
+  {
+   "word": "little",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "sick",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.9501953125
+  },
+  {
+   "word": "little",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "sick",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.95166015625
+  },
+  {
+   "word": "little",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "sick",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.953125
+  },
+  {
+   "word": "little",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "sick",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.95458984375
+  },
+  {
+   "word": "little",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.998046875
+  },
+  {
+   "word": "sick",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.95556640625
+  },
+  {
+   "word": "little",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.998046875
+  },
+  {
+   "word": "sick",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.95654296875
+  },
+  {
+   "word": "little",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.998046875
+  },
+  {
+   "word": "sick",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.95751953125
+  },
+  {
+   "word": "little",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.998046875
+  },
+  {
+   "word": "sick",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.95849609375
+  },
+  {
+   "word": "little",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.998046875
+  },
+  {
+   "word": "sick",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.95947265625
+  },
+  {
+   "word": "little",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.998046875
+  },
+  {
+   "word": "sick",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.9599609375
+  },
+  {
+   "word": "little",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.998046875
+  },
+  {
+   "word": "sick",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.96044921875
+  },
+  {
+   "word": "little",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.96142578125
+  },
+  {
+   "word": "little",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.96240234375
+  },
+  {
+   "word": "little",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 22.66,
+   "end": 22.66,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.66,
+   "end": 22.72,
+   "confidence": 0.962890625
+  },
+  {
+   "word": "little",
+   "start": 22.72,
+   "end": 22.72,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 22.72,
+   "end": 22.72,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.72,
+   "end": 22.72,
+   "confidence": 0.962890625
+  },
+  {
+   "word": "little",
+   "start": 22.72,
+   "end": 22.72,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 22.72,
+   "end": 22.72,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.72,
+   "end": 22.72,
+   "confidence": 0.962890625
+  },
+  {
+   "word": "little",
+   "start": 22.72,
+   "end": 22.72,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 22.72,
+   "end": 22.72,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.72,
+   "end": 22.78,
+   "confidence": 0.9638671875
+  },
+  {
+   "word": "little",
+   "start": 22.78,
+   "end": 22.78,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 22.78,
+   "end": 22.78,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.78,
+   "end": 22.78,
+   "confidence": 0.9638671875
+  },
+  {
+   "word": "little",
+   "start": 22.78,
+   "end": 22.78,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 22.78,
+   "end": 22.78,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.78,
+   "end": 22.8,
+   "confidence": 0.96435546875
+  },
+  {
+   "word": "little",
+   "start": 22.8,
+   "end": 22.8,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 22.8,
+   "end": 22.8,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.8,
+   "end": 22.8,
+   "confidence": 0.96435546875
+  },
+  {
+   "word": "little",
+   "start": 22.8,
+   "end": 22.8,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 22.8,
+   "end": 22.8,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 22.8,
+   "end": 23.08,
+   "confidence": 0.96484375
+  },
+  {
+   "word": "little",
+   "start": 23.08,
+   "end": 23.08,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.08,
+   "end": 23.08,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 23.08,
+   "end": 23.08,
+   "confidence": 0.96484375
+  },
+  {
+   "word": "little",
+   "start": 23.08,
+   "end": 23.08,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.08,
+   "end": 23.08,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 23.08,
+   "end": 23.08,
+   "confidence": 0.96484375
+  },
+  {
+   "word": "little",
+   "start": 23.08,
+   "end": 23.08,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.08,
+   "end": 23.08,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 23.08,
+   "end": 23.08,
+   "confidence": 0.96484375
+  },
+  {
+   "word": "little",
+   "start": 23.08,
+   "end": 23.08,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.08,
+   "end": 23.08,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 23.08,
+   "end": 23.08,
+   "confidence": 0.96533203125
+  },
+  {
+   "word": "little",
+   "start": 23.08,
+   "end": 23.08,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.08,
+   "end": 23.08,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 23.08,
+   "end": 23.08,
+   "confidence": 0.96484375
+  },
+  {
+   "word": "little",
+   "start": 23.08,
+   "end": 23.08,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.08,
+   "end": 23.08,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 23.08,
+   "end": 23.08,
+   "confidence": 0.96533203125
+  },
+  {
+   "word": "little",
+   "start": 23.08,
+   "end": 23.08,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.08,
+   "end": 23.08,
+   "confidence": 0.9970703125
+  },
+  {
+   "word": "a",
+   "start": 23.08,
+   "end": 23.3,
+   "confidence": 0.96484375
+  },
+  {
+   "word": "little",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.96533203125
+  },
+  {
+   "word": "little",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.9970703125
+  },
+  {
+   "word": "a",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.96533203125
+  },
+  {
+   "word": "little",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.9658203125
+  },
+  {
+   "word": "little",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.96533203125
+  },
+  {
+   "word": "little",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.9658203125
+  },
+  {
+   "word": "little",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.96533203125
+  },
+  {
+   "word": "little",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.96533203125
+  },
+  {
+   "word": "little",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.96630859375
+  },
+  {
+   "word": "little",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.96630859375
+  },
+  {
+   "word": "little",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.966796875
+  },
+  {
+   "word": "little",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.96630859375
+  },
+  {
+   "word": "little",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.96630859375
+  },
+  {
+   "word": "little",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.96728515625
+  },
+  {
+   "word": "little",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.9677734375
+  },
+  {
+   "word": "little",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.96826171875
+  },
+  {
+   "word": "little",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.96826171875
+  },
+  {
+   "word": "little",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.96826171875
+  },
+  {
+   "word": "little",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.96875
+  },
+  {
+   "word": "little",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99755859375
+  },
+  {
+   "word": "a",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.96923828125
+  },
+  {
+   "word": "little",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.3,
+   "end": 23.3,
+   "confidence": 0.998046875
+  },
+  {
+   "word": "a",
+   "start": 23.3,
+   "end": 23.4,
+   "confidence": 0.9697265625
+  },
+  {
+   "word": "little",
+   "start": 23.4,
+   "end": 23.44,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.44,
+   "end": 23.58,
+   "confidence": 0.998046875
+  },
+  {
+   "word": "a",
+   "start": 23.58,
+   "end": 23.76,
+   "confidence": 0.9697265625
+  },
+  {
+   "word": "little",
+   "start": 23.76,
+   "end": 23.76,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 23.76,
+   "end": 25.18,
+   "confidence": 0.998046875
+  },
+  {
+   "word": "a",
+   "start": 25.18,
+   "end": 25.42,
+   "confidence": 0.97021484375
+  },
+  {
+   "word": "little",
+   "start": 25.42,
+   "end": 25.42,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 25.42,
+   "end": 25.9,
+   "confidence": 0.998046875
+  },
+  {
+   "word": "a",
+   "start": 25.9,
+   "end": 26.26,
+   "confidence": 0.97119140625
+  },
+  {
+   "word": "little",
+   "start": 26.26,
+   "end": 26.26,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 26.26,
+   "end": 27.7,
+   "confidence": 0.998046875
+  },
+  {
+   "word": "a",
+   "start": 27.7,
+   "end": 27.92,
+   "confidence": 0.970703125
+  },
+  {
+   "word": "little",
+   "start": 27.92,
+   "end": 27.92,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 27.92,
+   "end": 28.3,
+   "confidence": 0.998046875
+  },
+  {
+   "word": "a",
+   "start": 28.3,
+   "end": 29.14,
+   "confidence": 0.97119140625
+  },
+  {
+   "word": "little",
+   "start": 29.14,
+   "end": 29.36,
+   "confidence": 0.99853515625
+  },
+  {
+   "word": "sick",
+   "start": 29.36,
+   "end": 29.66,
+   "confidence": 0.998046875
+  },
+  {
+   "word": "a",
+   "start": 29.66,
+   "end": 29.98,
+   "confidence": 0.97216796875
+  },
+  {
+   "word": "Splash.",
+   "start": 33.82,
+   "end": 35.22,
+   "confidence": 0.89111328125
+  },
+  {
+   "word": "Break.",
+   "start": 39.42,
+   "end": 40.82,
+   "confidence": 0.95654296875
+  },
+  {
+   "word": "Break.",
+   "start": 55.76,
+   "end": 57.16,
+   "confidence": 0.99072265625
+  },
+  {
+   "word": "Splash.",
+   "start": 65.94,
+   "end": 67.34,
+   "confidence": 0.64208984375
+  },
+  {
+   "word": "Break.",
+   "start": 71.26,
+   "end": 72.66,
+   "confidence": 0.0275726318359375
+  },
+  {
+   "word": "Break.",
+   "start": 78.06,
+   "end": 79.46,
+   "confidence": 0.00015997886657714844
+  },
+  {
+   "word": "Splash.",
+   "start": 84.46,
+   "end": 85.48,
+   "confidence": 0.97607421875
+  },
+  {
+   "word": "Splash.",
+   "start": 90.84,
+   "end": 92.24,
+   "confidence": 0.8447265625
+  },
+  {
+   "word": "Splash.",
+   "start": 98.92,
+   "end": 100.32,
+   "confidence": 0.994140625
+  },
+  {
+   "word": "Splash.",
+   "start": 106.16,
+   "end": 107.56,
+   "confidence": 0.9970703125
+  },
+  {
+   "word": "Splash.",
+   "start": 113.58,
+   "end": 114.98,
+   "confidence": 0.947265625
+  },
+  {
+   "word": "Break.",
+   "start": 122.02,
+   "end": 123.42,
+   "confidence": 0.32080078125
+  }
+ ],
+ "text": "a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a little sick a Splash. Break. Break. Splash. Break. Break. Splash. Splash. Splash. Splash. Splash. Break.",
+ "runtime_s": 190.83376675000181,
+ "peak_rss_mb": 1880.686592,
+ "prompt_used": true
+}

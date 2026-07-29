@@ -1,0 +1,64 @@
+{
+ "model_id": "whisperx-large-v3-int8",
+ "fixture": "D04",
+ "words": [
+  {
+   "word": "miss",
+   "start": 10.612,
+   "end": 36.279,
+   "confidence": 0.619
+  },
+  {
+   "word": "miss",
+   "start": 36.299,
+   "end": 36.399,
+   "confidence": 0.141
+  },
+  {
+   "word": "miss",
+   "start": 36.419,
+   "end": 36.499,
+   "confidence": 0.697
+  },
+  {
+   "word": "miss",
+   "start": 36.519,
+   "end": 36.599,
+   "confidence": 0.478
+  },
+  {
+   "word": "miss",
+   "start": 52.698,
+   "end": 57.004,
+   "confidence": 0.422
+  },
+  {
+   "word": "miss",
+   "start": 65.597,
+   "end": 65.677,
+   "confidence": 0.181
+  },
+  {
+   "word": "miss",
+   "start": 65.697,
+   "end": 65.777,
+   "confidence": 0.715
+  },
+  {
+   "word": "make",
+   "start": 65.797,
+   "end": 65.877,
+   "confidence": 0.504
+  },
+  {
+   "word": "thanks.",
+   "start": 100.825,
+   "end": 101.107,
+   "confidence": 0.401
+  }
+ ],
+ "text": "miss miss miss miss miss miss miss make thanks.",
+ "runtime_s": 81.62494724994758,
+ "peak_rss_mb": 2313.797632,
+ "prompt_used": true
+}

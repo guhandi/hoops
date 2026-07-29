@@ -1,0 +1,94 @@
+{
+ "model_id": "whisper-1",
+ "fixture": "F01",
+ "words": [
+  {
+   "word": "break",
+   "start": 3.2799999713897705,
+   "end": 4.679999828338623,
+   "confidence": null
+  },
+  {
+   "word": "break",
+   "start": 11.859999656677246,
+   "end": 12.5600004196167,
+   "confidence": null
+  },
+  {
+   "word": "break",
+   "start": 19.459999084472656,
+   "end": 20.860000610351562,
+   "confidence": null
+  },
+  {
+   "word": "break",
+   "start": 30.0,
+   "end": 30.6200008392334,
+   "confidence": null
+  },
+  {
+   "word": "break",
+   "start": 36.279998779296875,
+   "end": 37.68000030517578,
+   "confidence": null
+  },
+  {
+   "word": "splash",
+   "start": 41.439998626708984,
+   "end": 42.02000045776367,
+   "confidence": null
+  },
+  {
+   "word": "splash",
+   "start": 48.459999084472656,
+   "end": 48.5,
+   "confidence": null
+  },
+  {
+   "word": "break",
+   "start": 52.52000045776367,
+   "end": 53.5,
+   "confidence": null
+  },
+  {
+   "word": "break",
+   "start": 59.97999954223633,
+   "end": 61.380001068115234,
+   "confidence": null
+  },
+  {
+   "word": "break",
+   "start": 67.83999633789062,
+   "end": 67.87999725341797,
+   "confidence": null
+  },
+  {
+   "word": "break",
+   "start": 71.19999694824219,
+   "end": 72.5999984741211,
+   "confidence": null
+  },
+  {
+   "word": "splash",
+   "start": 76.18000030517578,
+   "end": 77.58000183105469,
+   "confidence": null
+  },
+  {
+   "word": "splash",
+   "start": 80.83999633789062,
+   "end": 81.37999725341797,
+   "confidence": null
+  },
+  {
+   "word": "splash",
+   "start": 85.58000183105469,
+   "end": 86.9800033569336,
+   "confidence": null
+  }
+ ],
+ "text": "break. break. break. break. break. splash. splash. break. break. break.  break. splash. splash. splash.",
+ "runtime_s": 4.4081187910051085,
+ "peak_rss_mb": null,
+ "prompt_used": true
+}

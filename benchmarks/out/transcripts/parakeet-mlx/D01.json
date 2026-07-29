@@ -1,0 +1,28 @@
+{
+ "model_id": "parakeet-tdt-0.6b-mlx",
+ "fixture": "D01",
+ "words": [
+  {
+   "word": "This",
+   "start": 34.48,
+   "end": 34.64,
+   "confidence": null
+  },
+  {
+   "word": "make",
+   "start": 60.4,
+   "end": 60.64,
+   "confidence": null
+  },
+  {
+   "word": "this",
+   "start": 85.12,
+   "end": 85.36,
+   "confidence": null
+  }
+ ],
+ "text": "This make this",
+ "runtime_s": 3.6011642499943264,
+ "peak_rss_mb": 434.683904,
+ "prompt_used": false
+}
