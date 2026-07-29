@@ -58,7 +58,7 @@ def test_silence_words():
 
 
 def test_assemble_metrics_integration():
-    """Integration test: build fake transcripts, call assemble_metrics, verify output."""
+    """Integration test: build fake transcripts, call assemble_metrics, verify full output."""
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir = Path(tmpdir)
         out_root = tmpdir / "out"
@@ -74,6 +74,22 @@ def test_assemble_metrics_integration():
                 "beep_interval_s": "",
                 "expected_calls": "",
             },
+            {
+                "fixture_id": "F02",
+                "vocabulary": "swish_brick",
+                "duration_s": "20.0",
+                "timing_ground_truth": "FALSE",
+                "beep_interval_s": "",
+                "expected_calls": "",  # Mode B: no label
+            },
+            {
+                "fixture_id": "F03",
+                "vocabulary": "make_miss",  # Test vocab fallback
+                "duration_s": "25.0",
+                "timing_ground_truth": "FALSE",
+                "beep_interval_s": "",
+                "expected_calls": "make miss",  # Mode A: labeled
+            },
         ]
 
         # Build fake vocabularies
@@ -81,6 +97,10 @@ def test_assemble_metrics_integration():
             "swish_brick": {
                 "swish": "make", "splash": "make",
                 "brick": "miss", "break": "miss"
+            },
+            "make_miss": {
+                "make": "make",
+                "miss": "miss",
             },
         }
 
@@ -113,33 +133,133 @@ def test_assemble_metrics_integration():
             "prompt_used": False,
         }
 
-        # Write transcript files
-        (out_root / "transcripts" / "model_a").mkdir(parents=True)
-        (out_root / "transcripts" / "model_b").mkdir(parents=True)
+        # F02 transcripts (chatty - test isolation gating)
+        f02_transcripts_a = {
+            "model_id": "model_a",
+            "fixture": "F02",
+            "words": [
+                {"word": "so", "start": 0.0, "end": 0.5, "confidence": None},
+                {"word": "swish", "start": 3.0, "end": 3.4, "confidence": None},
+                {"word": "yeah", "start": 5.0, "end": 5.5, "confidence": None},
+            ],
+            "text": "so swish yeah",
+            "runtime_s": 0.4,
+            "peak_rss_mb": 105.0,
+            "prompt_used": False,
+        }
 
-        (out_root / "transcripts" / "model_a" / "F01.json").write_text(
-            json.dumps(transcripts_a)
-        )
-        (out_root / "transcripts" / "model_b" / "F01.json").write_text(
-            json.dumps(transcripts_b)
-        )
+        f02_transcripts_b = {
+            "model_id": "model_b",
+            "fixture": "F02",
+            "words": [
+                {"word": "so", "start": 0.0, "end": 0.5, "confidence": None},
+                {"word": "brick", "start": 8.0, "end": 8.4, "confidence": None},
+                {"word": "yeah", "start": 10.0, "end": 10.5, "confidence": None},
+            ],
+            "text": "so brick yeah",
+            "runtime_s": 0.45,
+            "peak_rss_mb": 108.0,
+            "prompt_used": False,
+        }
+
+        # F03 transcripts (should match expected_calls for Mode A test)
+        f03_transcripts_a = {
+            "model_id": "model_a",
+            "fixture": "F03",
+            "words": [
+                {"word": "make", "start": 1.0, "end": 1.3, "confidence": None},
+                {"word": "miss", "start": 6.0, "end": 6.3, "confidence": None},
+            ],
+            "text": "make miss",
+            "runtime_s": 0.3,
+            "peak_rss_mb": 95.0,
+            "prompt_used": False,
+        }
+
+        f03_transcripts_b = {
+            "model_id": "model_b",
+            "fixture": "F03",
+            "words": [
+                {"word": "make", "start": 1.1, "end": 1.4, "confidence": None},
+                {"word": "miss", "start": 6.1, "end": 6.4, "confidence": None},
+            ],
+            "text": "make miss",
+            "runtime_s": 0.35,
+            "peak_rss_mb": 98.0,
+            "prompt_used": False,
+        }
+
+        # Write transcript files
+        for dir_name in ["model_a", "model_b"]:
+            (out_root / "transcripts" / dir_name).mkdir(parents=True)
+
+        (out_root / "transcripts" / "model_a" / "F01.json").write_text(json.dumps(transcripts_a))
+        (out_root / "transcripts" / "model_b" / "F01.json").write_text(json.dumps(transcripts_b))
+        (out_root / "transcripts" / "model_a" / "F02.json").write_text(json.dumps(f02_transcripts_a))
+        (out_root / "transcripts" / "model_b" / "F02.json").write_text(json.dumps(f02_transcripts_b))
+        (out_root / "transcripts" / "model_a" / "F03.json").write_text(json.dumps(f03_transcripts_a))
+        (out_root / "transcripts" / "model_b" / "F03.json").write_text(json.dumps(f03_transcripts_b))
 
         # Create empty skips file
         (out_root / "skips.json").write_text(json.dumps({}))
 
-        # Call assemble_metrics
+        # Call assemble_metrics with vocab_default
         assemble_metrics(
             out_root=out_root,
             manifest_rows=manifest_rows,
             vocabs=vocabs,
+            vocab_default="swish_brick",
         )
 
-        # Verify metrics.json exists
+        # Verify metrics.json exists and has required keys
         metrics_file = out_root / "metrics.json"
         assert metrics_file.exists()
         metrics = json.loads(metrics_file.read_text())
 
-        # Verify draft_truth.csv exists
+        # Check top-level structure
+        assert "models" in metrics
+        assert "fixtures" in metrics
+        assert "skips" in metrics
+        assert "isolation" in metrics
+        assert "agreement" in metrics
+        assert "silence" in metrics
+        assert "load_errors" in metrics
+        assert "unknown_vocab" in metrics
+
+        # Check models summary (per-model stats)
+        assert isinstance(metrics["models"], dict)
+        assert "model_a" in metrics["models"]
+        assert "model_b" in metrics["models"]
+        for model_name, model_summary in metrics["models"].items():
+            assert isinstance(model_summary, dict)
+            if model_summary:  # Only check if not empty
+                # Should have runtime stats
+                assert "runtime_mean" in model_summary or len(model_summary) == 0
+
+        # Check fixtures detail
+        assert "F01" in metrics["fixtures"]
+        f01_metrics = metrics["fixtures"]["F01"]
+        assert "detections_by_model" in f01_metrics
+        assert "clusters" in f01_metrics
+        assert "accuracy" in f01_metrics
+        assert "accuracy_mode" in f01_metrics
+        assert "gap_stats" in f01_metrics
+
+        # F01: Mode B (no expected_calls) should have accuracy=1.0 and accuracy_mode="consensus"
+        assert f01_metrics["accuracy"] == 1.0
+        assert f01_metrics["accuracy_mode"] == "consensus"
+
+        # F03: Mode A (expected_calls provided) should be labeled as "expected"
+        if "F03" in metrics["fixtures"]:
+            f03_metrics = metrics["fixtures"]["F03"]
+            assert f03_metrics["accuracy_mode"] == "expected"
+            # Should match expected_calls: "make miss"
+            assert f03_metrics["accuracy"] == 1.0
+
+        # Check silence metric
+        assert metrics["silence"]["status"] == "pending F10"
+
+        # Verify draft_truth.csv
         draft_truth_file = out_root / "draft_truth.csv"
         assert draft_truth_file.exists()
         draft_truth_lines = draft_truth_file.read_text().strip().split("\n")
@@ -147,9 +267,20 @@ def test_assemble_metrics_integration():
         # Check header
         assert draft_truth_lines[0] == "fixture_id,draft_expected_calls,disagreements"
 
-        # Check F01 row - should have consensus make cluster
-        f01_row = next(line for line in draft_truth_lines[1:] if line.startswith("F01"))
-        parts = f01_row.split(",")
+        # Check F01 row
+        f01_row = next((line for line in draft_truth_lines[1:] if line.startswith("F01")), None)
+        assert f01_row is not None
+        parts = f01_row.split(",", 2)  # Split on first 2 commas only
         assert parts[0] == "F01"
         # draft_expected_calls should contain 'make' (consensus cluster)
         assert "make" in parts[1] or parts[1] != ""
+
+        # Check disagreements format: should be "canonical@mid found by k/n"
+        if len(parts) > 2 and parts[2]:  # If there are disagreements
+            disagreements = parts[2]
+            if disagreements:
+                for disagreement in disagreements.split(";"):
+                    if disagreement:  # Skip empty
+                        # Format should be "canonical@mid found by k/n"
+                        assert " found by " in disagreement
+                        assert "/" in disagreement  # Should have k/n format

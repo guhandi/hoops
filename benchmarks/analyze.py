@@ -80,32 +80,32 @@ def silence_words(words, silence_start):
     return sum(1 for w in words if w.start >= silence_start)
 
 
-def assemble_metrics(out_root: Path, manifest_rows: list[dict], vocabs: dict[str, dict]) -> None:
-    """Load all cached transcripts and manifest, compute metrics, write JSON + CSV.
+def assemble_metrics(out_root: Path, manifest_rows: list[dict], vocabs: dict[str, dict],
+                    vocab_default: str = "swish_brick") -> None:
+    """Load all cached transcripts and manifest, compute full metrics.
 
     Args:
         out_root: Root path for benchmarks output (contains transcripts/ and skips.json)
         manifest_rows: List of manifest row dicts with fixture_id, vocabulary, expected_calls, etc.
         vocabs: Dict mapping vocabulary name to surface_to_canonical dict
+        vocab_default: Default vocabulary name if fixture specifies none
     """
     # Load skips
     skips_file = out_root / "skips.json"
     skips = json.loads(skips_file.read_text()) if skips_file.exists() else {}
-
-    # Invert vocabs: vocab_name -> surface_to_canonical
-    vocab_by_name = {}
-    for name, surface_to_canonical in vocabs.items():
-        vocab_by_name[name] = surface_to_canonical
 
     # Build a map of fixture_id -> row
     manifest_by_fixture = {row["fixture_id"]: row for row in manifest_rows}
 
     # Discover all models by scanning transcripts directory
     transcripts_dir = out_root / "transcripts"
+    if not transcripts_dir.exists():
+        return
     models = sorted([d.name for d in transcripts_dir.iterdir() if d.is_dir()])
 
     # Load all transcripts: model -> fixture -> TranscriptResult
     transcripts_by_model = {}
+    load_errors = []
     for model in models:
         transcripts_by_model[model] = {}
         model_dir = transcripts_dir / model
@@ -115,28 +115,32 @@ def assemble_metrics(out_root: Path, manifest_rows: list[dict], vocabs: dict[str
                 result_dict = json.loads(json_file.read_text())
                 result = TranscriptResult.from_dict(result_dict)
                 transcripts_by_model[model][fixture_id] = result
-            except Exception:
-                # Skip files that can't be parsed
-                pass
+            except Exception as e:
+                load_errors.append({"model": model, "fixture_id": fixture_id, "error": str(e)})
 
     # Compute metrics per fixture
     metrics_by_fixture = {}
     draft_truth_rows = []
+    all_clusters_combined = []  # For pairwise agreement across all fixtures
+    unknown_vocab_warnings = []
 
     for fixture_id, row in manifest_by_fixture.items():
-        # Get vocabulary for this fixture
-        vocab_name = row.get("vocabulary") or "swish_brick"
-        if vocab_name not in vocab_by_name:
+        # Get vocabulary for this fixture (use default if not specified)
+        vocab_name = row.get("vocabulary") or vocab_default
+        if vocab_name not in vocabs:
+            unknown_vocab_warnings.append({"fixture_id": fixture_id, "vocabulary": vocab_name})
             continue
-        surface_to_canonical = vocab_by_name[vocab_name]
+        surface_to_canonical = vocabs[vocab_name]
 
         # Load transcripts for this fixture from all models
         dets_by_model = {}
+        transcripts_for_fixture = {}
         for model in models:
             if fixture_id in transcripts_by_model.get(model, {}):
                 transcript = transcripts_by_model[model][fixture_id]
                 dets = detect(transcript.words, surface_to_canonical)
                 dets_by_model[model] = dets
+                transcripts_for_fixture[model] = transcript
 
         # Skip if no transcripts for this fixture
         if not dets_by_model:
@@ -144,20 +148,19 @@ def assemble_metrics(out_root: Path, manifest_rows: list[dict], vocabs: dict[str
 
         # Cluster detections across models
         clusters = cluster(dets_by_model)
+        all_clusters_combined.extend(clusters)
 
         # Build draft truth: consensus clusters in time order
         consensus_canonicals = [c["canonical"] for c in clusters if c["consensus"]]
         draft_expected_calls = " ".join(consensus_canonicals)
 
-        # Build disagreements: non-consensus clusters
+        # Build disagreements: non-consensus clusters with k/n format
         disagreements = []
+        n_models = len(dets_by_model)
         for c in clusters:
             if not c["consensus"]:
-                # Format: canonical@mid found by model1/n, model2/n, ...
-                n_models = len(dets_by_model)
                 n_found = len(c["models"])
-                model_list = ",".join(sorted(c["models"].keys()))
-                disagreements.append(f"{c['canonical']}@{c['mid']:.1f} found by {model_list}/{n_models}")
+                disagreements.append(f"{c['canonical']}@{c['mid']:.1f} found by {n_found}/{n_models}")
 
         disagreements_str = ";".join(disagreements)
 
@@ -167,10 +170,123 @@ def assemble_metrics(out_root: Path, manifest_rows: list[dict], vocabs: dict[str
             "disagreements": disagreements_str,
         })
 
+        # Detection accuracy: sequence match of canonicals
+        expected_calls_str = row.get("expected_calls", "").strip()
+        has_expected = expected_calls_str and expected_calls_str != "NEEDS_LABELING"
+        if has_expected:
+            # Mode A: match against expected_calls
+            expected_seq = expected_calls_str.split()
+            accuracy = 1.0 if expected_seq == consensus_canonicals else 0.0
+            accuracy_mode = "expected"
+        else:
+            # Mode B: match against consensus (assume consensus is ground truth)
+            accuracy = 1.0
+            accuracy_mode = "consensus"
+
+        # Gap stats for beep fixtures
+        beep_fixture = row.get("timing_ground_truth", "").upper() in ("TRUE", "YES")
+        gap_stats_by_model = {}
+        if beep_fixture and row.get("beep_interval_s"):
+            try:
+                interval = float(row["beep_interval_s"])
+                for model, dets in dets_by_model.items():
+                    mids = [d["mid"] for d in dets]
+                    stats = gap_stats(mids, interval)
+                    if stats:
+                        gap_stats_by_model[model] = stats
+            except (ValueError, TypeError):
+                pass
+
+        # Build fixture detail
         metrics_by_fixture[fixture_id] = {
             "detections_by_model": {model: dets for model, dets in dets_by_model.items()},
             "clusters": clusters,
+            "accuracy": accuracy,
+            "accuracy_mode": accuracy_mode,
+            "gap_stats": gap_stats_by_model,
         }
+
+    # Compute per-model summary stats
+    models_summary = {}
+    for model in models:
+        runtimes = []
+        rtfs = []
+        peak_rss_list = []
+        total_minutes = 0
+
+        for fixture_id, transcript in transcripts_by_model[model].items():
+            row = manifest_by_fixture.get(fixture_id)
+            if not row:
+                continue
+            runtimes.append(transcript.runtime_s)
+            if row.get("duration_s"):
+                try:
+                    duration = float(row["duration_s"])
+                    rtf = transcript.runtime_s / duration
+                    rtfs.append(rtf)
+                    total_minutes += duration / 60.0
+                except (ValueError, TypeError):
+                    pass
+            if transcript.peak_rss_mb is not None:
+                peak_rss_list.append(transcript.peak_rss_mb)
+
+        summary = {}
+        if runtimes:
+            summary["runtime_mean"] = round(statistics.mean(runtimes), 3)
+            summary["runtime_min"] = round(min(runtimes), 3)
+            summary["runtime_max"] = round(max(runtimes), 3)
+        if rtfs:
+            summary["rtf_mean"] = round(statistics.mean(rtfs), 3)
+            summary["rtf_median"] = round(statistics.median(rtfs), 3)
+        if peak_rss_list:
+            summary["peak_rss_mean"] = round(statistics.mean(peak_rss_list), 3)
+            summary["peak_rss_max"] = round(max(peak_rss_list), 3)
+        if model == "whisper-1" and total_minutes > 0:
+            summary["cost_usd"] = round(0.006 * total_minutes, 3)
+
+        models_summary[model] = summary
+
+    # Compute pairwise agreement over all fixtures' clusters combined
+    all_models = sorted(set(m for c in all_clusters_combined for m in c["models"].keys()))
+    agreement = pairwise_agreement(all_clusters_combined, all_models) if all_clusters_combined else {}
+
+    # Compute isolation split for F02 (if present)
+    isolation_result = {}
+    f02_row = manifest_by_fixture.get("F02")
+    if f02_row and "F02" in metrics_by_fixture:
+        f02_metrics = metrics_by_fixture["F02"]
+        f02_clusters = f02_metrics["clusters"]
+        # Real: detections within window of a consensus cluster of same canonical
+        # Bait: the rest
+        real = []
+        bait = []
+        window = 0.75
+        for c in f02_clusters:
+            if c["consensus"]:
+                # All detections in this cluster
+                for d in c["models"].values():
+                    real.append(d["isolation"])
+            else:
+                # All detections in non-consensus cluster
+                for d in c["models"].values():
+                    bait.append(d["isolation"])
+        threshold_result = recommend_threshold(real, bait)
+        isolation_result = threshold_result
+
+    # Silence metric: placeholder since no recorded fixture has known silence region
+    silence_metric = {"status": "pending F10"}
+
+    # Assemble output
+    metrics_output = {
+        "models": models_summary,
+        "fixtures": metrics_by_fixture,
+        "skips": skips,
+        "isolation": isolation_result,
+        "agreement": agreement,
+        "silence": silence_metric,
+        "load_errors": load_errors,
+        "unknown_vocab": unknown_vocab_warnings,
+    }
 
     # Write draft_truth.csv
     draft_truth_file = out_root / "draft_truth.csv"
@@ -178,13 +294,6 @@ def assemble_metrics(out_root: Path, manifest_rows: list[dict], vocabs: dict[str
         writer = csv.DictWriter(f, fieldnames=["fixture_id", "draft_expected_calls", "disagreements"])
         writer.writeheader()
         writer.writerows(draft_truth_rows)
-
-    # Compute summary metrics
-    metrics_output = {
-        "models": models,
-        "fixtures": metrics_by_fixture,
-        "skips": skips,
-    }
 
     # Write metrics.json
     metrics_file = out_root / "metrics.json"
@@ -212,6 +321,7 @@ def main() -> None:
         out_root=OUT,
         manifest_rows=manifest_rows,
         vocabs=vocabs,
+        vocab_default=cfg.vocab_default,
     )
 
 
