@@ -13,9 +13,11 @@ This benchmark measures **timestamp quality** of ASR backends across recorded ho
 ## Prerequisites
 
 **Required:**
-- `ffmpeg` on PATH (used by analyze.py for audio probing)
 - `.env` file in repo root with `OPENAI_API_KEY=sk-...` (for `whisper-1` backend)
 - `uv` command (see repo README for Python version / uv setup)
+
+**Required for local backends (e.g., mlx-whisper):**
+- `ffmpeg` on PATH (used by local transcriber scripts for audio decoding)
 
 **Optional (for specific backends):**
 - `HF_TOKEN` in `.env` if using CrisperWhisper backend and you have not yet accepted its license at https://huggingface.co/Vaibhavs10/Crisper-Whisper
@@ -83,9 +85,9 @@ uv run python benchmarks/report.py
 
 Some backends may fail on certain fixtures (missing library, OOM, timeout, API error, etc.).
 
-If a backend fails on *the first fixture* and has no cached results, it is assumed broken for that model and all remaining fixtures are skipped. Otherwise, individual failures are logged in `out/skips.json` and that fixture is regenerated if you re-run with `--force` or delete the cached transcript.
+If a backend fails on *the first fixture* and has no cached results, it is assumed broken for that model and all remaining fixtures are skipped. Otherwise, individual failures are logged in `benchmarks/out/skips.json` and that fixture is regenerated if you re-run with `--force` or delete the cached transcript.
 
-Always inspect `out/skips.json` before analyzing if you see unexpected model coverage gaps.
+Always inspect `benchmarks/out/skips.json` before analyzing if you see unexpected model coverage gaps.
 
 ---
 
@@ -99,14 +101,14 @@ Always inspect `out/skips.json` before analyzing if you see unexpected model cov
      - `peak_rss_mb() -> float` — Return peak resident memory in MB
      - `main()` — Parse `audio`, `out`, `--prompt`, `--fixture` arguments and call `run()`
    - Must write `out` as JSON: `{"model_id": MODEL_ID, "fixture": fixture, "words": [...], "text": "...", "runtime_s": ..., "peak_rss_mb": ..., "prompt_used": bool}`
-   - See `tests/test_benchmark_transcriber*.py` for the full contract
+   - See `tests/test_benchmark_base.py` and the `result_dict` contract in existing backends for validation
 
 2. **Register in `run_benchmark.py`**
    - Add entry to `BACKENDS` dict with `{"kind": "script", "script": SCRIPTS / "your_model_.py"}`
 
-3. **Add tests**
-   - Create `tests/test_benchmark_transcriber_your_model.py` testing load, run, and output validation
-   - Add to the test list in CI (see `vercel.json` or project's workflow config)
+3. **Add to test suite**
+   - Append your backend's module name (e.g., `"your_model_"`) to the `SCRIPTS` list in `tests/test_benchmark_scripts.py`
+   - Parametrized tests will automatically validate module load and result schema
 
 4. **Ask the owner before merging**
    - Backend additions are a product decision (cost, licensing, maintenance burden)
@@ -124,7 +126,7 @@ The benchmark supports two accuracy evaluation modes:
 
 **Mode B: Consensus (draft truth)**
 - No manual labels yet; `analyze.py` computes consensus from majority-agreement among models
-- `out/draft_truth.csv` captures consensus sequences for offline review
+- `benchmarks/out/draft_truth.csv` captures consensus sequences for offline review
 - Owner uses draft_truth to label `expected_calls` in the manifest
 - Re-run analyze/report with Mode A above
 
@@ -163,11 +165,11 @@ All outputs are regenerated on each run. Only **transcripts** are committed to g
 
 ## Troubleshooting
 
-**"First fixture failed; skipping model"** in `out/skips.json`
+**"First fixture failed; skipping model"** in `benchmarks/out/skips.json`
 - The backend is broken or misconfigured. Check the full error reason in the skip entry and debug the transcriber script.
 
 **No metrics.json or report.html after running analyze/report**
-- Check `out/transcripts/` is not empty. Re-run `run_benchmark.py` if needed.
+- Check `benchmarks/out/transcripts/` is not empty. Re-run `run_benchmark.py` if needed.
 
 **Model not showing in report despite successful transcription**
 - Ensure fixtures have `status=recorded` in the manifest. The benchmark skips NOT_RECORDED fixtures.
@@ -177,6 +179,6 @@ All outputs are regenerated on each run. Only **transcripts** are committed to g
 ## Development Notes
 
 - Tests: `uv run pytest tests/test_benchmark*.py` (runs full benchmark suite)
-- All core metric logic is pure (no I/O in parse.py / stats.py / analyze.py)
+- Core hoops logic is pure (no I/O in `src/hoops/parse.py`, `src/hoops/stats.py`, `src/hoops/invariants.py`); benchmark metrics helpers in `analyze.py` are pure, but its `main()` and `assemble_metrics()` do I/O
 - Backends are isolated; a crash in one does not stop others
 - Transcripts are JSON so they're diffs-friendly for code review and CI/CD
