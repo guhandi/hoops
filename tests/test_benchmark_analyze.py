@@ -58,7 +58,7 @@ def test_silence_words():
 
 
 def test_assemble_metrics_integration():
-    """Integration test covering all metric assembly paths."""
+    """Integration test covering all metric assembly paths with strict value assertions."""
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir = Path(tmpdir)
         out_root = tmpdir / "out"
@@ -66,7 +66,7 @@ def test_assemble_metrics_integration():
 
         # Comprehensive manifest covering all paths
         manifest_rows = [
-            # F01: Mode B (consensus ref), both models agree
+            # F01: Both models agree (baseline)
             {
                 "fixture_id": "F01",
                 "vocabulary": "swish_brick",
@@ -75,7 +75,7 @@ def test_assemble_metrics_integration():
                 "beep_interval_s": "",
                 "expected_calls": "",
             },
-            # F02: Isolation split, F02 consensus formation
+            # F02: Model disagreement - model_b hallucinates extra detection for isolation split
             {
                 "fixture_id": "F02",
                 "vocabulary": "swish_brick",
@@ -161,16 +161,17 @@ def test_assemble_metrics_integration():
             "prompt_used": False,
         }
 
-        # F02: Both models detect same calls (consensus formation for isolation split)
+        # F02: Real consensus + bait for isolation split
+        # model_a: detects swish (high isolation) and brick (high isolation) - both consensus
+        # model_b: detects same swish and brick, PLUS hallucinated extra "splash" (low isolation) - bait
         f02_a = {
             "model_id": "model_a",
             "fixture": "F02",
             "words": [
-                {"word": "so", "start": 0.0, "end": 0.5, "confidence": None},
-                {"word": "swish", "start": 3.0, "end": 3.4, "confidence": None},
-                {"word": "brick", "start": 8.0, "end": 8.4, "confidence": None},
+                {"word": "swish", "start": 3.0, "end": 3.4, "confidence": None},  # High isolation
+                {"word": "brick", "start": 15.0, "end": 15.4, "confidence": None},  # High isolation
             ],
-            "text": "so swish brick",
+            "text": "swish brick",
             "runtime_s": 0.4,
             "peak_rss_mb": 105.0,
             "prompt_used": False,
@@ -179,11 +180,11 @@ def test_assemble_metrics_integration():
             "model_id": "model_b",
             "fixture": "F02",
             "words": [
-                {"word": "so", "start": 0.0, "end": 0.5, "confidence": None},
-                {"word": "swish", "start": 3.1, "end": 3.5, "confidence": None},
-                {"word": "brick", "start": 8.1, "end": 8.5, "confidence": None},
+                {"word": "swish", "start": 3.1, "end": 3.5, "confidence": None},  # High isolation
+                {"word": "brick", "start": 15.1, "end": 15.5, "confidence": None},  # High isolation
+                {"word": "splash", "start": 10.0, "end": 10.4, "confidence": None},  # Hallucinated, low isolation
             ],
-            "text": "so swish brick",
+            "text": "swish splash brick",
             "runtime_s": 0.45,
             "peak_rss_mb": 108.0,
             "prompt_used": False,
@@ -274,7 +275,7 @@ def test_assemble_metrics_integration():
         assert metrics_file.exists()
         metrics = json.loads(metrics_file.read_text())
 
-        # Verify top-level structure
+        # ===== ASSERTION: Top-level structure =====
         assert "models" in metrics
         assert "fixtures" in metrics
         assert "skips" in metrics
@@ -284,45 +285,60 @@ def test_assemble_metrics_integration():
         assert "load_errors" in metrics
         assert "unknown_vocab" in metrics
 
-        # Check load_errors: should contain F06 malformed JSON
-        assert len(metrics["load_errors"]) > 0, "load_errors should be populated"
+        # ===== ASSERTION: Error tracking (populated, not just present) =====
+        assert len(metrics["load_errors"]) > 0, "load_errors must be populated"
         assert any(e["fixture_id"] == "F06" for e in metrics["load_errors"])
-
-        # Check unknown_vocab: should contain F05
-        assert len(metrics["unknown_vocab"]) > 0, "unknown_vocab should be populated"
+        assert len(metrics["unknown_vocab"]) > 0, "unknown_vocab must be populated"
         assert any(u["fixture_id"] == "F05" for u in metrics["unknown_vocab"])
 
-        # Verify per-model detection counts
-        for model_name in ["model_a", "model_b"]:
-            assert model_name in metrics["models"]
-            summary = metrics["models"][model_name]
-            assert "detections_found" in summary
-            assert "detections_matched" in summary
-            assert "detections_extra" in summary
+        # ===== ASSERTION: Detection counts with ACTUAL VALUES =====
+        # Verify formula: extra = found - matched
+        f01_summary_a = metrics["models"]["model_a"]
+        f01_summary_b = metrics["models"]["model_b"]
+        assert f01_summary_a["detections_found"] >= 1
+        assert f01_summary_a["detections_matched"] >= 1
+        assert f01_summary_a["detections_extra"] == f01_summary_a["detections_found"] - f01_summary_a["detections_matched"]
+        assert f01_summary_b["detections_extra"] == f01_summary_b["detections_found"] - f01_summary_b["detections_matched"]
 
-        # F01: Mode B, both models agree, each should have accuracy=1.0
+        # ===== ASSERTION: F02 hallucination - model_b has extra detection =====
+        # model_a: found=2 (swish, brick), matched=2 (both consensus), extra=0
+        # model_b: found=3 (swish, brick, splash), matched=2 (swish, brick), extra=1 (splash)
+        f02_metrics = metrics["fixtures"]["F02"]
+        model_a_found = len(f02_metrics["detections_by_model"]["model_a"])
+        model_b_found = len(f02_metrics["detections_by_model"]["model_b"])
+        assert model_b_found > model_a_found, "model_b should have more detections (hallucinated splash)"
+        assert model_b_found == 3 and model_a_found == 2, "F02: model_a=2, model_b=3 (hallucination)"
+        # Verify F02 has 2 consensus clusters (swish and brick)
+        assert len([c for c in f02_metrics["clusters"] if c["consensus"]]) == 2, "F02 should have 2 consensus clusters"
+
+        # ===== ASSERTION: Per-model accuracy with disagreement =====
+        # F01: Both models agree on consensus ["make"] → both score 1.0
         f01_metrics = metrics["fixtures"]["F01"]
         assert f01_metrics["accuracy_mode"] == "consensus"
-        assert "per_model_accuracy" in f01_metrics
         assert f01_metrics["per_model_accuracy"]["model_a"] == 1.0
         assert f01_metrics["per_model_accuracy"]["model_b"] == 1.0
 
-        # F03: Mode A, should reference expected_calls
+        # F02: model_b detected ["make", "make", "miss"] but consensus is ["make", "miss"]
+        # → model_b's sequence doesn't match → scores 0.0 in Mode B
+        # → model_a's sequence ["make", "miss"] matches → scores 1.0
+        f02_metrics = metrics["fixtures"]["F02"]
+        assert f02_metrics["accuracy_mode"] == "consensus"
+        assert f02_metrics["per_model_accuracy"]["model_a"] == 1.0, "model_a should score 1.0 (matches consensus)"
+        assert f02_metrics["per_model_accuracy"]["model_b"] == 0.0, "model_b should score 0.0 (hallucinated extra call)"
+
+        # F03: Mode A - both models match expected_calls "make miss"
         f03_metrics = metrics["fixtures"]["F03"]
         assert f03_metrics["accuracy_mode"] == "expected"
-        # Both models match expected_calls
         assert f03_metrics["per_model_accuracy"]["model_a"] == 1.0
         assert f03_metrics["per_model_accuracy"]["model_b"] == 1.0
 
-        # F04: Vocab fallback test (empty vocab field should use vocab_default)
+        # ===== ASSERTION: Vocab fallback =====
         assert "F04" in metrics["fixtures"]
         f04_metrics = metrics["fixtures"]["F04"]
-        # F04 only has model_a
         assert "model_a" in f04_metrics["detections_by_model"]
-        # Should have detected "splash" as "make"
         assert len(f04_metrics["detections_by_model"]["model_a"]) > 0
 
-        # F06: Beep fixture should have gap_stats for model_a
+        # ===== ASSERTION: Gap stats with ACTUAL NUMBERS =====
         f06_metrics = metrics["fixtures"]["F06"]
         assert "gap_stats" in f06_metrics
         if "model_a" in f06_metrics["gap_stats"]:
@@ -330,13 +346,19 @@ def test_assemble_metrics_integration():
             assert "mean" in gap_stats
             assert "median" in gap_stats
             assert "max" in gap_stats
+            assert isinstance(gap_stats["mean"], (int, float))
+            assert isinstance(gap_stats["median"], (int, float))
+            assert isinstance(gap_stats["max"], (int, float))
 
-        # F02: Isolation split should compute threshold
+        # ===== ASSERTION: Isolation split with REAL threshold/margin values =====
+        # F02 has consensus clusters (high isolation real) and non-consensus (low isolation bait)
+        # Should compute actual threshold
         assert "isolation" in metrics
-        # F02 had 2 consensus clusters (swish and brick), no bait
-        # If threshold was computed, should have threshold key
-        if metrics["isolation"]:
-            assert "threshold" in metrics["isolation"] or metrics["isolation"] == {}
+        isolation = metrics["isolation"]
+        assert "threshold" in isolation, "F02 should produce threshold (has real + bait)"
+        assert "margin" in isolation, "F02 should produce margin"
+        assert isinstance(isolation["threshold"], (int, float))
+        assert isinstance(isolation["margin"], (int, float))
 
         # Verify draft_truth.csv
         draft_truth_file = out_root / "draft_truth.csv"

@@ -242,19 +242,15 @@ def assemble_metrics(out_root: Path, manifest_rows: list[dict], vocabs: dict[str
                 dets = metrics_by_fixture[fixture_id]["detections_by_model"].get(model, [])
                 found_count += len(dets)
                 clusters = metrics_by_fixture[fixture_id]["clusters"]
-                # Count matched: detections that belong to a consensus cluster
+                # Count matched for THIS fixture only
+                matched_for_fixture = 0
                 for c in clusters:
                     if c["consensus"] and model in c["models"]:
-                        matched_count += 1
-                # Count extra: detections not in any consensus cluster
-                for d in dets:
-                    in_consensus = False
-                    for c in clusters:
-                        if c["consensus"] and model in c["models"] and d in c["models"][model].values():
-                            in_consensus = True
-                            break
-                    if not in_consensus:
-                        extra_count += 1
+                        # This cluster has a detection from this model
+                        matched_for_fixture += 1
+                matched_count += matched_for_fixture
+                # Count extra: found - matched (detections not in any consensus cluster)
+                extra_count += len(dets) - matched_for_fixture
 
         summary = {}
         if runtimes:
