@@ -1,6 +1,6 @@
 import json
 import shutil
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from pathlib import Path
 from mutagen.mp4 import MP4
 from . import PARSER_VERSION
@@ -8,7 +8,8 @@ from .config import Config, Vocabulary
 from .invariants import check_invariants
 from .parse import parse_words
 from .repair import attempt_repair
-from .render import render_strip, render_report
+from .render import render_strip, Narrative
+from .report_html import render_interactive_report
 from .session import (session_id_for, session_dir_for, sid_date_and_time,
                       write_transcript, write_shots_csv, write_session_json,
                       read_session_json, read_envelope)
@@ -187,17 +188,21 @@ def process_file(path: Path, cfg: Config, transcriber, *, email: bool,
         if narrative:
             stats["quote_of_day"] = narrative.quote
             write_session_json(sdir, stats)
-
-    render_strip(rows, sdir / "strip.png")
-    render_report(stats, rows, narrative, flags, sdir / "report.html", img_src="strip.png")
+            (sdir / "narrative.json").write_text(json.dumps(asdict(narrative), indent=2))
 
     if archive == "move":
         shutil.move(str(path), str(sdir / "audio.m4a"))
     elif archive == "copy":
         shutil.copy(str(path), str(sdir / "audio.m4a"))
-
     if archive in ("move", "copy") and sidecar is not None and sidecar.exists():
         (shutil.move if archive == "move" else shutil.copy)(str(sidecar), str(sdir / "vocab.json"))
+
+    render_strip(rows, sdir / "strip.png")
+    audio_path = sdir / "audio.m4a"
+    if not audio_path.exists():                     # archive="none" leaves audio in place
+        audio_path = path if path.exists() else None
+    (sdir / "report.html").write_text(render_interactive_report(
+        stats, rows, narrative, flags, words, audio_path))
 
     if email:
         try:
@@ -227,6 +232,13 @@ def replay_session(sdir: Path, cfg: Config, vocab_name: str | None = None) -> Ou
         old = read_session_json(sdir)
     except FileNotFoundError:
         old = {}
+    narrative = None
+    nfile = sdir / "narrative.json"
+    if nfile.exists():
+        try:
+            narrative = Narrative(**json.loads(nfile.read_text()))
+        except (TypeError, ValueError):
+            narrative = None
     if vocab_name:
         vocab = cfg.vocab(vocab_name)
     elif old.get("vocab_map"):
@@ -254,6 +266,9 @@ def replay_session(sdir: Path, cfg: Config, vocab_name: str | None = None) -> Ou
     write_shots_csv(sdir, rows)
     write_session_json(sdir, stats)
     render_strip(rows, sdir / "strip.png")
-    render_report(stats, rows, None, flags, sdir / "report.html", img_src="strip.png")
+    audio_path = sdir / "audio.m4a"
+    (sdir / "report.html").write_text(render_interactive_report(
+        stats, rows, narrative, flags, words,
+        audio_path if audio_path.exists() else None))
     return Outcome(status="ok", sid=sid, session_dir=sdir, stats=stats,
                    rows=rows, flags=flags)

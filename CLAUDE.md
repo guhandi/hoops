@@ -10,6 +10,7 @@ One-button voice data capture: Apple Shortcut records shot call-outs → iCloud 
 - Dev fixtures dev01–dev04 transcribed with real whisper-1; transcripts committed in `fixtures/transcripts/`.
 - The whisper bias prompt is deliberately **transcript-style, not instructions** (`transcribe.py:vocab_prompt`) — an instruction-phrased prompt got echoed over quiet audio as hallucinated vocabulary words (phantom calls). Don't regress this.
 - Vocabulary (owner decision, `docs/specs/2026-07-28-finish-pipeline-design.md` — supersedes the earlier make/splash line above and PRD §6.3): production default `swish_brick` was widened 2026-07-28 for whisper transcription variance — `swish`/`splash`/`make` → make, `brick`/`break`/`miss` → miss; a named `make_miss` set (`make`→make, `miss`→miss) also exists. Per-recording override via a `<same-stem>.json` sidecar next to the audio (`{"vocabulary": "make_miss"}` or `{"vocab_map": {...}}`, now validated — a `vocab_map` must have exactly `make`/`miss` keys each mapped to a non-empty list of surface-form strings, or it routes to `needs_review/`); `hoops process` also takes `--vocab NAME`. All live in `config.yaml`.
+- Interactive HTML session report shipped (2026-07-30): `report_html.py` generates self-contained replay with SVG charts + audio-synced movie mode and embedded audio; email slimmed to summary body (CID-inline strip.png) + single `report.html` attachment; `narrative.json` persisted per session for replay reuse.
 
 ## Pending work
 

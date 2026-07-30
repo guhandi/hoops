@@ -1,3 +1,4 @@
+import json
 import shutil
 import pytest
 from pathlib import Path
@@ -164,6 +165,41 @@ def test_explicit_vocab_name_beats_sidecar(tmp_path, cfg):
     out = process_file(f, cfg, FakeTranscriber(env), email=False,
                        vocab_name="make_miss", cached_env=env, repair_enabled=False)
     assert out.status == "ok" and [r["result"] for r in out.rows] == ["make"]
+
+def test_narrative_persisted_and_replay_reuses_it(tmp_path, cfg, monkeypatch):
+    from hoops.render import Narrative
+    from hoops.pipeline import process_file, replay_session
+    n = Narrative("Ice in the veins", "One cold stretch, then done.", "come on", 9.0)
+    monkeypatch.setattr("hoops.narrative.generate_narrative", lambda *a, **k: n)
+    monkeypatch.setattr("hoops.mailer.send", lambda *a, **k: None)
+    out = process_file(audio(tmp_path), cfg, FakeTranscriber(make_env(GOOD, duration=30.0)),
+                       email=True, out_root=tmp_path / "sessions")
+    sdir = out.session_dir
+    saved = json.loads((sdir / "narrative.json").read_text())
+    assert saved == {"headline": "Ice in the veins",
+                     "recap": "One cold stretch, then done.",
+                     "quote": "come on", "quote_t_s": 9.0}
+    assert "Ice in the veins" in (sdir / "report.html").read_text()
+    replay_session(sdir, cfg)
+    assert "Ice in the veins" in (sdir / "report.html").read_text()   # not lost
+
+def test_report_is_interactive_and_embeds_audio(tmp_path, cfg):
+    from hoops.pipeline import process_file
+    out = process_file(audio(tmp_path), cfg, FakeTranscriber(make_env(GOOD, duration=30.0)),
+                       email=False, out_root=tmp_path / "sessions")
+    html = (out.session_dir / "report.html").read_text()
+    assert "const DATA =" in html
+    assert "data:audio/mp4;base64," in html            # audio was archived then embedded
+
+def test_replay_without_audio_or_narrative_degrades(tmp_path, cfg):
+    from hoops.pipeline import process_file, replay_session
+    out = process_file(audio(tmp_path), cfg, FakeTranscriber(make_env(GOOD, duration=30.0)),
+                       email=False, out_root=tmp_path / "sessions")
+    (out.session_dir / "audio.m4a").unlink()
+    replay_session(out.session_dir, cfg)
+    html = (out.session_dir / "report.html").read_text()
+    assert "audio unavailable" in html.lower()
+    assert "const DATA =" in html
 
 def test_session_json_persists_vocab_and_replay_uses_it(tmp_path, cfg):
     f = audio(tmp_path)

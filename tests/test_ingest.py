@@ -186,6 +186,19 @@ def test_pending_email_marker_kept_on_repeated_failure(cfg, monkeypatch):
     assert poll_once(cfg, None) == []
     assert (sdir / "pending_email").exists()
 
+def test_pending_email_retry_includes_narrative(cfg, monkeypatch):
+    sdir = _pending_email_session(cfg)
+    (sdir / "narrative.json").write_text(json.dumps({
+        "headline": "Cold start, hot finish", "recap": "Recap sentence here.",
+        "quote": "ugh come on", "quote_t_s": 8.0}))
+    captured = []
+    monkeypatch.setattr("hoops.mailer.send", lambda msg, cfg: captured.append(msg))
+    assert poll_once(cfg, None) == []
+    assert len(captured) == 1
+    assert not (sdir / "pending_email").exists()
+    body = captured[0].get_body(("html",)).get_content()
+    assert "Cold start, hot finish" in body
+
 def test_is_dataless_predicate():
     from types import SimpleNamespace
     from hoops.ingest import _is_dataless
