@@ -490,7 +490,7 @@ def _fg_chart_svg(rows) -> str:
     def x(i): return pad + (W - 2 * pad) * (i - 1) / max(len(live) - 1, 1)
     def y(p): return (H - 20) - (H - 40) * p
     line = " ".join(f"{x(i):.1f},{y(p):.1f}" for i, p in pts)
-    dots = "".join(f"<circle class=\"shot-dot\" data-shot=\"{r['shot_num']}\" "
+    dots = "".join(f"<circle class=\"fg-dot\" data-shot=\"{r['shot_num']}\" "
                    f"cx='{x(i):.1f}' cy='{y(p):.1f}' r='4' fill='var(--ball)'/>"
                    for (i, p), r in zip(pts, live))
     return (f"<svg id='fg-chart' viewBox='0 0 {W} {H}' role='img' aria-label='running FG%'>"
@@ -588,7 +588,7 @@ def test_movie_ui_present_with_audio(tmp_path):
 
 def test_movie_ui_absent_without_audio():
     html = render(audio_path=None)
-    assert "play-btn" not in html
+    assert "id='play-btn'" not in html          # controls absent (JS may mention the id)
     assert "audio unavailable" in html.lower()
 
 def test_scrubber_markers_per_live_shot(tmp_path):
