@@ -16,7 +16,7 @@ src/hoops/
   narrative.py   LLM headline/recap/quote for the email, guardrailed, optional
   render.py      shot-strip PNG (matplotlib), fixture gallery
   report_html.py interactive self-contained session report — SVG charts + audio-synced movie replay; session audio embedded base64
-  mailer.py      SMTP email: CID-inline strip.png, report.html attachment
+  mailer.py      SMTP email: CID-inline strip.png, session zip attachment (all session files, report.html inside)
   session.py     session-id derivation, folder layout, artifact read/write
   fixtures.py    fixture runner + committed transcript cache
   score.py       accuracy metrics + gate table vs fixtures/manifest.csv
