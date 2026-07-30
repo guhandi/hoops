@@ -87,26 +87,40 @@ hoops transcribe-fixtures [--only <name>]  # refresh fixture transcripts (paid A
 Every session is a self-contained folder — reprocessable from its own audio and nothing else:
 
 ```
-sessions/2026/07/hoops__20260728-061204/
-    audio.m4a          ground truth (gitignored; the email attachment is its offsite copy)
+sessions/                  (gitignored — local-only)
+  2026/07/hoops__20260728-061204/
+    audio.m4a          ground truth; the email attachment is its offsite copy
     transcript.json    full whisper response: words, timestamps, confidences
     transcript.txt     human-readable
     shots.csv          one row per shot: result, time, gap, streak, isolation, raw token
     session.json       session stats: shots_to_three, streaks, gaps, notes, flags
-    report.html        the emailed report
+    report.html        the interactive report (emailed inside the session zip)
     strip.png          shot chart: filled = make, hollow = miss, spacing = rhythm
 ```
 
-The git repo **is** the store: text artifacts are committed, binaries are gitignored, and `scripts/build_db.py` rebuilds a disposable SQLite DB from the committed CSVs whenever you want to query. No live database sits in the capture path.
+Fixtures and their transcripts are committed — that's the golden dataset. Per-session data (everything under `sessions/`) is fully gitignored and stays local-only; `scripts/build_db.py` rebuilds a disposable SQLite DB from local session CSVs whenever you want to query. No live database sits in the capture path.
 
 ## Accuracy and testing
 
 - `fixtures/` holds labeled recordings; `fixtures/manifest.csv` is the single source of truth for expected call sequences.
 - `hoops score` prints the gate table (call recall/precision ≥ 0.99, sequence exact-match ≥ 0.90, **zero** phantom shots on bait-word fixtures — a hard failure).
-- The parser runs from stored transcripts, so `hoops replay --all && git diff sessions/` is a free regression test over every real session ever recorded.
+- The parser runs from stored transcripts, so `hoops replay --all` re-parses every archived session for free and `hoops score` re-scores every committed fixture transcript. Parser changes merge only after a no-op replay leaves session outputs byte-identical — `sessions/` isn't tracked in git, so snapshot the folder first and compare with `git diff --no-index` — and the score gates pass.
 - `uv run pytest` — the full suite is offline and free; API-touching tests are opt-in (`-m paid`).
 
-Deeper docs: [docs/architecture.md](docs/architecture.md) · design spec: [docs/specs/2026-07-27-hoops-voice-log-design.md](docs/specs/2026-07-27-hoops-voice-log-design.md) · original PRD: [docs/PRD-hoops-voice-log.md](docs/PRD-hoops-voice-log.md)
+## Use this repo as a template
+
+hoops doubles as my worked example of building an AI-automated personal
+tool: spec-first design, a golden labeled dataset before capability,
+score gates instead of demos, and an assistant working agreement
+(CLAUDE.md) that stays truthful. The process, with links to every real
+artifact here, is written down in [docs/playbook.md](docs/playbook.md).
+
+Reading path: this README → [docs/playbook.md](docs/playbook.md) →
+[docs/architecture.md](docs/architecture.md) →
+[docs/methodology.md](docs/methodology.md) →
+[docs/pattern/README.md](docs/pattern/README.md).
+
+Deeper docs: [docs/playbook.md](docs/playbook.md) · [docs/architecture.md](docs/architecture.md) · design spec: [docs/specs/2026-07-27-hoops-voice-log-design.md](docs/specs/2026-07-27-hoops-voice-log-design.md) · original PRD (archived): [docs/archive/PRD-hoops-voice-log.md](docs/archive/PRD-hoops-voice-log.md)
 
 ## Adding a second capture type later
 

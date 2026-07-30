@@ -1,6 +1,6 @@
 # Architecture
 
-How the pipeline is built, why it's shaped this way, and where to look when something's wrong. The behavioral contract lives in the [PRD](PRD-hoops-voice-log.md); decisions that supersede it live in the [design spec](specs/2026-07-27-hoops-voice-log-design.md).
+How the pipeline is built, why it's shaped this way, and where to look when something's wrong. The behavioral contract lives in the original [PRD](archive/PRD-hoops-voice-log.md) (archived); decisions that supersede it live in the [design spec](specs/2026-07-27-hoops-voice-log-design.md).
 
 ## Module map
 
@@ -39,7 +39,7 @@ Every session persists three layers, each answering one question:
 | L2 | `transcript.json` | Did the ASR hear the words correctly? |
 | L3 | `shots.csv` / `session.json` | Given the transcript, did the parse produce the right table? |
 
-Triage: transcript right but shots wrong → parser/config bug (fix thresholds or aliases, then `replay`). Transcript wrong → ASR problem (prompt, vocabulary, mic distance, model). This separation is why `hoops replay` exists: the parser re-runs from stored L2 in seconds, at zero API cost, across the entire archive — and because session artifacts are committed text, `git diff sessions/` after a replay shows exactly which shots a parser change flipped.
+Triage: transcript right but shots wrong → parser/config bug (fix thresholds or aliases, then `replay`). Transcript wrong → ASR problem (prompt, vocabulary, mic distance, model). This separation is why `hoops replay` exists: the parser re-runs from stored L2 in seconds, at zero API cost, across the entire archive — and because session outputs are plain text (though `sessions/` itself isn't tracked in git), snapshot the folder before a replay and compare with `git diff --no-index` to see exactly which shots a parser change flipped.
 
 ## The parser (the part that matters most)
 
@@ -70,7 +70,7 @@ On failure the LLM repair pass gets the raw transcript plus these constraints; i
 ## Design principles (and what they buy)
 
 - **Sessions are independent.** No cross-session state, no rolling baselines, no database in the capture path. Removes every class of bug where a store and a folder disagree; any session is reprocessable from its own audio alone.
-- **The repo is the store.** Text committed, binaries gitignored, SQLite generated on demand by `build_db.py`. Merges can't corrupt data, diffs stay meaningful, and the pipeline physically cannot write to the DB.
+- **The repo is the store for the golden dataset.** Fixture audio and transcripts are committed; per-session data stays local-only under gitignored `sessions/`; SQLite is generated on demand by `build_db.py`. Merges can't corrupt data, diffs stay meaningful, and the pipeline physically cannot write to the DB.
 - **Capture must never depend on reporting.** Data is persisted before narrative/email run; every AI or SMTP failure degrades the email (or leaves a `pending_email` marker retried next poll) — it never blocks or corrupts a session.
 - **Transport is a queue, not a call.** The iCloud drop folder means a sleeping Mac produces delay, not loss — files pool and drain when the poller wakes. The poller only picks up files whose size is stable across two polls and whose mtime is >60s old (iCloud partial-sync safety), and force-downloads `.icloud` placeholder stubs.
 - **Deterministic by default.** The only nondeterministic stages are repair (rare, re-validated) and narrative (cosmetic, optional). Same audio in → same table out.

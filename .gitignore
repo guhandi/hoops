@@ -8,12 +8,10 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .venv/
+.playwright-mcp/
 
-# per-session binaries and derived artifacts (text stays committed)
-sessions/**/audio.m4a
-sessions/**/report.html
-sessions/**/strip.png
-sessions/**/pending_email
+# per-session data (fully local-only)
+sessions/
 rejected/
 needs_review/
 logs/

@@ -57,7 +57,7 @@ def render(**kw):
 def data_blob(html):
     m = re.search(r"const DATA = (.*?);\n", html, re.S)
     assert m, "DATA blob missing"
-    return json.loads(m.group(1).replace("<\\/", "</"))
+    return json.loads(m.group(1))                 # < is valid JSON — no un-escaping needed
 
 def test_stats_values_present():
     html = render()
@@ -190,3 +190,25 @@ def test_empty_charts_hide_headers():
     assert 'id="fg-chart"' not in html
     assert 'id="gap-chart"' not in html
     assert "<html" in html                             # still renders, doesn't crash
+
+def test_gap_bar_width_never_negative():
+    rows = []
+    for i in range(1, 161):                      # 160 timed shots
+        rows.append({**ROWS[1], "shot_num": i, "t_call_s": float(i * 2),
+                     "gap_s": 2.0, "streak_after": 0})
+    html = render(rows=rows)
+    assert "width='-" not in html and 'width="-' not in html
+
+def test_blob_escapes_all_angle_brackets():
+    evil = dict(STATS, notes="<!--<script>boom")
+    html = render(stats=evil)
+    m = re.search(r"const DATA = (.*?);\n", html, re.S)
+    assert "<" not in m.group(1)                 # every < escaped in the blob
+    assert json.loads(m.group(1))["stats"]["notes"] == "<!--<script>boom"
+
+def test_shared_call_matcher_consistency():
+    from hoops.report_html import _call_row_for, CALL_MATCH_TOLERANCE_S
+    w = WORDS[0]                                  # brick @ 5.0 == shot 1
+    assert _call_row_for(w, ROWS)["shot_num"] == 1
+    off = type(w)(w.text, w.raw, w.start + CALL_MATCH_TOLERANCE_S + 0.01, w.end, None)
+    assert _call_row_for(off, ROWS) is None
