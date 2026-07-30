@@ -90,9 +90,81 @@ def _movie_section(has_audio: bool) -> str:
                 "no movie, but everything below still works.</p></section>")
     return "<section id='movie'><h2>Replay</h2><div id='court-slot'></div></section>"
 
+def _timeline_svg(rows, session_len) -> str:
+    W, H, pad = 640, 90, 24
+    dur = max(session_len or 0, max((r["t_call_s"] for r in rows), default=1), 1)
+    def x(t): return pad + (W - 2 * pad) * t / dur
+    parts = [f'<svg id="timeline" viewBox="0 0 {W} {H}" role="img" '
+             f'aria-label="shot timeline">',
+             f'<line x1="{pad}" y1="45" x2="{W - pad}" y2="45" stroke="#ddd" stroke-width="2"/>']
+    live = [r for r in rows if not r["voided"]]
+    if len(live) >= 3 and all(r["result"] == "make" for r in live[-3:]):
+        parts.append(f'<line class="close-run" x1="{x(live[-3]["t_call_s"]):.1f}" y1="62" '
+                     f'x2="{x(live[-1]["t_call_s"]):.1f}" y2="62" '
+                     f'stroke="var(--make)" stroke-width="4" stroke-linecap="round"/>')
+    for r in rows:
+        cx = f"{x(r['t_call_s']):.1f}"
+        common = f'class="shot-dot" data-shot="{r["shot_num"]}"'
+        if r["voided"]:
+            parts.append(f'<text {common} x="{cx}" y="50" text-anchor="middle" '
+                         f'fill="var(--dim)" font-size="14">×</text>')
+        elif r["result"] == "make":
+            parts.append(f'<circle {common} cx="{cx}" cy="45" r="8" fill="var(--make)"/>')
+        else:
+            parts.append(f'<circle {common} cx="{cx}" cy="45" r="8" fill="#fff" '
+                         f'stroke="var(--miss)" stroke-width="2.5"/>')
+    parts.append(f'<text x="{pad}" y="{H - 4}" font-size="10" fill="var(--dim)">0s</text>'
+                 f'<text x="{W - pad}" y="{H - 4}" font-size="10" fill="var(--dim)" '
+                 f'text-anchor="end">{dur:.0f}s</text></svg>')
+    return "".join(parts)
+
+def _fg_chart_svg(rows) -> str:
+    W, H, pad = 640, 120, 24
+    live = [r for r in rows if not r["voided"]]
+    if not live:
+        return ""
+    pts, makes = [], 0
+    for i, r in enumerate(live, start=1):
+        makes += r["result"] == "make"
+        pts.append((i, makes / i))
+    def x(i): return pad + (W - 2 * pad) * (i - 1) / max(len(live) - 1, 1)
+    def y(p): return (H - 20) - (H - 40) * p
+    line = " ".join(f"{x(i):.1f},{y(p):.1f}" for i, p in pts)
+    dots = "".join(f'<circle class="fg-dot" data-shot="{r["shot_num"]}" '
+                   f'cx="{x(i):.1f}" cy="{y(p):.1f}" r="4" fill="var(--ball)"/>'
+                   for (i, p), r in zip(pts, live))
+    return (f'<svg id="fg-chart" viewBox="0 0 {W} {H}" role="img" aria-label="running FG%">'
+            f'<line x1="{pad}" y1="{y(0.5):.1f}" x2="{W - pad}" y2="{y(0.5):.1f}" '
+            f'stroke="#eee"/><text x="{pad}" y="{y(0.5) - 4:.1f}" font-size="10" '
+            f'fill="var(--dim)">50%</text>'
+            f'<polyline class="fg-line" points="{line}" fill="none" '
+            f'stroke="var(--ball)" stroke-width="2.5"/>' + dots + '</svg>')
+
+def _gap_chart_svg(rows) -> str:
+    W, H, pad = 640, 110, 24
+    gaps = [(r["shot_num"], r["gap_s"], r["result"]) for r in rows
+            if not r["voided"] and r["gap_s"] is not None]
+    if not gaps:
+        return ""
+    top = max(g for _, g, _ in gaps)
+    bw = min(28, (W - 2 * pad) / len(gaps) - 4)
+    parts = [f'<svg id="gap-chart" viewBox="0 0 {W} {H}" role="img" aria-label="gaps between shots">']
+    for i, (n, g, result) in enumerate(gaps):
+        h = (H - 30) * g / top
+        bx = pad + i * ((W - 2 * pad) / len(gaps))
+        color = "var(--make)" if result == "make" else "var(--miss)"
+        parts.append(f'<rect class="gap-bar" data-shot="{n}" x="{bx:.1f}" '
+                     f'y="{H - 20 - h:.1f}" width="{bw:.1f}" height="{h:.1f}" '
+                     f'rx="3" fill="{color}" opacity="0.85"/>')
+    parts.append(f'<text x="{pad}" y="{H - 6}" font-size="10" fill="var(--dim)">'
+                 f'gap before each shot (tallest {top:.1f}s)</text></svg>')
+    return "".join(parts)
+
 def _charts_section(rows, stats) -> str:
-    # Real SVG charts arrive in Task 2.
-    return "<section id='charts'><h2>Charts</h2><div id='charts-slot'></div></section>"
+    return ("<section id='charts'><h2>Shot timeline</h2>"
+            + _timeline_svg(rows, stats.get("session_len_s"))
+            + "<h2>Running FG%</h2>" + _fg_chart_svg(rows)
+            + "<h2>Rhythm</h2>" + _gap_chart_svg(rows) + "</section>")
 
 def _stats_grid(stats, narrative) -> str:
     e = _html.escape
@@ -176,6 +248,18 @@ function seekTo(t) {
 }
 document.querySelectorAll('.word[data-t]').forEach(el =>
   el.addEventListener('click', () => seekTo(parseFloat(el.dataset.t))));
+const shotByNum = Object.fromEntries(DATA.shots.map(s => [s.n, s]));
+document.querySelectorAll('[data-shot]').forEach(el => {
+  const s = shotByNum[parseInt(el.dataset.shot)];
+  if (!s) return;
+  const label = s.voided ? 'voided' : s.result.toUpperCase();
+  const card = `#${s.n} ${label} — "${s.raw}" @ ${s.t.toFixed(1)}s` +
+    (s.gap != null ? `<br>gap ${s.gap.toFixed(1)}s` : '') +
+    (s.voided ? '' : `<br>streak ${s.streak}`);
+  el.addEventListener('mousemove', evt => showTip(evt, card));
+  el.addEventListener('mouseleave', hideTip);
+  el.addEventListener('click', () => seekTo(s.t));
+});
 """
 
 def render_interactive_report(stats: dict, rows: list[dict], narrative,

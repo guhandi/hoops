@@ -117,3 +117,24 @@ def test_script_injection_guarded():
     html = render(stats=evil)
     assert "<script>alert(1)</script>" not in html
     data_blob(html)                             # blob still parses
+
+def test_timeline_has_marker_per_shot():
+    html = render()
+    assert html.count('class="shot-dot') == 5          # every shot incl. voided
+    assert 'data-shot="2"' in html
+
+def test_timeline_underlines_closing_run():
+    html = render()
+    assert 'class="close-run"' in html                 # live tail is 3 makes
+
+def test_timeline_no_underline_without_run():
+    rows = [dict(r) for r in ROWS]
+    rows[4]["result"] = "miss"; rows[4]["streak_after"] = 0; rows[4]["raw_token"] = "brick"
+    html = render(rows=rows)
+    assert 'class="close-run"' not in html
+
+def test_fg_chart_and_gap_bars_present():
+    html = render()
+    assert 'id="fg-chart"' in html and 'class="fg-line"' in html
+    assert 'id="gap-chart"' in html
+    assert html.count('class="gap-bar') == 3           # live shots with a gap
