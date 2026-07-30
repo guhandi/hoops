@@ -1,0 +1,119 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Model Selection: whisper-1</title>
+<style>
+:root { color-scheme: light dark; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  margin: 0; padding: 48px 24px 80px; background: #fbfaf8; color: #2b2925;
+  line-height: 1.55;
+}
+.page { max-width: 880px; margin: 0 auto; }
+h1 { font-size: 1.9rem; font-weight: 600; margin: 0 0 8px; letter-spacing: -0.01em; }
+h2 { font-size: 1.2rem; font-weight: 600; margin: 56px 0 16px; color: #2b2925;
+     border-top: 1px solid #e4e0d8; padding-top: 32px; }
+h3 { font-size: 1rem; font-weight: 600; margin: 0 0 6px; }
+.subtitle { color: #6b6659; font-size: 1rem; margin: 0 0 40px; }
+.banner {
+  background: #f4f1ec; border: 1px solid #e4e0d8; border-radius: 12px;
+  padding: 24px 28px; margin-bottom: 8px;
+}
+.banner .decision { font-size: 1.15rem; font-weight: 600; margin: 0 0 6px; }
+.banner .source { color: #6b6659; font-size: 0.85rem; margin: 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; margin: 12px 0; }
+th, td { text-align: left; padding: 9px 14px; border-bottom: 1px solid #e4e0d8; }
+th { color: #6b6659; font-weight: 600; font-size: 0.78rem; text-transform: uppercase;
+     letter-spacing: 0.03em; }
+td.pass { color: #3d7a4f; font-weight: 600; }
+td.fail { color: #ad3d33; font-weight: 600; }
+.cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 16px; }
+.card { background: #f4f1ec; border: 1px solid #e4e0d8; border-radius: 10px; padding: 18px 20px; }
+.card .verdict { color: #6b6659; font-size: 0.85rem; margin: 0 0 10px; }
+.card blockquote { margin: 0 0 10px; padding-left: 12px; border-left: 3px solid #b0a89a;
+                    font-style: italic; font-size: 0.9rem; color: #3a362f; }
+.card .source { font-size: 0.75rem; color: #93897a; margin: 0; font-family: ui-monospace,
+                SFMono-Regular, Menlo, monospace; }
+.loop-wrap { display: flex; justify-content: center; margin-top: 12px; }
+.muted { color: #93897a; font-size: 0.85rem; }
+footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid #e4e0d8;
+         color: #6b6659; font-size: 0.85rem; }
+footer a { color: #3a362f; }
+a { color: #3a362f; }
+@media (max-width: 640px) { .cards { grid-template-columns: 1fr; } }
+@media (prefers-color-scheme: dark) {
+  body { background: #1c1a17; color: #e8e4da; }
+  h2 { border-top-color: #38352d; }
+  .subtitle, .muted, footer { color: #a39a89; }
+  .banner, .card { background: #262319; border-color: #38352d; }
+  .banner .source, .card .source { color: #8f8672; }
+  th { color: #a39a89; }
+  th, td { border-bottom-color: #38352d; }
+  td.pass { color: #6fbf82; }
+  td.fail { color: #e0685c; }
+  a, footer a { color: #e8e4da; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+<h1>Picking an ASR model for a morning free-throw voice log</h1>
+<p class="subtitle">An empirical model-selection case study &mdash; golden-dataset evidence, snapshot 2026-07-30.</p>
+<div class="banner"><p class="decision">Decision: Stay on whisper-1.</p><p class="source">Full rationale: docs/decisions/001-transcriber-selection.md</p></div>
+<h2>Model comparison</h2>
+<table class="models">
+<tr><th>Model</th><th>RTF Median</th><th>Peak RSS Max (MB)</th><th>Cost ($)</th><th>Found</th><th>Matched</th><th>Extra</th></tr>
+<tr><td>faster-whisper</td><td>11.349</td><td>1546.3</td><td>—</td><td>5</td><td>5</td><td>0</td></tr>
+<tr><td>mlx-whisper</td><td>1.586</td><td>2323.9</td><td>—</td><td>184</td><td>53</td><td>131</td></tr>
+<tr><td>parakeet-mlx</td><td>0.049</td><td>870.5</td><td>—</td><td>122</td><td>51</td><td>71</td></tr>
+<tr><td>whisper-1</td><td>0.040</td><td>—</td><td>0.113</td><td>148</td><td>48</td><td>100</td></tr>
+<tr><td>whisperx</td><td>0.709</td><td>2675.3</td><td>—</td><td>27</td><td>12</td><td>15</td></tr>
+</table>
+<h2>Why the alternatives were disqualified</h2>
+<div class="cards">
+<div class="card"><h3>mlx-whisper</h3><p class="verdict">Hallucination loop on quiet audio</p><blockquote>&quot;make. make. make. make. make. make. make. make. make. make. make. make. make. make. make. I guess I&#x27;ll stop there.&quot; (15 phantom makes; whisper-1&#x27;s transcript of the same audio has no loop)</blockquote><p class="source">benchmarks/out/transcripts/mlx-whisper/D02.json</p></div>
+<div class="card"><h3>parakeet-mlx</h3><p class="verdict">Quiet-audio collapse</p><blockquote>&quot;This make this&quot; — full transcript text (whisper-1 heard 10 calls on the same audio)</blockquote><p class="source">benchmarks/out/transcripts/parakeet-mlx/R02.json</p></div>
+<div class="card"><h3>whisperx</h3><p class="verdict">Forced alignment silently drops words</p><blockquote>27 detections total vs 122-184 for peers; 0 detections on R02, D02, F02</blockquote><p class="source">benchmarks/out/metrics.json (models.whisperx)</p></div>
+<div class="card"><h3>faster-whisper</h3><p class="verdict">Impractical latency for a morning loop</p><blockquote>381 s to transcribe 33.6 s of audio (F08); RTF ≈ 11 including model load</blockquote><p class="source">benchmarks/out/metrics.json (models[&#x27;faster-whisper&#x27;])</p></div>
+</div>
+<h2>Gate results</h2>
+<p class="muted">Source: <code>uv run hoops score</code> against the 10 labeled fixtures, snapshot 2026-07-30. Precision and phantom-on-traps are the load-bearing passes for this domain (a phantom shot is a hard failure; a missed shot is a tuning problem).</p>
+<table class="gates">
+<tr><th>Gate</th><th>Value</th><th>Verdict</th><th>Threshold</th></tr>
+<tr><td>recall</td><td>0.565</td><td class="fail">FAIL</td><td>0.99</td></tr>
+<tr><td>precision</td><td>1.000</td><td class="pass">PASS</td><td>0.99</td></tr>
+<tr><td>classification</td><td>1.000</td><td class="pass">PASS</td><td>0.98</td></tr>
+<tr><td>exact_fraction</td><td>0.000</td><td class="fail">FAIL</td><td>0.9</td></tr>
+<tr><td>gap_mae</td><td>n/a</td><td class="pass">PASS</td><td>0.5</td></tr>
+<tr><td>phantom_on_traps</td><td>0</td><td class="pass">PASS</td><td>0 (hard)</td></tr>
+<tr><td>invariant_mismatches</td><td>1</td><td class="fail">FAIL</td><td>0 (hard)</td></tr>
+</table>
+<h2>The loop</h2>
+<div class="loop-wrap">
+<svg width="470" height="252" viewBox="0 0 470 252" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#8a8378"/></marker></defs>
+<rect x="10" y="10" width="130" height="46" rx="10" fill="#f4f1ec" stroke="#8a8378" stroke-width="1.5"/>
+<text x="75.0" y="38.0" font-size="14" text-anchor="middle" fill="#3a362f">record</text>
+<rect x="170" y="10" width="130" height="46" rx="10" fill="#f4f1ec" stroke="#8a8378" stroke-width="1.5"/>
+<text x="235.0" y="38.0" font-size="14" text-anchor="middle" fill="#3a362f">label</text>
+<rect x="330" y="10" width="130" height="46" rx="10" fill="#f4f1ec" stroke="#8a8378" stroke-width="1.5"/>
+<text x="395.0" y="38.0" font-size="14" text-anchor="middle" fill="#3a362f">gate</text>
+<rect x="10" y="126" width="130" height="46" rx="10" fill="#f4f1ec" stroke="#8a8378" stroke-width="1.5"/>
+<text x="75.0" y="154.0" font-size="14" text-anchor="middle" fill="#3a362f">build</text>
+<rect x="170" y="126" width="130" height="46" rx="10" fill="#f4f1ec" stroke="#8a8378" stroke-width="1.5"/>
+<text x="235.0" y="154.0" font-size="14" text-anchor="middle" fill="#3a362f">score</text>
+<rect x="330" y="126" width="130" height="46" rx="10" fill="#f4f1ec" stroke="#8a8378" stroke-width="1.5"/>
+<text x="395.0" y="154.0" font-size="14" text-anchor="middle" fill="#3a362f">improve</text>
+<line x1="140" y1="33.0" x2="164" y2="33.0" stroke="#8a8378" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="300" y1="33.0" x2="324" y2="33.0" stroke="#8a8378" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M395.0,56 C 395.0,86 75.0,86 75.0,120" fill="none" stroke="#8a8378" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="140" y1="149.0" x2="164" y2="149.0" stroke="#8a8378" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="300" y1="149.0" x2="324" y2="149.0" stroke="#8a8378" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M395.0,126 C 395.0,86 75.0,-30 75.0,4" fill="none" stroke="#b0a89a" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+</svg>
+</div>
+<footer><p><a href="../decisions/001-transcriber-selection.md">Decision record</a> &nbsp;&middot;&nbsp; <a href="../methodology.md">Methodology</a></p></footer>
+</div>
+</body></html>
