@@ -146,3 +146,16 @@ def test_score_fixture_records_heard_tokens(sandbox):
     put_cache(sandbox, "f01.m4a", CLEAN)
     s = score_fixture(row("f01.m4a", "miss make make make"), sandbox)
     assert s.heard == ["brick", "swish", "swish", "swish"]
+
+def test_update_manifest_rejects_duplicate_filenames(sandbox, tmp_path):
+    from hoops.score import update_manifest
+    put_cache(sandbox, "f01.m4a", CLEAN)
+    s = score_fixture(row("f01.m4a", "miss make make make"), sandbox)
+    p = manifest_file(tmp_path,
+                      _row_text("f01.m4a", "miss make make make") + "\n" +
+                      _row_text("f01.m4a", "miss miss miss miss") + "\n")
+    with pytest.raises(ValueError, match="duplicate filename"):
+        update_manifest(p, [s], scored_at="2026-07-30")
+    import csv
+    rows = list(csv.DictReader(p.open()))
+    assert all(r.get("scored_at") in (None, "") for r in rows)   # file untouched on error

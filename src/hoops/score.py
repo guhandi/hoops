@@ -22,6 +22,11 @@ def update_manifest(manifest_path, scores, scored_at: str) -> None:
         reader = csv.DictReader(f)
         fieldnames = list(reader.fieldnames)
         rows = list(reader)
+    names = [r["filename"] for r in rows]
+    dups = sorted({n for n in names if names.count(n) > 1 and n})
+    if dups:
+        raise ValueError(f"manifest has duplicate filename rows: {', '.join(dups)} — "
+                         "fix fixtures/manifest.csv before scoring")
     for col in MACHINE_COLS:
         if col not in fieldnames:
             fieldnames.append(col)
