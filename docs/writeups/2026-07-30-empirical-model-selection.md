@@ -44,7 +44,7 @@ This is where the table stops being the interesting part.
 
 > "make. make. make. make. make. make. make. make. make. make. make. make. make. make. make. I guess I'll stop there."
 
-Fifteen consecutive phantom "make."s, confidence scores in the 0.88–0.90 range — the model is *confident* about words that were never said. Whisper-1, run on the exact same audio with the exact same bias vocabulary, produces no loop at all; its transcript of that stretch just trails into silence and picks back up on the actual next call. Phantom shots are this project's designated hard-failure mode. One 15-word hallucination loop on a dev fixture is disqualifying on its own.
+Fifteen consecutive phantom "make."s. The per-word confidence on those tokens starts near-zero (0.001, then 0.003) and climbs through 0.499 and 0.715 before settling around 0.88–0.90 for the remaining ten — the model is unsure when the loop starts, then locks in and becomes confident about words that were never said. Whisper-1, run on the exact same audio with the exact same bias vocabulary, produces no loop at all; its transcript of that stretch just trails into silence and picks back up on the actual next call. Phantom shots are this project's designated hard-failure mode. One 15-word hallucination loop on a dev fixture is disqualifying on its own.
 
 **parakeet-mlx** runs with no bias prompt at all, which makes it a genuinely independent check — and it's genuinely good, cheap, and fast. It also collapsed on R02, a real quiet out-of-breath session. Its full transcript output for that entire 89-second recording:
 
@@ -54,7 +54,7 @@ Three words, one real call buried in there. Whisper-1, same audio, heard ten cal
 
 **whisperx** doesn't hallucinate, but its forced-alignment step silently drops words: 27 total detections across the whole fixture set versus 122–184 for its peers, and zero detections on R02, D02, and F02 specifically — three of the fixtures I care most about. A word-timing pipeline that silently discards words is disqualifying for a use case where a missed call is invisible until you go looking for it.
 
-**faster-whisper** took 381 seconds to transcribe F08, a 33.6-second fixture — a real-time factor around 11. A 90-second morning session would take about 17 minutes to transcribe. That's not a tuning problem, it's a different product.
+**faster-whisper** took 381 seconds to transcribe F08, a 33.6-second fixture — a real-time factor around 11. At that rate, a 90-second morning session would take on the order of 17 minutes to transcribe. That's not a tuning problem, it's a different product.
 
 **crisper-whisper** never got evaluated — it's skipped in `benchmarks/out/skips.json` because the Hugging Face `transformers` pipeline it depends on can't decode `.m4a` directly, and I didn't have a reason to build a WAV-conversion detour for a model that would need one more workaround before I even got a transcript to judge.
 
