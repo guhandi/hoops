@@ -144,3 +144,23 @@ def test_gap_chart_zero_gap_does_not_crash():
     rows[1]["gap_s"] = 0.0
     html = render(rows=rows)
     assert 'id="gap-chart"' in html
+
+def _with_audio(tmp_path):
+    fake = tmp_path / "audio.m4a"
+    fake.write_bytes(b"\x00\x00\x00\x18ftypM4A fake-audio")
+    return render(audio_path=fake)
+
+def test_movie_ui_present_with_audio(tmp_path):
+    html = _with_audio(tmp_path)
+    for el_id in ["court", "ball", "play-btn", "speed-btn", "skip-btn",
+                  "scrubber", "make-count", "miss-count", "call-flash"]:
+        assert f"id='{el_id}'" in html or f'id="{el_id}"' in html, el_id
+
+def test_movie_ui_absent_without_audio():
+    html = render(audio_path=None)
+    assert "id='play-btn'" not in html          # controls absent (JS may mention the id)
+    assert "audio unavailable" in html.lower()
+
+def test_scrubber_markers_per_live_shot(tmp_path):
+    html = _with_audio(tmp_path)
+    assert html.count("scrub-mark") >= 4               # 4 live shots

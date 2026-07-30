@@ -44,6 +44,19 @@ footer { color:var(--dim); font-size:11px; text-align:center; padding:12px; }
 svg { max-width:100%; height:auto; display:block; }
 #tooltip { position:fixed; pointer-events:none; background:var(--ink); color:#fff;
            font-size:12px; padding:6px 9px; border-radius:6px; display:none; z-index:9; }
+#controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:10px; }
+#controls button { font-size:15px; padding:8px 14px; border:0; border-radius:8px;
+                   background:var(--ball); color:#fff; font-weight:700; cursor:pointer; }
+#controls button:active { transform:scale(.96); }
+#scrubber { flex:1 1 160px; accent-color:var(--ball); }
+#scrub-marks { position:relative; width:100%; height:8px; }
+.scrub-mark { position:absolute; top:0; width:4px; height:8px; border-radius:2px; }
+#ball.fly-make { animation:flyMake .9s ease-in forwards; }
+#ball.fly-miss { animation:flyMiss .9s ease-in forwards; }
+@keyframes flyMake { 40% { cx:180px; cy:40px; } 70% { cx:236px; cy:58px; }
+                     100% { cx:236px; cy:95px; } }
+@keyframes flyMiss { 40% { cx:180px; cy:40px; } 60% { cx:232px; cy:52px; }
+                     100% { cx:190px; cy:170px; } }
 """
 
 def _fmt(v, pat="{:.1f}", dash="—"):
@@ -83,12 +96,32 @@ def _hero(stats) -> str:
             f"{_fmt(fg, '{:.0%}')} FG</div></section>")
 
 def _movie_section(has_audio: bool) -> str:
-    # Real court/controls arrive in Task 3.
     if not has_audio:
         return ("<section id='movie'><h2>Replay</h2>"
                 "<p class='word aside'>audio unavailable for this session — "
                 "no movie, but everything below still works.</p></section>")
-    return "<section id='movie'><h2>Replay</h2><div id='court-slot'></div></section>"
+    return """<section id='movie'><h2>Replay</h2>
+<svg id='court' viewBox='0 0 320 200' aria-label='replay court'>
+  <rect x='0' y='0' width='320' height='200' rx='10' fill='#f2dfc9'/>
+  <rect x='250' y='30' width='6' height='90' fill='#8a5a2b'/>
+  <rect x='232' y='28' width='44' height='30' rx='3' fill='#fff' stroke='#8a5a2b' stroke-width='2'/>
+  <ellipse id='rim' cx='236' cy='62' rx='14' ry='4' fill='none' stroke='var(--ball)' stroke-width='3'/>
+  <path d='M224 64 L230 84 L242 84 L248 64' fill='none' stroke='#bbb' stroke-width='1.5'/>
+  <circle id='ball' cx='60' cy='150' r='11' fill='var(--ball)' stroke='#a3540f' stroke-width='1.5'/>
+  <text id='call-flash' x='160' y='120' text-anchor='middle' font-size='30'
+        font-weight='800' opacity='0'></text>
+  <g font-size='15' font-weight='700'>
+    <text x='16' y='28' fill='var(--make)'>✓ <tspan id='make-count'>0</tspan></text>
+    <text x='16' y='50' fill='var(--miss)'>✗ <tspan id='miss-count'>0</tspan></text>
+  </g>
+</svg>
+<div id='controls'>
+  <button id='play-btn'>▶ Play</button>
+  <button id='speed-btn'>1×</button>
+  <button id='skip-btn'>⏭ next shot</button>
+  <input id='scrubber' type='range' min='0' max='100' step='0.1' value='0'>
+  <div id='scrub-marks'></div>
+</div></section>"""
 
 def _timeline_svg(rows, session_len) -> str:
     W, H, pad = 640, 90, 24
@@ -260,6 +293,72 @@ document.querySelectorAll('[data-shot]').forEach(el => {
   el.addEventListener('mouseleave', hideTip);
   el.addEventListener('click', () => seekTo(s.t));
 });
+const audio = document.getElementById('session-audio');
+if (audio && document.getElementById('play-btn')) {
+  const live = DATA.shots.filter(s => !s.voided);
+  const playBtn = document.getElementById('play-btn');
+  const speedBtn = document.getElementById('speed-btn');
+  const scrub = document.getElementById('scrubber');
+  const ball = document.getElementById('ball');
+  const flash = document.getElementById('call-flash');
+  const dur = DATA.stats.session_len_s || (live.length ? live[live.length-1].t + 2 : 1);
+  scrub.max = dur;
+  const marks = document.getElementById('scrub-marks');
+  live.forEach(s => {
+    const m = document.createElement('div');
+    m.className = 'scrub-mark';
+    m.style.left = `calc(${(100 * s.t / dur).toFixed(2)}% - 2px)`;
+    m.style.background = s.result === 'make' ? 'var(--make)' : 'var(--miss)';
+    marks.appendChild(m);
+  });
+  const speeds = [1, 2, 4];
+  let speedIdx = 0, fired = new Set();
+  speedBtn.onclick = () => {
+    speedIdx = (speedIdx + 1) % speeds.length;
+    audio.playbackRate = speeds[speedIdx];
+    speedBtn.textContent = speeds[speedIdx] + '×';
+  };
+  playBtn.onclick = () => audio.paused ? audio.play() : audio.pause();
+  audio.onplay = () => { playBtn.textContent = '⏸ Pause'; tick(); };
+  audio.onpause = () => { playBtn.textContent = '▶ Play'; };
+  document.getElementById('skip-btn').onclick = () => {
+    const next = live.find(s => s.t > audio.currentTime + 0.2);
+    if (next) { audio.currentTime = Math.max(0, next.t - 1.5); audio.play(); }
+  };
+  scrub.oninput = () => { audio.currentTime = parseFloat(scrub.value); };
+  function fireShot(s) {
+    ball.classList.remove('fly-make', 'fly-miss');
+    void ball.getBBox();                       // restart CSS animation
+    ball.classList.add(s.result === 'make' ? 'fly-make' : 'fly-miss');
+    flash.textContent = s.raw.toUpperCase() + (s.result === 'make' ? '!' : '');
+    flash.setAttribute('fill', s.result === 'make' ? 'var(--make)' : 'var(--miss)');
+    flash.style.transition = 'none'; flash.style.opacity = 1;
+    setTimeout(() => { flash.style.transition = 'opacity .8s'; flash.style.opacity = 0; }, 700);
+    const upto = live.filter(x => x.t <= s.t);
+    document.getElementById('make-count').textContent =
+      upto.filter(x => x.result === 'make').length;
+    document.getElementById('miss-count').textContent =
+      upto.filter(x => x.result === 'miss').length;
+  }
+  function sync() {
+    const t = audio.currentTime;
+    scrub.value = t;
+    live.forEach(s => {
+      if (t >= s.t && !fired.has(s.n)) { fired.add(s.n); fireShot(s); }
+      if (t < s.t) fired.delete(s.n);          // rewound past it: re-arm
+    });
+  }
+  function tick() { if (!audio.paused) { sync(); requestAnimationFrame(tick); } }
+  audio.onseeked = () => {                     // keep scoreboard honest on seek
+    fired = new Set(live.filter(s => s.t <= audio.currentTime).map(s => s.n));
+    const upto = live.filter(s => s.t <= audio.currentTime);
+    document.getElementById('make-count').textContent =
+      upto.filter(x => x.result === 'make').length;
+    document.getElementById('miss-count').textContent =
+      upto.filter(x => x.result === 'miss').length;
+    scrub.value = audio.currentTime;
+  };
+}
 """
 
 def render_interactive_report(stats: dict, rows: list[dict], narrative,
