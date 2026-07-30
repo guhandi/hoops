@@ -1,3 +1,4 @@
+import io, zipfile
 import pytest
 from pathlib import Path
 from hoops.config import load_config
@@ -14,20 +15,24 @@ def test_subject():
     assert build_subject(STATS, []) == "🏀 Mon Jul 27 — 8 shots to close it out (4/8)"
     assert build_subject(STATS, ["I1: bad"]).startswith("⚠️ 🏀")
 
-def test_build_email_single_report_attachment(tmp_path):
+def test_build_email_single_zip_attachment(tmp_path):
     cfg = load_config(REPO / "config.yaml")
     sdir = tmp_path / "hoops__20260727-061204"; sdir.mkdir()
-    for name, data in [("shots.csv", b"a"), ("session.json", b"{}"),
-                       ("transcript.txt", b"t"), ("strip.png", b"\x89PNG_fake"),
-                       ("audio.m4a", b"m4a"), ("report.html", b"<html>interactive</html>")]:
+    files = {"shots.csv": b"a", "session.json": b"{}", "transcript.txt": b"t",
+             "strip.png": b"\x89PNG_fake", "audio.m4a": b"m4a",
+             "report.html": b"<html>interactive</html>"}
+    for name, data in files.items():
         (sdir / name).write_bytes(data)
     msg = build_email(STATS, sdir, None, [], cfg)
     assert msg["To"] == cfg.email["to"] and "8 shots" in msg["Subject"]
-    names = {p.get_filename() for p in msg.iter_attachments()}
-    assert names == {"report.html"}                    # nothing else rides along
+    atts = list(msg.iter_attachments())
+    assert [p.get_filename() for p in atts] == [f"{sdir.name}.zip"]
+    assert atts[0].get_content_type() == "application/zip"
+    zf = zipfile.ZipFile(io.BytesIO(atts[0].get_payload(decode=True)))
+    assert set(zf.namelist()) == {f"{sdir.name}/{n}" for n in files}
+    assert zf.read(f"{sdir.name}/report.html") == files["report.html"]
     body = msg.get_body(("html",)).get_content()
     assert "cid:strip" in body
-    assert not (sdir / "_email_body.html").exists()    # temp-file dance is gone
     for part in msg.walk():
         if part.get("Content-ID") == "<strip>":
             assert part.get_content_disposition() == "inline"
@@ -35,8 +40,11 @@ def test_build_email_single_report_attachment(tmp_path):
     else:
         pytest.fail("Related image part with Content-ID <strip> not found")
 
-def test_build_email_survives_missing_report(tmp_path):
+def test_build_email_empty_session_dir_attaches_empty_zip(tmp_path):
     cfg = load_config(REPO / "config.yaml")
     sdir = tmp_path / "hoops__20260727-061204"; sdir.mkdir()
     msg = build_email(STATS, sdir, None, [], cfg)      # bare dir: no strip, no report
-    assert {p.get_filename() for p in msg.iter_attachments()} == set()
+    atts = list(msg.iter_attachments())
+    assert [p.get_filename() for p in atts] == [f"{sdir.name}.zip"]
+    zf = zipfile.ZipFile(io.BytesIO(atts[0].get_payload(decode=True)))
+    assert zf.namelist() == []

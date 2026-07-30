@@ -1,4 +1,4 @@
-import os, smtplib
+import io, os, smtplib, zipfile
 from datetime import date
 from email.message import EmailMessage
 from pathlib import Path
@@ -16,7 +16,8 @@ def build_email(stats: dict, session_dir: Path, narrative, flags: list[str],
     msg = EmailMessage()
     msg["From"], msg["To"] = cfg.email["from"], cfg.email["to"]
     msg["Subject"] = build_subject(stats, flags)
-    msg.set_content("Open the attached report.html for the interactive session report.")
+    msg.set_content("Extract the attached zip; open report.html inside "
+                    "for the interactive session report.")
     msg.add_alternative(render_email_body(stats, narrative, flags, img_src="cid:strip"),
                         subtype="html")
     strip = session_dir / "strip.png"
@@ -24,11 +25,17 @@ def build_email(stats: dict, session_dir: Path, narrative, flags: list[str],
         msg.get_payload()[1].add_related(strip.read_bytes(), maintype="image",
                                          subtype="png", cid="<strip>",
                                          disposition="inline")
-    report = session_dir / "report.html"
-    if report.exists():
-        msg.add_attachment(report.read_bytes(), maintype="text", subtype="html",
-                           filename="report.html")
+    msg.add_attachment(build_session_zip(session_dir), maintype="application",
+                       subtype="zip", filename=f"{session_dir.name}.zip")
     return msg
+
+def build_session_zip(session_dir: Path) -> bytes:
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        for f in sorted(session_dir.iterdir()):
+            if f.is_file():
+                zf.write(f, arcname=f"{session_dir.name}/{f.name}")
+    return buf.getvalue()
 
 def send(msg: EmailMessage, cfg: Config) -> None:
     password = os.environ["GMAIL_APP_PASSWORD"]
