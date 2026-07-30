@@ -34,8 +34,8 @@ running or triaging the benchmark.
 | `conditions` | free-text condition tags (quiet, music, chatty, …) | no |
 | `what_it_tests` | free-text — why this fixture exists | no |
 | `use_for` | `GATE` (must pass), `tuning`, or `regression` | yes — only `GATE` rows enter the aggregate gate scores |
-| `timing_ground_truth` | TRUE if the fixture has a metronome/beep for boundary-timing validation | yes (feeds `gap_mae`, see §4) |
-| `beep_interval_s` | beep period in seconds, when `timing_ground_truth=TRUE` | yes (feeds `gap_mae`) |
+| `timing_ground_truth` | TRUE if the fixture has a metronome/beep for boundary-timing validation | consumed by `benchmarks/analyze.py`'s `gap_stats` (a benchmark metric) — **not yet wired into the `gap_mae` score gate**, see §4 |
+| `beep_interval_s` | beep period in seconds, when `timing_ground_truth=TRUE` | same as above — benchmark metric only; `gap_mae` gate wiring pending |
 | `expected_calls` | owner-labeled ground truth: space-separated **canonical** tokens (`make`/`miss`), not surface words | yes — the sequence every accuracy gate compares against |
 | `expected_shot_count` | expected number of shots, independent of exact sequence | no (sanity cross-check) |
 | `expect_invariants_pass` | TRUE if the expected sequence should satisfy the invariants module | yes — feeds `invariant_mismatches` |
@@ -73,16 +73,25 @@ Two traps from hoops history, both real, both worth guarding against explicitly:
 
 ## 4. Gate template
 
-Six gates, source `uv run hoops score`:
+Seven gates, source `src/hoops/score.py` (`GATES` dict — five threshold gates —
+plus two hardcoded zero-tolerance gates), as run by `uv run hoops score`:
 
 | gate | what it measures | hoops default threshold |
 |---|---|---|
 | `precision` | of detected calls, fraction that were real | 0.99 |
 | `recall` | of expected calls, fraction detected | 0.99 |
+| `classification` | of matched calls, fraction correctly classified make/miss | 0.98 |
 | `exact_fraction` | fraction of fixtures with an exact sequence match | 0.90 |
 | `phantom_on_traps` | detections on planted bait sentences | 0 (hard) |
 | `invariant_mismatches` | fixtures where the invariants module's verdict disagrees with the label | 0 (hard) |
 | `gap_mae` | mean absolute error of detected-call timing vs. beep ground truth | 0.5 s |
+
+`gap_mae` is currently a silent n/a-PASS in hoops itself: `score_fixture` reads
+`row.get("expected_gaps")`, a manifest column that no longer exists (§2's
+`timing_ground_truth`/`beep_interval_s` feed the *benchmark*'s `gap_stats`, not
+this gate — wiring is pending). It always evaluates to `None` and passes by
+default, not by evidence. Don't copy that gap into instance #2: a gate that can
+silently no-op is a bug, not a passing score.
 
 The principle, independent of the numbers: **pick your hard-failure direction
 first.** In hoops that's phantom shots — a false positive silently corrupts the
