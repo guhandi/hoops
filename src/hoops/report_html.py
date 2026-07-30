@@ -11,6 +11,14 @@ FLAG_EXPLAIN = {
     "I6": "Three straight makes happened mid-session but shooting continued afterwards.",
 }
 
+CALL_MATCH_TOLERANCE_S = 0.05
+
+def _call_row_for(word, rows):
+    for r in rows:
+        if abs(word.start - r["t_call_s"]) < CALL_MATCH_TOLERANCE_S:
+            return r
+    return None
+
 CSS = """
 :root { --wood:#f7ede2; --ink:#2d2a26; --ball:#e2711d; --make:#1a7f37;
         --miss:#c0392b; --dim:#999; --card:#fff; --amber:#fff3cd; }
@@ -68,10 +76,8 @@ def _build_data(stats, rows, narrative, flags, words, has_audio: bool) -> dict:
               "gap": r["gap_s"], "streak": r["streak_after"],
               "voided": r["voided"], "raw": r["raw_token"]} for r in rows]
     def call_num(w):
-        for r in rows:
-            if abs(w.start - r["t_call_s"]) < 0.05:
-                return r["shot_num"]
-        return 0
+        r = _call_row_for(w, rows)
+        return r["shot_num"] if r else 0
     return {"stats": stats, "shots": shots, "flags": flags,
             "words": [{"t": w.start, "text": w.text, "call": call_num(w)} for w in words],
             "narrative": ({"headline": narrative.headline, "recap": narrative.recap,
@@ -181,7 +187,7 @@ def _gap_chart_svg(rows) -> str:
     if not gaps:
         return ""
     top = max(g for _, g, _ in gaps) or 1.0
-    bw = min(28, (W - 2 * pad) / len(gaps) - 4)
+    bw = max(1, min(28, (W - 2 * pad) / len(gaps) - 4))
     parts = [f'<svg id="gap-chart" viewBox="0 0 {W} {H}" role="img" aria-label="gaps between shots">']
     for i, (n, g, result) in enumerate(gaps):
         h = (H - 30) * g / top
@@ -255,10 +261,9 @@ def _flags_section(flags) -> str:
 
 def _transcript(words, rows) -> str:
     e = _html.escape
-    by_t = {r["t_call_s"]: r for r in rows}
     spans = []
     for w in words:
-        row = next((r for t, r in by_t.items() if abs(w.start - t) < 0.05), None)
+        row = _call_row_for(w, rows)
         if row:
             cls = "call-make" if row["result"] == "make" else "call-miss"
             spans.append(f"<span class='word {cls}' data-t='{w.start}'>{e(w.text)}</span>")
@@ -377,7 +382,7 @@ def render_interactive_report(stats: dict, rows: list[dict], narrative,
                               audio_path: Path | None) -> str:
     audio_html, has_audio = _audio_tag(audio_path)
     data = json.dumps(_build_data(stats, rows, narrative, flags, words, has_audio)
-                      ).replace("</", "<\\/")
+                      ).replace("<", "\\u003c")
     return "\n".join([
         "<!doctype html><html lang='en'><head><meta charset='utf-8'>",
         "<meta name='viewport' content='width=device-width,initial-scale=1'>",
