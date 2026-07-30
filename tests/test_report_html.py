@@ -138,3 +138,9 @@ def test_fg_chart_and_gap_bars_present():
     assert 'id="fg-chart"' in html and 'class="fg-line"' in html
     assert 'id="gap-chart"' in html
     assert html.count('class="gap-bar') == 3           # live shots with a gap
+
+def test_gap_chart_zero_gap_does_not_crash():
+    rows = [dict(ROWS[0]), dict(ROWS[1])]
+    rows[1]["gap_s"] = 0.0
+    html = render(rows=rows)
+    assert 'id="gap-chart"' in html

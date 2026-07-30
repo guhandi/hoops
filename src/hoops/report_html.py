@@ -146,7 +146,7 @@ def _gap_chart_svg(rows) -> str:
             if not r["voided"] and r["gap_s"] is not None]
     if not gaps:
         return ""
-    top = max(g for _, g, _ in gaps)
+    top = max(g for _, g, _ in gaps) or 1.0
     bw = min(28, (W - 2 * pad) / len(gaps) - 4)
     parts = [f'<svg id="gap-chart" viewBox="0 0 {W} {H}" role="img" aria-label="gaps between shots">']
     for i, (n, g, result) in enumerate(gaps):
