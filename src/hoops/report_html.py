@@ -195,10 +195,16 @@ def _gap_chart_svg(rows) -> str:
     return "".join(parts)
 
 def _charts_section(rows, stats) -> str:
-    return ("<section id='charts'><h2>Shot timeline</h2>"
-            + _timeline_svg(rows, stats.get("session_len_s"))
-            + "<h2>Running FG%</h2>" + _fg_chart_svg(rows)
-            + "<h2>Rhythm</h2>" + _gap_chart_svg(rows) + "</section>")
+    fg_svg = _fg_chart_svg(rows)
+    gap_svg = _gap_chart_svg(rows)
+    out = ["<section id='charts'><h2>Shot timeline</h2>"
+           + _timeline_svg(rows, stats.get("session_len_s"))]
+    if fg_svg:
+        out.append("<h2>Running FG%</h2>" + fg_svg)
+    if gap_svg:
+        out.append("<h2>Rhythm</h2>" + gap_svg)
+    out.append("</section>")
+    return "".join(out)
 
 def _stats_grid(stats, narrative) -> str:
     e = _html.escape
@@ -263,7 +269,10 @@ def _transcript(words, rows) -> str:
 def _audio_tag(audio_path: Path | None) -> tuple[str, bool]:
     if audio_path is None or not audio_path.exists():
         return "", False
-    b64 = base64.b64encode(audio_path.read_bytes()).decode()
+    try:
+        b64 = base64.b64encode(audio_path.read_bytes()).decode()
+    except OSError:
+        return "", False
     return (f"<audio id='session-audio' preload='auto' "
             f"src='data:audio/mp4;base64,{b64}'></audio>", True)
 

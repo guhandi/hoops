@@ -98,6 +98,20 @@ def test_missing_audio_file_degrades(tmp_path):
     html = render(audio_path=tmp_path / "nope.m4a")   # path given but absent
     assert "audio unavailable" in html.lower()
 
+def test_unreadable_audio_degrades(tmp_path, monkeypatch):
+    fake = tmp_path / "audio.m4a"
+    fake.write_bytes(b"\x00\x00\x00\x18ftypM4A fake-audio")
+    from pathlib import Path as _P
+    def boom(self):
+        if self.name == "audio.m4a":
+            raise OSError("dataless stub")
+        return _orig(self)
+    _orig = _P.read_bytes
+    monkeypatch.setattr(_P, "read_bytes", boom)
+    html = render(audio_path=fake)
+    assert "audio unavailable" in html.lower()
+    assert "data:audio/mp4" not in html
+
 def test_self_contained():
     html = render()
     assert not re.search(r"(src|href)\s*=\s*['\"]https?://", html)
@@ -164,3 +178,15 @@ def test_movie_ui_absent_without_audio():
 def test_scrubber_markers_per_live_shot(tmp_path):
     html = _with_audio(tmp_path)
     assert html.count("scrub-mark") >= 4               # 4 live shots
+
+def test_empty_charts_hide_headers():
+    rows = [dict(r) for r in ROWS]
+    for r in rows:
+        r["voided"] = True
+        r["gap_s"] = None
+    html = render(rows=rows)
+    assert "<h2>Running FG%</h2>" not in html
+    assert "<h2>Rhythm</h2>" not in html
+    assert 'id="fg-chart"' not in html
+    assert 'id="gap-chart"' not in html
+    assert "<html" in html                             # still renders, doesn't crash

@@ -57,6 +57,7 @@ def _repair_duplicate(inbox_file: Path, session_dir: Path | None, repo_root: Pat
 
 def _retry_pending_emails(cfg: Config) -> None:
     from .mailer import build_email, send
+    from .render import Narrative
     from .session import find_session_dirs, read_session_json
     for sdir in find_session_dirs(cfg.sessions_root):
         marker = sdir / "pending_email"
@@ -66,7 +67,14 @@ def _retry_pending_emails(cfg: Config) -> None:
             stats = read_session_json(sdir)
             flags = ([] if stats.get("invariants_passed", True)
                      else ["invariants failed — see session.json"])
-            msg = build_email(stats, sdir, None, flags, cfg)
+            narrative = None
+            nfile = sdir / "narrative.json"
+            if nfile.exists():
+                try:
+                    narrative = Narrative(**json.loads(nfile.read_text()))
+                except (TypeError, ValueError):
+                    narrative = None
+            msg = build_email(stats, sdir, narrative, flags, cfg)
             send(msg, cfg)
             marker.unlink()
         except Exception:
