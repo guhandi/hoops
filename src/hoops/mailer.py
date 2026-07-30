@@ -1,12 +1,9 @@
-import mimetypes, os, smtplib
+import os, smtplib
 from datetime import date
 from email.message import EmailMessage
 from pathlib import Path
 from .config import Config
-from .render import render_report
-
-ARTIFACTS = ["shots.csv", "session.json", "transcript.json", "transcript.txt",
-             "report.html", "strip.png", "audio.m4a"]
+from .render import render_email_body
 
 def build_subject(stats: dict, flags: list[str]) -> str:
     d = date.fromisoformat(stats["session_date_local"])
@@ -19,24 +16,18 @@ def build_email(stats: dict, session_dir: Path, narrative, flags: list[str],
     msg = EmailMessage()
     msg["From"], msg["To"] = cfg.email["from"], cfg.email["to"]
     msg["Subject"] = build_subject(stats, flags)
-    tmp = session_dir / "_email_body.html"
-    render_report(stats, [], narrative, flags, tmp, img_src="cid:strip")
-    body = tmp.read_text(); tmp.unlink()
-    msg.set_content("Session report attached (HTML email).")
-    msg.add_alternative(body, subtype="html")
+    msg.set_content("Open the attached report.html for the interactive session report.")
+    msg.add_alternative(render_email_body(stats, narrative, flags, img_src="cid:strip"),
+                        subtype="html")
     strip = session_dir / "strip.png"
     if strip.exists():
         msg.get_payload()[1].add_related(strip.read_bytes(), maintype="image",
                                          subtype="png", cid="<strip>",
                                          disposition="inline")
-    for name in ARTIFACTS:
-        p = session_dir / name
-        if not p.exists():
-            continue
-        ctype = mimetypes.guess_type(name)[0] or "application/octet-stream"
-        maintype, subtype = ctype.split("/", 1)
-        msg.add_attachment(p.read_bytes(), maintype=maintype, subtype=subtype,
-                           filename=name)
+    report = session_dir / "report.html"
+    if report.exists():
+        msg.add_attachment(report.read_bytes(), maintype="text", subtype="html",
+                           filename="report.html")
     return msg
 
 def send(msg: EmailMessage, cfg: Config) -> None:

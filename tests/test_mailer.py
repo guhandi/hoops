@@ -14,24 +14,29 @@ def test_subject():
     assert build_subject(STATS, []) == "🏀 Mon Jul 27 — 8 shots to close it out (4/8)"
     assert build_subject(STATS, ["I1: bad"]).startswith("⚠️ 🏀")
 
-def test_build_email_attachments(tmp_path):
+def test_build_email_single_report_attachment(tmp_path):
     cfg = load_config(REPO / "config.yaml")
     sdir = tmp_path / "hoops__20260727-061204"; sdir.mkdir()
     for name, data in [("shots.csv", b"a"), ("session.json", b"{}"),
-                       ("transcript.json", b"{}"), ("transcript.txt", b"t"),
-                       ("strip.png", b"\x89PNG_fake"), ("audio.m4a", b"m4a")]:
+                       ("transcript.txt", b"t"), ("strip.png", b"\x89PNG_fake"),
+                       ("audio.m4a", b"m4a"), ("report.html", b"<html>interactive</html>")]:
         (sdir / name).write_bytes(data)
     msg = build_email(STATS, sdir, None, [], cfg)
     assert msg["To"] == cfg.email["to"] and "8 shots" in msg["Subject"]
     names = {p.get_filename() for p in msg.iter_attachments()}
-    assert {"shots.csv", "session.json", "transcript.json",
-            "transcript.txt", "strip.png", "audio.m4a"} <= names
+    assert names == {"report.html"}                    # nothing else rides along
     body = msg.get_body(("html",)).get_content()
     assert "cid:strip" in body
-    # Verify related image part has Content-Disposition: inline
+    assert not (sdir / "_email_body.html").exists()    # temp-file dance is gone
     for part in msg.walk():
         if part.get("Content-ID") == "<strip>":
             assert part.get_content_disposition() == "inline"
             break
     else:
         pytest.fail("Related image part with Content-ID <strip> not found")
+
+def test_build_email_survives_missing_report(tmp_path):
+    cfg = load_config(REPO / "config.yaml")
+    sdir = tmp_path / "hoops__20260727-061204"; sdir.mkdir()
+    msg = build_email(STATS, sdir, None, [], cfg)      # bare dir: no strip, no report
+    assert {p.get_filename() for p in msg.iter_attachments()} == set()
