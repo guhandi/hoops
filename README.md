@@ -87,8 +87,9 @@ hoops transcribe-fixtures [--only <name>]  # refresh fixture transcripts (paid A
 Every session is a self-contained folder — reprocessable from its own audio and nothing else:
 
 ```
-sessions/2026/07/hoops__20260728-061204/
-    audio.m4a          ground truth (gitignored; the email attachment is its offsite copy)
+sessions/                  (gitignored — local-only)
+  2026/07/hoops__20260728-061204/
+    audio.m4a          ground truth; the email attachment is its offsite copy
     transcript.json    full whisper response: words, timestamps, confidences
     transcript.txt     human-readable
     shots.csv          one row per shot: result, time, gap, streak, isolation, raw token

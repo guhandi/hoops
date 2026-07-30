@@ -1,7 +1,6 @@
 import csv, difflib, json, os, tempfile
 from dataclasses import dataclass
 from datetime import date
-from pathlib import Path
 from .config import Config
 from .fixtures import read_manifest, transcript_cache_path
 from .invariants import check_invariants
@@ -36,7 +35,7 @@ def update_manifest(manifest_path, scores, scored_at: str) -> None:
         s = by_name.get(r["filename"])
         if s is None:
             continue
-        r["heard_calls"] = " ".join(s.heard)
+        r["heard_calls"] = " ".join(t.lower() for t in s.heard)
         r["got_calls"] = " ".join(s.got)
         r["match"] = "TRUE" if s.got == s.expected else "FALSE"
         r["scored_at"] = scored_at

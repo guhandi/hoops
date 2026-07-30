@@ -39,7 +39,7 @@ Every session persists three layers, each answering one question:
 | L2 | `transcript.json` | Did the ASR hear the words correctly? |
 | L3 | `shots.csv` / `session.json` | Given the transcript, did the parse produce the right table? |
 
-Triage: transcript right but shots wrong → parser/config bug (fix thresholds or aliases, then `replay`). Transcript wrong → ASR problem (prompt, vocabulary, mic distance, model). This separation is why `hoops replay` exists: the parser re-runs from stored L2 in seconds, at zero API cost, across the entire archive — and because session artifacts are committed text, `git diff sessions/` after a replay shows exactly which shots a parser change flipped.
+Triage: transcript right but shots wrong → parser/config bug (fix thresholds or aliases, then `replay`). Transcript wrong → ASR problem (prompt, vocabulary, mic distance, model). This separation is why `hoops replay` exists: the parser re-runs from stored L2 in seconds, at zero API cost, across the entire archive — and because transcripts are committed text, snapshot `sessions/` before a replay and compare with `git diff --no-index` to see exactly which shots a parser change flipped.
 
 ## The parser (the part that matters most)
 

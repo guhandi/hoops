@@ -102,6 +102,11 @@ def test_update_manifest_writes_machine_columns(sandbox, tmp_path):
     assert rows[0]["got_calls"] == "miss make make make"
     assert rows[0]["match"] == "TRUE"
     assert rows[0]["scored_at"] == "2026-07-30"
+    # Prove lowercasing: score a fixture with capitalized tokens
+    s2 = type(s)(**{**s.__dict__, "heard": ["Brick", "SWISH"]})
+    update_manifest(p, [s2], scored_at="2026-07-30")
+    rows = list(csv.DictReader(p.open()))
+    assert rows[0]["heard_calls"] == "brick swish"
 
 def test_update_manifest_preserves_hand_columns(sandbox, tmp_path):
     from hoops.score import update_manifest
