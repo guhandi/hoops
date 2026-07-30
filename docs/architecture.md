@@ -14,8 +14,9 @@ src/hoops/
   invariants.py  PURE: I1–I6 checks on the shot table
   repair.py      LLM sequence reconstruction, only invoked on invariant failure
   narrative.py   LLM headline/recap/quote for the email, guardrailed, optional
-  render.py      shot-strip PNG (matplotlib), HTML report, fixture gallery
-  mailer.py      SMTP email: CID-inline chart, all artifacts attached
+  render.py      shot-strip PNG (matplotlib), fixture gallery
+  report_html.py interactive self-contained session report — SVG charts + audio-synced movie replay; session audio embedded base64
+  mailer.py      SMTP email: CID-inline strip.png, report.html attachment
   session.py     session-id derivation, folder layout, artifact read/write
   fixtures.py    fixture runner + committed transcript cache
   score.py       accuracy metrics + gate table vs fixtures/manifest.csv
