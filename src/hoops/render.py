@@ -47,7 +47,7 @@ def _stat_cells(stats: dict) -> str:
                    f"<div style='font-size:20px;font-weight:700'>{v}</div>"
                    f"<div style='font-size:11px;color:#666'>{k}</div></td>" for k, v in items)
 
-def render_report(stats, rows, narrative, flags, out_html: Path, img_src: str) -> None:
+def render_email_body(stats, narrative, flags, img_src: str) -> str:
     e = _html.escape
     parts = [f"<div style='font-family:-apple-system,Helvetica,sans-serif;max-width:640px;margin:auto'>"]
     if narrative:
@@ -69,7 +69,10 @@ def render_report(stats, rows, narrative, flags, out_html: Path, img_src: str) -
                      f"border-radius:6px'><b>Flags</b><ul style='margin:4px 0'>{lis}</ul></div>")
     parts.append(f"<p style='color:#999;font-size:11px'>Session {stats['session_id']} · "
                  f"{stats['session_date_local']}</p></div>")
-    out_html.write_text("\n".join(parts))
+    return "\n".join(parts)
+
+def render_report(stats, rows, narrative, flags, out_html: Path, img_src: str) -> None:
+    out_html.write_text(render_email_body(stats, narrative, flags, img_src))
 
 def render_gallery(entries: list[dict], out_html: Path) -> None:
     e = _html.escape

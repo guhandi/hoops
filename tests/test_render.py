@@ -35,6 +35,13 @@ def test_render_report_no_narrative_no_flags(tmp_path):
     html = out.read_text()
     assert "cid:strip" in html and "Flags" not in html
 
+def test_render_email_body_returns_string():
+    from hoops.render import render_email_body
+    n = Narrative("Cold start, hot finish", "Recap here.", "ugh come on", 14.2)
+    body = render_email_body(STATS, n, ["I4: gap 130s > 120s"], img_src="cid:strip")
+    assert isinstance(body, str)
+    assert "Cold start, hot finish" in body and "cid:strip" in body and "I4" in body
+
 def test_render_gallery(tmp_path):
     out = tmp_path / "index.html"
     render_gallery([{"name": "dev01", "expected": ["make"], "got": ["make", "miss"],
