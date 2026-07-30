@@ -71,9 +71,6 @@ def render_email_body(stats, narrative, flags, img_src: str) -> str:
                  f"{stats['session_date_local']}</p></div>")
     return "\n".join(parts)
 
-def render_report(stats, rows, narrative, flags, out_html: Path, img_src: str) -> None:
-    out_html.write_text(render_email_body(stats, narrative, flags, img_src))
-
 def render_gallery(entries: list[dict], out_html: Path) -> None:
     e = _html.escape
     rows_html = []

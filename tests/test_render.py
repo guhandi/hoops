@@ -1,5 +1,5 @@
 import pytest
-from hoops.render import Narrative, render_strip, render_report, render_gallery
+from hoops.render import Narrative, render_strip, render_gallery
 
 pytestmark = pytest.mark.unit
 
@@ -20,20 +20,6 @@ def test_render_strip_writes_png(tmp_path):
     out = tmp_path / "strip.png"
     render_strip(ROWS, out)
     assert out.exists() and out.stat().st_size > 1000
-
-def test_render_report_full(tmp_path):
-    out = tmp_path / "report.html"
-    n = Narrative("Cold start, hot finish", "Recap here.", "ugh come on", 14.2)
-    render_report(STATS, ROWS, n, ["I4: gap 130s > 120s"], out, img_src="strip.png")
-    html = out.read_text()
-    assert "Cold start, hot finish" in html and "strip.png" in html
-    assert "I4" in html and "ugh come on" in html
-
-def test_render_report_no_narrative_no_flags(tmp_path):
-    out = tmp_path / "report.html"
-    render_report(STATS, ROWS, None, [], out, img_src="cid:strip")
-    html = out.read_text()
-    assert "cid:strip" in html and "Flags" not in html
 
 def test_render_email_body_returns_string():
     from hoops.render import render_email_body
