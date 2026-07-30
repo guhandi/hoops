@@ -68,9 +68,81 @@ def test_score_and_print_fails_on_invariant_mismatch(sandbox, capsys):
 
 def test_aggregate_gates():
     from hoops.score import FixtureScore
-    good = FixtureScore(name="a", expected=["make"] * 4, got=["make"] * 4, matched=4,
+    good = FixtureScore(name="a", expected=["make"] * 4, got=["make"] * 4, heard=["brick"] * 4, matched=4,
                         inserted=0, deleted=0, misclassified=0, exact=True, gap_mae=None,
                         traps=False, invariants_ok_expected=True, invariants_ok_got=True)
     agg = aggregate([good])
     assert agg["recall"] == 1.0 and agg["precision"] == 1.0
     assert agg["exact_fraction"] == 1.0 and agg["phantom_on_traps"] == 0
+
+MACHINE_COLS = ["heard_calls", "got_calls", "match", "scored_at"]
+
+def manifest_file(tmp_path, rows_text):
+    p = tmp_path / "fixtures" / "manifest.csv"
+    p.parent.mkdir(exist_ok=True)
+    p.write_text(NEW_HEADER + "\n" + rows_text)
+    return p
+
+def _row_text(filename, expected_calls):
+    cells = [""] * 21
+    cells[0] = filename
+    cells[13] = expected_calls
+    cells[20] = "note, with comma"          # comma forces quoting — survives round-trip
+    return ",".join(f'"{c}"' if "," in c else c for c in cells)
+
+def test_update_manifest_writes_machine_columns(sandbox, tmp_path):
+    from hoops.score import update_manifest
+    put_cache(sandbox, "f01.m4a", CLEAN)
+    s = score_fixture(row("f01.m4a", "miss make make make"), sandbox)
+    p = manifest_file(tmp_path, _row_text("f01.m4a", "miss make make make") + "\n")
+    update_manifest(p, [s], scored_at="2026-07-30")
+    import csv
+    rows = list(csv.DictReader(p.open()))
+    assert rows[0]["heard_calls"] == "brick swish swish swish"
+    assert rows[0]["got_calls"] == "miss make make make"
+    assert rows[0]["match"] == "TRUE"
+    assert rows[0]["scored_at"] == "2026-07-30"
+
+def test_update_manifest_preserves_hand_columns(sandbox, tmp_path):
+    from hoops.score import update_manifest
+    put_cache(sandbox, "f01.m4a", CLEAN)
+    s = score_fixture(row("f01.m4a", "miss make miss make"), sandbox)   # mismatch
+    p = manifest_file(tmp_path, _row_text("f01.m4a", "miss make miss make") + "\n")
+    import csv
+    before = list(csv.DictReader(p.open()))
+    update_manifest(p, [s], scored_at="2026-07-30")
+    after = list(csv.DictReader(p.open()))
+    hand_cols = NEW_HEADER.split(",")
+    for b, a in zip(before, after):
+        assert {k: b[k] for k in hand_cols} == {k: a[k] for k in hand_cols}
+    assert after[0]["match"] == "FALSE"
+    assert after[0]["notes"] == "note, with comma"    # quoting survived round-trip
+
+def test_update_manifest_leaves_unscored_rows_blank(sandbox, tmp_path):
+    from hoops.score import update_manifest
+    put_cache(sandbox, "f01.m4a", CLEAN)
+    s = score_fixture(row("f01.m4a", "miss make make make"), sandbox)
+    p = manifest_file(tmp_path,
+                      _row_text("f01.m4a", "miss make make make") + "\n" +
+                      _row_text("f99.m4a", "") + "\n")     # never scored
+    update_manifest(p, [s], scored_at="2026-07-30")
+    import csv
+    rows = list(csv.DictReader(p.open()))
+    assert rows[1]["heard_calls"] == "" and rows[1]["scored_at"] == ""
+
+def test_update_manifest_idempotent_columns(sandbox, tmp_path):
+    from hoops.score import update_manifest
+    put_cache(sandbox, "f01.m4a", CLEAN)
+    s = score_fixture(row("f01.m4a", "miss make make make"), sandbox)
+    p = manifest_file(tmp_path, _row_text("f01.m4a", "miss make make make") + "\n")
+    update_manifest(p, [s], scored_at="2026-07-30")
+    update_manifest(p, [s], scored_at="2026-07-31")       # second run
+    header = p.read_text().splitlines()[0]
+    assert header.count("heard_calls") == 1               # columns not duplicated
+    import csv
+    assert list(csv.DictReader(p.open()))[0]["scored_at"] == "2026-07-31"
+
+def test_score_fixture_records_heard_tokens(sandbox):
+    put_cache(sandbox, "f01.m4a", CLEAN)
+    s = score_fixture(row("f01.m4a", "miss make make make"), sandbox)
+    assert s.heard == ["brick", "swish", "swish", "swish"]

@@ -1,5 +1,7 @@
-import difflib, json
+import csv, difflib, json, os, tempfile
 from dataclasses import dataclass
+from datetime import date
+from pathlib import Path
 from .config import Config
 from .fixtures import read_manifest, transcript_cache_path
 from .invariants import check_invariants
@@ -10,11 +12,46 @@ from .transcribe import words_from_envelope
 GATES = {"recall": 0.99, "precision": 0.99, "classification": 0.98,
          "exact_fraction": 0.90, "gap_mae": 0.5}
 
+MACHINE_COLS = ["heard_calls", "got_calls", "match", "scored_at"]
+
+def update_manifest(manifest_path, scores, scored_at: str) -> None:
+    """Write machine columns back into the manifest. Hand columns are never
+    touched; only rows present in `scores` are updated; atomic replace."""
+    by_name = {s.name: s for s in scores}
+    with manifest_path.open(newline="") as f:
+        reader = csv.DictReader(f)
+        fieldnames = list(reader.fieldnames)
+        rows = list(reader)
+    for col in MACHINE_COLS:
+        if col not in fieldnames:
+            fieldnames.append(col)
+    for r in rows:
+        for col in MACHINE_COLS:
+            r.setdefault(col, "")
+        s = by_name.get(r["filename"])
+        if s is None:
+            continue
+        r["heard_calls"] = " ".join(s.heard)
+        r["got_calls"] = " ".join(s.got)
+        r["match"] = "TRUE" if s.got == s.expected else "FALSE"
+        r["scored_at"] = scored_at
+    fd, tmp = tempfile.mkstemp(dir=manifest_path.parent, suffix=".csv")
+    try:
+        with os.fdopen(fd, "w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(rows)
+        os.replace(tmp, manifest_path)
+    except BaseException:
+        os.unlink(tmp)
+        raise
+
 @dataclass
 class FixtureScore:
     name: str
     expected: list
     got: list
+    heard: list
     matched: int
     inserted: int
     deleted: int
@@ -37,6 +74,7 @@ def score_fixture(row: dict, cfg: Config) -> FixtureScore | None:
                          cfg.isolation_low, cfg.isolation_high)
     live = [c for c in parsed.calls if not c.voided]
     got = [c.result for c in live]
+    heard = [c.raw_token for c in live]
     expected = row["expected_calls"].split()
     sm = difflib.SequenceMatcher(a=expected, b=got, autojunk=False)
     matched = sum(b.size for b in sm.get_matching_blocks())
@@ -52,7 +90,7 @@ def score_fixture(row: dict, cfg: Config) -> FixtureScore | None:
         if len(exp_gaps) == len(got_gaps):
             gap_mae = sum(abs(a - b) for a, b in zip(exp_gaps, got_gaps)) / len(exp_gaps)
     traps = bool(row.get("traps_planted", "").strip()) and row["traps_planted"].strip() != "0"
-    return FixtureScore(name=row["filename"], expected=expected, got=got,
+    return FixtureScore(name=row["filename"], expected=expected, got=got, heard=heard,
                         matched=matched, inserted=len(got) - matched,
                         deleted=len(expected) - matched, misclassified=mis,
                         exact=expected == got, gap_mae=gap_mae, traps=traps,
@@ -84,6 +122,10 @@ def score_and_print(cfg: Config) -> int:
         if s is None:
             continue
         (gating if r.get("use_for", "").strip().upper() == "GATE" else info).append(s)
+    scored = gating + info
+    if scored:
+        update_manifest(cfg.repo_root / "fixtures" / "manifest.csv", scored,
+                        scored_at=date.today().isoformat())
     agg = aggregate(gating) if gating else None
     print(f"{'fixture':<28}{'expected':<10}{'got':<10}exact")
     for s in gating + info:
