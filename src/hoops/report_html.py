@@ -48,7 +48,8 @@ svg { max-width:100%; height:auto; display:block; }
 #controls button { font-size:15px; padding:8px 14px; border:0; border-radius:8px;
                    background:var(--ball); color:#fff; font-weight:700; cursor:pointer; }
 #controls button:active { transform:scale(.96); }
-#scrubber { flex:1 1 160px; accent-color:var(--ball); }
+#scrub-wrap { flex:1 1 160px; position:relative; }
+#scrubber { width:100%; display:block; margin:0; accent-color:var(--ball); }
 #scrub-marks { position:relative; width:100%; height:8px; }
 .scrub-mark { position:absolute; top:0; width:4px; height:8px; border-radius:2px; }
 #ball.fly-make { animation:flyMake .9s ease-in forwards; }
@@ -119,8 +120,8 @@ def _movie_section(has_audio: bool) -> str:
   <button id='play-btn'>▶ Play</button>
   <button id='speed-btn'>1×</button>
   <button id='skip-btn'>⏭ next shot</button>
-  <input id='scrubber' type='range' min='0' max='100' step='0.1' value='0'>
-  <div id='scrub-marks'></div>
+  <div id='scrub-wrap'><input id='scrubber' type='range' min='0' max='100' step='0.1' value='0'>
+  <div id='scrub-marks'></div></div>
 </div></section>"""
 
 def _timeline_svg(rows, session_len) -> str:
@@ -312,7 +313,7 @@ if (audio && document.getElementById('play-btn')) {
     marks.appendChild(m);
   });
   const speeds = [1, 2, 4];
-  let speedIdx = 0, fired = new Set();
+  let speedIdx = 0, fired = new Set(), flashTimer;
   speedBtn.onclick = () => {
     speedIdx = (speedIdx + 1) % speeds.length;
     audio.playbackRate = speeds[speedIdx];
@@ -333,7 +334,8 @@ if (audio && document.getElementById('play-btn')) {
     flash.textContent = s.raw.toUpperCase() + (s.result === 'make' ? '!' : '');
     flash.setAttribute('fill', s.result === 'make' ? 'var(--make)' : 'var(--miss)');
     flash.style.transition = 'none'; flash.style.opacity = 1;
-    setTimeout(() => { flash.style.transition = 'opacity .8s'; flash.style.opacity = 0; }, 700);
+    clearTimeout(flashTimer);
+    flashTimer = setTimeout(() => { flash.style.transition = 'opacity .8s'; flash.style.opacity = 0; }, 700);
     const upto = live.filter(x => x.t <= s.t);
     document.getElementById('make-count').textContent =
       upto.filter(x => x.result === 'make').length;
