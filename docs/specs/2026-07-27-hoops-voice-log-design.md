@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-27
 **Status:** approved pending final review
-**Base document:** [`docs/PRD-hoops-voice-log.md`](../PRD-hoops-voice-log.md). The PRD is the design for everything it covers. This spec records only (a) decisions that supersede the PRD, (b) decisions the PRD left open, and (c) the concrete build shape. Where this spec and the PRD conflict, this spec wins.
+**Base document:** [`docs/archive/PRD-hoops-voice-log.md`](../archive/PRD-hoops-voice-log.md). The PRD is the design for everything it covers. This spec records only (a) decisions that supersede the PRD, (b) decisions the PRD left open, and (c) the concrete build shape. Where this spec and the PRD conflict, this spec wins.
 
 ## 1. Scope of this build
 
@@ -89,7 +89,7 @@ hoops/
   tests/                    # markers: unit / parse / paid
   fixtures/                 # audio + manifest.csv + transcripts/ (all committed)
   sessions/YYYY/MM/<sid>/   # text committed; audio.m4a, report.html, strip.png gitignored
-  docs/PRD-hoops-voice-log.md  docs/specs/  docs/decisions/
+  docs/archive/PRD-hoops-voice-log.md  docs/specs/  docs/decisions/
 ```
 
 ### 4.2 CLI surface

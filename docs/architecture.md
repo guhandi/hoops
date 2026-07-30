@@ -1,6 +1,6 @@
 # Architecture
 
-How the pipeline is built, why it's shaped this way, and where to look when something's wrong. The behavioral contract lives in the [PRD](PRD-hoops-voice-log.md); decisions that supersede it live in the [design spec](specs/2026-07-27-hoops-voice-log-design.md).
+How the pipeline is built, why it's shaped this way, and where to look when something's wrong. The behavioral contract lives in the original [PRD](archive/PRD-hoops-voice-log.md) (archived); decisions that supersede it live in the [design spec](specs/2026-07-27-hoops-voice-log-design.md).
 
 ## Module map
 
