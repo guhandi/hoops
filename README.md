@@ -103,7 +103,7 @@ Fixtures and their transcripts are committed — that's the golden dataset. Per-
 
 - `fixtures/` holds labeled recordings; `fixtures/manifest.csv` is the single source of truth for expected call sequences.
 - `hoops score` prints the gate table (call recall/precision ≥ 0.99, sequence exact-match ≥ 0.90, **zero** phantom shots on bait-word fixtures — a hard failure).
-- The parser runs from stored transcripts, so `hoops replay --all` re-parses every archived session for free (compare outputs by checksum), and `hoops score` re-scores every committed fixture transcript.
+- The parser runs from stored transcripts, so `hoops replay --all` re-parses every archived session for free and `hoops score` re-scores every committed fixture transcript. Parser changes merge only after a no-op replay leaves session outputs byte-identical — `sessions/` isn't tracked in git, so snapshot the folder first and compare with `git diff --no-index` — and the score gates pass.
 - `uv run pytest` — the full suite is offline and free; API-touching tests are opt-in (`-m paid`).
 
 ## Use this repo as a template
