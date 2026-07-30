@@ -1,6 +1,8 @@
 # Picking a Transcription Model With Data, Not Vibes
 
-I built a one-button morning free-throw log. I push a button, shoot free throws, call out "make" or "miss" after each one, and drop the phone. An Apple Shortcut records the whole thing to iCloud, a Mac-side pipeline picks it up, transcribes it, parses the call-outs into a shot sequence, checks the sequence against a few invariants (a session shouldn't end mid-shot, calls shouldn't cluster impossibly close together), computes stats, and emails me a report before I've finished my coffee. Basketball is instance #1 of a pattern I want to reuse: voice call-outs in, structured events out.
+*Guhan · July 30, 2026*
+
+I built a one-button morning free-throw log. I push a button, shoot free throws, call out "make" or "miss" after each one, and drop the phone. An Apple Shortcut records the whole thing to iCloud, a Mac-side pipeline picks it up, transcribes it, parses the call-outs into a shot sequence, checks the sequence against a few invariants (a session ends with three straight makes, calls shouldn't cluster impossibly close together), computes stats, and emails me a report before I've finished my coffee. Basketball is instance #1 of a pattern I want to reuse: voice call-outs in, structured events out.
 
 The part of this pipeline I was least sure about wasn't the parser — it's dumb string matching once you have clean words with timestamps. It was transcription. Whisper is good at English. It is not obviously good at "a winded guy standing eight feet from his phone, muttering one of six near-homophone words, sometimes over music, sometimes while narrating his own game." If it mishears "miss" as something outside my vocabulary, I silently lose a shot. If it hallucinates a "make" that was never said, my stat line lies to me and I have no way of knowing, because the whole point of the pipeline is that I don't review every morning's audio by hand.
 
@@ -44,7 +46,7 @@ This is where the table stops being the interesting part.
 
 > "make. make. make. make. make. make. make. make. make. make. make. make. make. make. make. I guess I'll stop there."
 
-Fifteen consecutive phantom "make."s. The per-word confidence on those tokens starts near-zero (0.001, then 0.003) and climbs through 0.499 and 0.715 before settling around 0.88–0.90 for the remaining ten — the model is unsure when the loop starts, then locks in and becomes confident about words that were never said. Whisper-1, run on the exact same audio with the exact same bias vocabulary, produces no loop at all; its transcript of that stretch just trails into silence and picks back up on the actual next call. Phantom shots are this project's designated hard-failure mode. One 15-word hallucination loop on a dev fixture is disqualifying on its own.
+Fifteen consecutive phantom "make."s. The per-word confidence on those tokens starts near-zero (0.001, then 0.003) and climbs through 0.499, 0.715, and 0.835 before settling between 0.88 and 0.90 for the final ten — the model is unsure when the loop starts, then locks in and becomes confident about words that were never said. Whisper-1, run on the exact same audio with the exact same bias vocabulary, produces no loop at all; its transcript of that stretch just trails into silence and picks back up on the actual next call. Phantom shots are this project's designated hard-failure mode. One 15-word hallucination loop on a dev fixture is disqualifying on its own.
 
 **parakeet-mlx** runs with no bias prompt at all, which makes it a genuinely independent check — and it's genuinely good, cheap, and fast. It also collapsed on R02, a real quiet out-of-breath session. Its full transcript output for that entire 89-second recording:
 
@@ -73,7 +75,7 @@ Choosing a transcriber didn't finish the job — it just cleared the way to run 
 | classification | 1.000 | 0.98 | PASS |
 | exact_fraction | 0.000 | 0.9 | FAIL |
 | gap_mae | n/a | 0.5 | PASS |
-| phantom_on_traps | 0 | 0 | PASS |
+| phantom_on_traps | 0 | 0 (hard) | PASS |
 | invariant_mismatches | 1 | 0 (hard) | FAIL |
 
 Per-fixture, expected calls versus what the pipeline actually produced: F02 8→2, F06 15→11, R01 12→9, R02 11→3, F01 14→14 (not an exact sequence match), F04 12→11, F05 9→7, F08 4→2, F07 16→13, F07b 7→7 exact.

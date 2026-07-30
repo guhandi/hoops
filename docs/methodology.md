@@ -33,13 +33,15 @@ Source: `uv run hoops score`, 10 labeled fixtures.
 | precision | 1.000 | 0.99 | PASS |
 | classification | 1.000 | 0.98 | PASS |
 | exact_fraction | 0.000 | 0.9 | FAIL |
-| gap_mae | n/a | 0.5 | PASS |
-| phantom_on_traps | 0 | 0 | PASS |
+| gap_mae | n/a | 0.5 | PASS¹ |
+| phantom_on_traps | 0 | 0 (hard) | PASS |
 | invariant_mismatches | 1 | 0 (hard) | FAIL |
+
+¹ `gap_mae` is a silent n/a-PASS, not a verified one: `score_fixture` (`src/hoops/score.py`) reads `row.get("expected_gaps")`, a manifest column that no longer exists — `timing_ground_truth`/`beep_interval_s` currently feed only the benchmark's `gap_stats`, not this score gate, and wiring them in is still pending (see `docs/pattern/README.md` §4). The gate always evaluates to `None` and passes by default, not by evidence.
 
 Per-fixture score (expected→got): F02 8→2 · F06 15→11 · R01 12→9 · R02 11→3 · F01 14→14 (not exact) · F04 12→11 · F05 9→7 · F08 4→2 · F07 16→13 · F07b 7→7 exact.
 
-Precision and phantom-on-traps are the load-bearing passes — the pipeline does not hallucinate shots, including on fixtures with planted trap sentences. Recall and exact-match failures are not evidence of a broken parser; they decompose into the five limitations below, each with a known cause and owner.
+Precision and phantom-on-traps are the load-bearing passes — the pipeline does not hallucinate shots, including on fixtures with planted trap sentences. Recall and exact-match failures are not evidence of a broken parser; they decompose into the six limitations below, each with a known cause and owner.
 
 ## 4. Limitations register
 
@@ -48,6 +50,7 @@ Precision and phantom-on-traps are the load-bearing passes — the pipeline does
 3. **F03/F09/F10 unrecorded.** Conversational call words, a deliberately uncalled shot, out-of-breath + trailing silence — the trickiest conditions are exactly the ones missing. **Fix:** owner records them.
 4. **F02 isolation negative margin.** whisper-1 real-call isolations land 0.0–0.5 s vs. the planted bait at 0.8 s — inverted from what the isolation gate expects, so isolation alone can't separate real calls from bait on this fixture. **Fix:** revisit after labeling; may need a second signal beyond isolation.
 5. **D01–D04 unlabeled.** `expected_calls` is empty for these rows. **Fix:** owner labels.
+6. **`gap_mae` gate is unwired, not verified.** `score_fixture` reads `row.get("expected_gaps")`, a manifest column removed from the schema; `timing_ground_truth`/`beep_interval_s` currently only feed the benchmark's `gap_stats`, not this score gate. The gate reports `n/a` and passes by default — a silent no-op, not a verified pass. **Fix:** wire `beep_interval_s`/`timing_ground_truth` into `gap_mae` (CLAUDE.md pending item 3).
 
 ## 5. How AI sessions use this
 
