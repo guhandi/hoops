@@ -121,7 +121,7 @@ def _stats_grid(stats, narrative) -> str:
                         for k, v in items)
         out.append(f"<h3>{title}</h3><div class='grid'>{cells}</div>")
     if stats.get("quote_of_day"):
-        out.append(f'<blockquote>"{e(stats["quote_of_day"])}"</blockquote>')
+        out.append(f"<blockquote>“{e(stats['quote_of_day'])}”</blockquote>")
     if narrative:
         out.append(f"<p>{e(narrative.recap)}</p>")
     if stats.get("notes"):
