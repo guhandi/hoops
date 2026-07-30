@@ -2,7 +2,7 @@
 
 One-button voice data capture: Apple Shortcut records shot call-outs → iCloud drop folder → Mac pipeline (whisper-1 → isolation-gated parser → invariants → stats → emailed report). Basketball is instance #1 of a generalizable capture pattern.
 
-**Read first:** `README.md` (purpose + usage) · `docs/architecture.md` (how it works, module map, failure handling) · `docs/shortcut-setup.md` (phone-side Apple Shortcut setup) · `docs/specs/2026-07-27-hoops-voice-log-design.md` (decisions — supersedes `docs/PRD-hoops-voice-log.md` where they conflict).
+**Read first:** `README.md` (purpose + usage) · `docs/architecture.md` (how it works, module map, failure handling) · `docs/shortcut-setup.md` (phone-side Apple Shortcut setup) · `docs/specs/2026-07-27-hoops-voice-log-design.md` (decisions — supersedes `docs/PRD-hoops-voice-log.md` where they conflict) · `docs/methodology.md` (golden-dataset methodology — read before capability work).
 
 ## Current status (2026-07-28)
 
@@ -28,3 +28,4 @@ One-button voice data capture: Apple Shortcut records shot call-outs → iCloud 
 - Parser/config changes: `uv run hoops replay --all` then `git diff sessions/` — a no-op change must produce no diff; `uv run hoops score` must pass before merging (phantom shots on trap fixtures = hard failure).
 - Text is committed; session audio, binaries, `out/`, and `hoops.db` are gitignored (fixture `.m4a` are deliberately committed). The pipeline never writes to `hoops.db` — it's rebuilt on demand by `scripts/build_db.py`.
 - `parse.py` / `stats.py` / `invariants.py` stay pure stdlib, no I/O — that's the load-bearing, testable core.
+- New capability ⇒ new labeled fixture first; gates (uv run hoops score) decide done. See docs/methodology.md.
