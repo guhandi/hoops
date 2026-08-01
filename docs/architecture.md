@@ -1,13 +1,13 @@
 # Architecture
 
-How the pipeline is built, why it's shaped this way, and where to look when something's wrong. The behavioral contract lives in the original [PRD](archive/PRD-hoops-voice-log.md) (archived); decisions that supersede it live in the [design spec](specs/2026-07-27-hoops-voice-log-design.md).
+How the pipeline is built, why it's shaped this way, and where to look when something's wrong. The behavioral contract lives in the original [PRD](archive/PRD-hoops-voice-log.md) (archived); decisions that supersede it live in the [design spec](specs/2026-07-27-hoops-voice-log-design.md) and, for the cloud ingestion path, [the cloud migration spec](specs/2026-07-31-cloud-migration-design.md).
 
 ## Module map
 
 ```
 src/hoops/
   cli.py         entry points: process / process-all / replay / poll / score / transcribe-fixtures
-  ingest.py      inbox poller: stability rules, .icloud stubs, lock file, pending-email retry
+  ingest.py      inbox poller: stability rules, .icloud stubs, lock file, pending-email retry (local fallback path)
   transcribe.py  Transcriber interface + whisper-1 backend; Word model; transcript envelope
   parse.py       PURE: word stream → calls (isolation gate, vocabulary, scratch-that, note:)
   stats.py       PURE: calls → shot rows (§7.6 schema) → session stats (§7.7 schema)
@@ -21,13 +21,67 @@ src/hoops/
   fixtures.py    fixture runner + committed transcript cache
   score.py       accuracy metrics + gate table vs fixtures/manifest.csv
   pipeline.py    orchestration: process_file() and replay_session()
+cloud/
+  modal_app.py   Modal wiring only: image, secrets, endpoint, spawn+retries, `pull_sessions` entrypoint
+  web.py         FastAPI upload endpoint app factory — auth, filename validation, size cap, dedupe (no Modal imports, fully testable)
+  processor.py   stateless worker: download raw → scratch → process_file() → upload session dir → delete raw
+  store.py       S3-compatible (R2) object store wrapper: put/get/list/delete
+  config.cloud.yaml  scratch-space clone of config.yaml for the Modal container
 scripts/
   build_db.py            rebuild disposable hoops.db from committed session text
-  install_launchd.sh     schedule `hoops poll` every 300s
-  com.guhan.hoops.plist  the launchd job
+  install_launchd.sh     schedule `hoops poll` every 300s (local fallback path)
+  com.guhan.hoops.plist  the launchd job (kept for rollback)
 ```
 
 `parse.py`, `stats.py`, `invariants.py` are pure functions over data — no I/O, no clock, no network. That's deliberate: they're the load-bearing logic, so they're the most testable.
+
+## Ingestion
+
+**Primary: cloud pipeline.** The phone POSTs straight to a Modal endpoint; the Mac is out of the ingestion path entirely.
+
+```
+[iPhone]  Shortcut → POST https://<modal-endpoint>/upload
+          multipart hoops__<yyyyMMdd-HHmmss>.m4a + X-Hoops-Key header → instant ack
+   │
+   ▼
+[Modal endpoint  cloud/web.py]
+   auth (hmac.compare_digest) → filename vs hoops__ prefix pattern → ≤64MB size cap
+   → dedupe check against R2 → PUT raw/<name> → spawn processor → ack
+   │
+   ▼
+[R2 bucket "hoops-data"]  raw/<name> (transient) · sessions/YYYY/MM/<sid>/ · needs_review/ · rejected/
+   │
+   ▼
+[Modal processor  cloud/processor.py]
+   download raw/<name> → scratch dir → process_file() (transcribe → parse → invariants →
+   stats → render → report — same core as local mode) → upload session artifacts to R2
+   → delete raw/<name>
+   │
+   ▼
+[Email]  session zip attached (report.html inside), same mailer.py as local mode
+```
+
+Endpoint contract: `401` wrong/missing `X-Hoops-Key`; `400` filename doesn't match `hoops__YYYYMMDD-HHMMSS.m4a`; `413` over the 64MB cap; `200 {"status": "duplicate"}` on a re-tap of an already-processed session (idempotent — nothing reprocessed, nothing re-emailed); `200 {"status": "processing"}` otherwise. The report email lands roughly 2 minutes after the tap.
+
+Dev loop: the Mac never touches inbound audio, but stays the dev loop for replay/score/inspection —
+
+```bash
+set -a; source .env.r2; set +a
+uv run modal run cloud/modal_app.py::pull_sessions
+```
+
+pulls new session artifacts down from R2 into local `sessions/`, skipping files already present.
+
+### Local fallback mode
+
+Kept for rollback — `launchctl load ~/Library/LaunchAgents/com.guhan.hoops.plist` (the plist is retained on disk for exactly this) and re-point the Shortcut at iCloud — if the cloud endpoint is ever unreachable. Both ingest paths share the same downstream pipeline core; only how a file arrives on disk differs:
+
+```
+[iPhone]  Apple Shortcut → Save File → iCloud Drive/Capture/inbox/hoops__<yyyyMMdd-HHmmss>.m4a
+[Mac]     launchd runs `hoops poll` every 5 minutes → ingest.py stability checks (size stable
+          across two polls, mtime >60s old, .icloud stub force-download), dedupe → process_file()
+          → email
+```
 
 ## Three debuggable layers
 
@@ -72,7 +126,7 @@ On failure the LLM repair pass gets the raw transcript plus these constraints; i
 - **Sessions are independent.** No cross-session state, no rolling baselines, no database in the capture path. Removes every class of bug where a store and a folder disagree; any session is reprocessable from its own audio alone.
 - **The repo is the store for the golden dataset.** Fixture audio and transcripts are committed; per-session data stays local-only under gitignored `sessions/`; SQLite is generated on demand by `build_db.py`. Merges can't corrupt data, diffs stay meaningful, and the pipeline physically cannot write to the DB.
 - **Capture must never depend on reporting.** Data is persisted before narrative/email run; every AI or SMTP failure degrades the email (or leaves a `pending_email` marker retried next poll) — it never blocks or corrupts a session.
-- **Transport is a queue, not a call.** The iCloud drop folder means a sleeping Mac produces delay, not loss — files pool and drain when the poller wakes. The poller only picks up files whose size is stable across two polls and whose mtime is >60s old (iCloud partial-sync safety), and force-downloads `.icloud` placeholder stubs.
+- **The Mac's disk is not the source of truth.** R2 is — every session artifact lands in the bucket under `sessions/YYYY/MM/<sid>/` regardless of which Mac (or none) is awake; `pull_sessions` is a cache-fill, not a requirement. In local fallback mode, transport is a queue, not a call: the iCloud drop folder means a sleeping Mac produces delay, not loss — files pool and drain when the poller wakes. The poller only picks up files whose size is stable across two polls and whose mtime is >60s old (iCloud partial-sync safety), and force-downloads `.icloud` placeholder stubs.
 - **Deterministic by default.** The only nondeterministic stages are repair (rare, re-validated) and narrative (cosmetic, optional). Same audio in → same table out.
 
 ## Transcription notes
@@ -80,6 +134,20 @@ On failure the LLM repair pass gets the raw transcript plus these constraints; i
 whisper-1 via the OpenAI API with `response_format=verbose_json` and `timestamp_granularities=["word"]` — word timestamps are non-negotiable (the isolation gate depends on them), which rules out on-device iOS transcription and the gpt-4o-transcribe family. The bias prompt is written as **transcript-style context, not instructions** (`"brick. make. miss. splash. scratch that. note: ..."`): whisper echoes instruction-phrased prompts verbatim over quiet audio, which we observed injecting hallucinated vocabulary words — i.e. phantom shots — before the phrasing was fixed. The `Transcriber` interface is pluggable so a local `faster-whisper` backend can drop in later for cost/offline reasons.
 
 ## Failure handling
+
+**Cloud (primary):**
+
+| Failure | Behavior |
+|---|---|
+| Wrong/missing upload key | Endpoint returns `401`; nothing written to R2 |
+| Malformed filename | Endpoint returns `400`; nothing written to R2 |
+| Recording over 64MB | Endpoint returns `413`; nothing written to R2 |
+| Duplicate sid re-tap | Endpoint returns `200 {"status": "duplicate"}`; idempotent, nothing reprocessed |
+| Processor failure (any exception) | Modal retries the run up to 3× (exponential backoff); on final failure sends a best-effort alert email and re-raises so the Modal dashboard logs the run as failed |
+| Total failure after retries | `raw/<name>` is retained in the bucket (never deleted on failure) for manual replay; every run — success or failure — is visible in the Modal dashboard logs |
+| Audio < 5s / > 20min, zero calls, invariants fail, LLM narrative failure | Same behavior as local mode below — this logic lives in the shared `process_file()` core, not the cloud wiring |
+
+**Local fallback:**
 
 | Failure | Behavior |
 |---|---|

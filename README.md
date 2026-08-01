@@ -18,19 +18,24 @@ Basketball is instance #1. The capture pattern (one Shortcut, spoken vocabulary,
 
 ```
 [iPhone]  Apple Shortcut, one press
-   └─ records audio → iCloud Drive/Capture/inbox/hoops__20260728-061204.m4a
+   └─ records audio → POST https://<modal-endpoint>/upload (multipart + X-Hoops-Key)
 
-[Mac]     launchd runs `hoops poll` every 5 minutes
-   ├─ 1. Ingest      stability checks (iCloud partial-sync safe), dedupe
+[Modal endpoint]  auth + filename check + size cap + dedupe → instant ack
+   └─ raw recording lands in R2 (Cloudflare object storage); processor spawned
+
+[Modal processor]  (same pipeline core as ever, now running in the cloud)
+   ├─ 1. Ingest      download raw from R2, dedupe
    ├─ 2. Transcribe  OpenAI whisper-1, word-level timestamps
-   ├─ 3. Persist     full transcript JSON saved BEFORE parsing
+   ├─ 3. Persist     full transcript JSON saved BEFORE parsing, uploaded to R2
    ├─ 4. Parse       isolation gating + vocabulary → shot calls (pure, deterministic)
    ├─ 5. Validate    invariants (e.g. session must end on exactly three straight makes)
    ├─ 6. Repair      only if invariants fail: LLM reconstructs the sequence, re-validated
    ├─ 7. Stats       shots-to-three, streaks, gaps, FG%
    ├─ 8. Render      shot-strip PNG + HTML report
-   └─ 9. Email       report + every artifact attached (the email is the offsite backup)
+   └─ 9. Email       report + every artifact attached (R2 is the offsite backup)
 ```
+
+Report email lands ~2 minutes after the tap — no iCloud sync wait. A local mode (Mac + launchd + iCloud drop folder, same pipeline core) is kept as a fallback; see [docs/architecture.md](docs/architecture.md) and [docs/shortcut-setup.md](docs/shortcut-setup.md).
 
 **The spoken protocol** (all of it):
 

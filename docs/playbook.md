@@ -103,6 +103,10 @@ actually remember happening, before I stop checking. Gates passing on
 recorded fixtures is necessary, not sufficient — see
 [`pattern/README.md`](pattern/README.md) §6.
 
+When local infra fights the data (iCloud evicted sessions mid-pipeline),
+I moved compute to the cloud rather than adding workarounds — see
+[`docs/specs/2026-07-31-cloud-migration-design.md`](specs/2026-07-31-cloud-migration-design.md).
+
 ## 7. Record why, not just what
 
 Git history carries the what; it doesn't carry the why, and future-me (or
