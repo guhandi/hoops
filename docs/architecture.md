@@ -124,7 +124,7 @@ On failure the LLM repair pass gets the raw transcript plus these constraints; i
 ## Design principles (and what they buy)
 
 - **Sessions are independent.** No cross-session state, no rolling baselines, no database in the capture path. Removes every class of bug where a store and a folder disagree; any session is reprocessable from its own audio alone.
-- **The repo is the store for the golden dataset.** Fixture audio and transcripts are committed; per-session data stays local-only under gitignored `sessions/`; SQLite is generated on demand by `build_db.py`. Merges can't corrupt data, diffs stay meaningful, and the pipeline physically cannot write to the DB.
+- **The repo is the store for the golden dataset.** Fixture audio and transcripts are committed; per-session data is never committed either way — its source of truth is the R2 bucket (cloud path) or the session folder alone (local fallback), and local `sessions/` is a gitignored cache that `pull_sessions` fills from R2, not a store in its own right; SQLite is generated on demand by `build_db.py`. Merges can't corrupt data, diffs stay meaningful, and the pipeline physically cannot write to the DB.
 - **Capture must never depend on reporting.** Data is persisted before narrative/email run; every AI or SMTP failure degrades the email (or leaves a `pending_email` marker retried next poll) — it never blocks or corrupts a session.
 - **The Mac's disk is not the source of truth.** R2 is — every session artifact lands in the bucket under `sessions/YYYY/MM/<sid>/` regardless of which Mac (or none) is awake; `pull_sessions` is a cache-fill, not a requirement. In local fallback mode, transport is a queue, not a call: the iCloud drop folder means a sleeping Mac produces delay, not loss — files pool and drain when the poller wakes. The poller only picks up files whose size is stable across two polls and whose mtime is >60s old (iCloud partial-sync safety), and force-downloads `.icloud` placeholder stubs.
 - **Deterministic by default.** The only nondeterministic stages are repair (rare, re-validated) and narrative (cosmetic, optional). Same audio in → same table out.
@@ -143,8 +143,8 @@ whisper-1 via the OpenAI API with `response_format=verbose_json` and `timestamp_
 | Malformed filename | Endpoint returns `400`; nothing written to R2 |
 | Recording over 64MB | Endpoint returns `413`; nothing written to R2 |
 | Duplicate sid re-tap | Endpoint returns `200 {"status": "duplicate"}`; idempotent, nothing reprocessed |
-| Processor failure (any exception) | Modal retries the run up to 3× (exponential backoff); on final failure sends a best-effort alert email and re-raises so the Modal dashboard logs the run as failed |
-| Total failure after retries | `raw/<name>` is retained in the bucket (never deleted on failure) for manual replay; every run — success or failure — is visible in the Modal dashboard logs |
+| Processor failure (any exception) | A best-effort alert email fires on *every* raised attempt, then Modal re-raises and retries (up to 3× more, exponential backoff) — so a permanently failing file can send up to 4 alert emails (one per attempt) before Modal gives up, while a transient failure may send one alert and then succeed on a later retry with no further email |
+| Total failure after retries exhausted | `raw/<name>` is retained in the bucket (never deleted on failure) for manual replay; every attempt — success or failure — is visible in the Modal dashboard logs |
 | Audio < 5s / > 20min, zero calls, invariants fail, LLM narrative failure | Same behavior as local mode below — this logic lives in the shared `process_file()` core, not the cloud wiring |
 
 **Local fallback:**

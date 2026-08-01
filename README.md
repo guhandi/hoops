@@ -32,7 +32,7 @@ Basketball is instance #1. The capture pattern (one Shortcut, spoken vocabulary,
    ├─ 6. Repair      only if invariants fail: LLM reconstructs the sequence, re-validated
    ├─ 7. Stats       shots-to-three, streaks, gaps, FG%
    ├─ 8. Render      shot-strip PNG + HTML report
-   └─ 9. Email       report + every artifact attached (R2 is the offsite backup)
+   └─ 9. Email       report + every artifact attached (R2 is the source of truth; the emailed zip is the belt-and-suspenders copy)
 ```
 
 Report email lands ~2 minutes after the tap — no iCloud sync wait. A local mode (Mac + launchd + iCloud drop folder, same pipeline core) is kept as a fallback; see [docs/architecture.md](docs/architecture.md) and [docs/shortcut-setup.md](docs/shortcut-setup.md).

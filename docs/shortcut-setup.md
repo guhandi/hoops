@@ -22,7 +22,7 @@ The Shortcut is the button that turns a recording into a POST straight to the cl
    - Form field: `file` = the renamed recording (from step 4 above)
    - Headers: `X-Hoops-Key` = the upload secret
 
-   The real endpoint URL and `X-Hoops-Key` value are not committed to this repo (public repo, defense in depth) — they live in the owner's local `.env.r2`.
+   The real endpoint URL and `X-Hoops-Key` value are not committed to this repo (public repo, defense in depth) — they live in your local `.env.r2`.
 
    Tapping Stop gets an instant `{"status": "processing"}` (or `"duplicate"` on a re-tap of an already-processed recording) acknowledgment from the endpoint, and the report email lands roughly 2 minutes later — no iCloud sync wait.
 
