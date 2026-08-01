@@ -30,7 +30,7 @@ Two sessions in two days were half-processed and never emailed. Root cause: the 
   processor retries=3 · download raw → scratch · process_file(..., email=True,
             archive="move") with scratch-rooted Config · upload session dir
             (or needs_review/rejected outcome) to R2 · delete raw/<name>
-            · final failure → alert email + Modal dashboard logs
+            · each failed attempt → alert email + Modal dashboard logs
   secrets   modal.Secret "hoops-secrets" (OpenAI, Anthropic, Gmail, upload key,
             R2 keys) — never committed, never printed
 
@@ -55,7 +55,7 @@ Baseline = the manifest's committed machine columns (`got_calls`, local run 2026
 ## Error handling
 
 - Endpoint: wrong key → 401 (nothing written); malformed filename → 4xx with clear message; duplicate sid → 200 `{"status":"duplicate"}` (idempotent re-taps); oversize → 413.
-- Processor: Modal retries ×3; final failure emails the alert with the error; raw file remains in `raw/` for manual replay; nothing is silently swallowed (Modal logs every run).
+- Processor: Modal retries ×3; each failed attempt fires a best-effort alert email — up to 4 for a permanent failure — with the error; raw file remains in `raw/` for manual replay; nothing is silently swallowed (Modal logs every run). (amended 2026-08-01: alert is per-attempt)
 - Rollback: `launchctl load` the kept plist + re-point the Shortcut at iCloud — both ingest paths coexist in the repo.
 
 ## Testing

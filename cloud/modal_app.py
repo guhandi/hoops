@@ -48,7 +48,9 @@ def _alert(name: str, err: str) -> None:
         msg = EmailMessage()
         msg["From"], msg["To"] = addr, addr
         msg["Subject"] = f"⚠️ 🏀 cloud processing failed for {name}"
-        msg.set_content(f"All retries exhausted.\n\n{err}")
+        msg.set_content(
+            "A processing attempt failed (Modal retries up to 3x with backoff — "
+            f"check the dashboard; a later attempt may succeed).\n\n{err}")
         with smtplib.SMTP_SSL(email["smtp_host"], int(email["smtp_port"])) as s:
             s.login(addr, os.environ["GMAIL_APP_PASSWORD"])
             s.send_message(msg)
@@ -62,7 +64,7 @@ def web():
     from cloud.web import make_app
     from cloud.store import ObjectStore
     return make_app(ObjectStore.from_env(),
-                    lambda name: processor.spawn(name),
+                    lambda name: processor.spawn.aio(name),
                     os.environ["HOOPS_UPLOAD_KEY"])
 
 @app.local_entrypoint()

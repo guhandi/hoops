@@ -1,6 +1,7 @@
 """Upload endpoint app factory. Pure FastAPI — no Modal imports — so it is
 fully testable with TestClient and reusable for future capture tools."""
 import hmac
+import inspect
 from fastapi import FastAPI, File, Header, HTTPException, UploadFile
 from hoops.session import _PREFIX_RE
 
@@ -30,7 +31,9 @@ def make_app(store, spawn, upload_key: str) -> FastAPI:
         if store.exists(session_key_for(name)):
             return {"status": "duplicate", "sid": sid}
         store.put_bytes(f"raw/{name}", data)
-        spawn(name)
+        res = spawn(name)
+        if inspect.isawaitable(res):
+            await res
         return {"status": "processing", "sid": sid}
 
     return app

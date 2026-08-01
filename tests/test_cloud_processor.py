@@ -65,3 +65,36 @@ def test_missing_raw_raises(rig):
     store.delete(f"raw/{NAME}")
     with pytest.raises(Exception):
         run_from_bucket(NAME, store, FakeTranscriber(), scratch)
+
+def test_email_failure_raises_and_keeps_raw(rig, monkeypatch):
+    store, sent, scratch = rig
+
+    def boom(msg, cfg):
+        raise RuntimeError("smtp down")
+    monkeypatch.setattr("hoops.mailer.send", boom)
+
+    with pytest.raises(RuntimeError, match="email send failed"):
+        run_from_bucket(NAME, store, FakeTranscriber(), scratch)
+
+    assert store.exists(f"raw/{NAME}")                  # raw retained for Modal retry
+    assert store.list_keys("sessions/") == []            # marker never uploaded
+
+def test_session_json_uploaded_last(rig):
+    store, sent, scratch = rig
+    status = run_from_bucket(NAME, store, FakeTranscriber(), scratch)
+    assert status == "ok"
+    keys = [k for (b, k) in store.client.blobs if k.startswith("sessions/")]
+    assert keys[-1].endswith("/session.json")
+
+def test_unexpected_outcome_raises_and_keeps_raw(rig, monkeypatch):
+    import types
+    store, sent, scratch = rig
+
+    def fake_process_file(*a, **k):
+        return types.SimpleNamespace(status="needs_review", session_dir=None, sid="x")
+    monkeypatch.setattr("cloud.processor.process_file", fake_process_file)
+
+    with pytest.raises(RuntimeError, match="unexpected outcome"):
+        run_from_bucket(NAME, store, FakeTranscriber(), scratch)
+
+    assert store.exists(f"raw/{NAME}")

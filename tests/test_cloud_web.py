@@ -60,3 +60,16 @@ def test_oversize_413(rig):
     r = post(client, data=b"x" * (64 * 1024 * 1024 + 1))
     assert r.status_code == 413
     assert store.list_keys("raw/") == [] and spawned == []
+
+def test_async_spawn_is_awaited():
+    store = ObjectStore(FakeClient(), "hoops-data")
+    spawned = []
+
+    async def spawn(name):
+        spawned.append(name)
+
+    client = TestClient(make_app(store, spawn, KEY))
+    r = post(client)
+    assert r.status_code == 200
+    assert r.json() == {"status": "processing", "sid": "20260731-070000"}
+    assert spawned == [GOOD]
