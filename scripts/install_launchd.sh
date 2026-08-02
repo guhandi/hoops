@@ -5,7 +5,7 @@ REPO="$(pwd)"
 LABEL="com.hoops.poller"
 PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
 mkdir -p logs
-uv sync                                    # ensures .venv/bin/hoops exists
+uv sync --inexact                          # ensures .venv/bin/hoops exists, removes nothing
 cat > "$PLIST" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
