@@ -65,7 +65,7 @@ Endpoint contract: `401` wrong/missing `X-Hoops-Key`; `400` filename doesn't mat
 Dev loop: the Mac never touches inbound audio, but stays the dev loop for replay/score/inspection —
 
 ```bash
-set -a; source .env.r2; set +a
+set -a; source .env; set +a
 uv run modal run cloud/modal_app.py::pull_sessions
 ```
 

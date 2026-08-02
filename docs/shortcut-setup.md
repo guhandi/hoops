@@ -14,6 +14,8 @@ The Shortcut is the button that turns a recording into a POST straight to the cl
 
 ## Cloud upload (current)
 
+Your endpoint URL comes from [deploy-your-own.md](deploy-your-own.md).
+
 Three actions total — the filename travels as a URL query parameter, so no rename step is needed:
 
 4. Add action **Get Contents of URL**:
@@ -24,7 +26,7 @@ Three actions total — the filename travels as a URL query parameter, so no ren
 
    (Why raw File and not a multipart form: iOS Shortcuts' Form + File-type field is unreliable at holding a variable; the endpoint accepts both shapes, and File mode is the one Shortcuts handles well. The multipart form field `file` remains supported for `curl` and `scripts/cloud_acceptance.py`.)
 
-   The real endpoint URL and `X-Hoops-Key` value are not committed to this repo (public repo, defense in depth) — they live in your local `.env.r2`.
+   The real endpoint URL and `X-Hoops-Key` value are not committed to this repo (public repo, defense in depth) — they live in your local `.env`.
 
    Tapping Stop gets an instant `{"status": "processing"}` (or `"duplicate"` on a re-tap of an already-processed recording) acknowledgment from the endpoint, and the report email lands roughly 2 minutes later — no iCloud sync wait.
 

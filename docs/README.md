@@ -2,11 +2,12 @@
 
 Reading path: [`../README.md`](../README.md) → [`playbook.md`](playbook.md) →
 [`architecture.md`](architecture.md) → [`methodology.md`](methodology.md) →
-[`pattern/README.md`](pattern/README.md)
+[`deploy-your-own.md`](deploy-your-own.md) → [`pattern/README.md`](pattern/README.md)
 
 - `playbook.md` — the repeatable build process (start here)
 - `architecture.md` — how the pipeline works, module map, failure handling
 - `methodology.md` — golden-dataset methodology binding this repo
+- `deploy-your-own.md` — deploy your own instance in ~15 minutes
 - `shortcut-setup.md` — phone-side Apple Shortcut setup
 - `specs/` — dated design specs; later specs supersede earlier where named
 - `superpowers/` — brainstormed specs + task-level implementation plans
