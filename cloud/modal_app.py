@@ -81,3 +81,19 @@ def pull_sessions(dest: str = "sessions"):
             target.write_bytes(store.get_bytes(key))
             n += 1
     print(f"pulled {n} new file(s) into {dest}/")
+
+@app.local_entrypoint()
+def push_sessions(src: str = "sessions"):
+    """modal run cloud/modal_app.py::push_sessions — one-way local -> bucket backfill.
+
+    Uploads any file missing from the bucket; never overwrites existing keys."""
+    from cloud.store import ObjectStore
+    store = ObjectStore.from_env()
+    n = 0
+    for f in sorted(Path(src).rglob("*")):
+        if f.is_file() and not f.name.startswith("."):
+            key = f"sessions/{f.relative_to(src)}"
+            if not store.exists(key):
+                store.put_bytes(key, f.read_bytes())
+                n += 1
+    print(f"pushed {n} new file(s) from {src}/ to the bucket")

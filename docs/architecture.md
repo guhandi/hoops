@@ -70,7 +70,7 @@ set -a; source .env.r2; set +a
 uv run modal run cloud/modal_app.py::pull_sessions
 ```
 
-pulls new session artifacts down from R2 into local `sessions/`, skipping files already present.
+pulls new session artifacts down from R2 into local `sessions/`, skipping files already present. The mirror command, `uv run modal run cloud/modal_app.py::push_sessions`, backfills local session folders up to the bucket (skip-if-exists, never overwrites) — used once to migrate the pre-cloud July 2026 history, and safe to re-run any time.
 
 ### Local fallback mode
 
