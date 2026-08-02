@@ -58,3 +58,48 @@ def test_zero_miss_words_per_miss_none():
         session_len_s=8.0, transcriber="t", parser_version="1", profanity=[])
     assert stats["words_per_miss"] is None
     assert stats["median_gap_s"] == 3.0
+
+from hoops.stats import build_chase
+
+def _row(n, result, t, voided=False):
+    return {"shot_num": n, "result": result, "t_call_s": float(t), "voided": voided}
+
+def test_chase_counts_broken_two_in_a_row():
+    # miss, make, make, miss, make, make, miss, make, make, make -> 2 almosts, closed
+    seq = ["miss", "make", "make", "miss", "make", "make", "miss",
+           "make", "make", "make"]
+    rows = [_row(i + 1, r, 5 * (i + 1)) for i, r in enumerate(seq)]
+    chase = build_chase(rows)
+    assert chase["almosts"] == 2
+    assert chase["closed_out"] is True
+    assert chase["runs"][0] == {"result": "miss", "start_shot": 1, "end_shot": 1,
+                                "start_t": 5.0, "end_t": 5.0, "length": 1}
+    assert chase["runs"][-1]["length"] == 3
+
+def test_chase_final_two_run_is_not_an_almost():
+    seq = ["make", "make"]                       # session ended without closing
+    rows = [_row(i + 1, r, 5 * (i + 1)) for i, r in enumerate(seq)]
+    chase = build_chase(rows)
+    assert chase["almosts"] == 0
+    assert chase["closed_out"] is False
+
+def test_chase_skips_voided_rows():
+    rows = [_row(1, "make", 5), _row(2, "make", 8, voided=True),
+            _row(3, "miss", 12)]
+    chase = build_chase(rows)
+    assert [r["result"] for r in chase["runs"]] == ["make", "miss"]
+
+def test_chase_empty():
+    assert build_chase([]) == {"runs": [], "almosts": 0, "closed_out": False}
+
+def test_session_stats_gains_chase_keys():
+    # SEQ and call() are this file's existing module-level helpers
+    rows = build_shot_rows(SEQ, "s", "2026-07-27")
+    stats = build_session_stats(rows, ParseResult(), [], session_id="s",
+        session_date_local="2026-07-27", start_time_local="06:12:04",
+        session_len_s=50.0, transcriber="whisper-1", parser_version="1",
+        profanity=["fuck"])
+    assert stats["closed_out"] is True            # SEQ ends make, make, make
+    assert stats["almost_closeouts"] == 0         # no broken 2-run: the make at
+                                                  # 12.0 stands alone (18.0 voided)
+    assert stats["runs"][-1]["length"] == 3

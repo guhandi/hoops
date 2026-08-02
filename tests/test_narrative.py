@@ -49,3 +49,21 @@ def test_api_failure_returns_none(monkeypatch):
         def __init__(self): raise RuntimeError("down")
     monkeypatch.setattr("hoops.narrative.anthropic.Anthropic", Boom)
     assert generate_narrative(STATS, ENV, "m") is None
+
+def test_narrative_payload_includes_chase_context(monkeypatch):
+    sent = {}
+    class Msg:
+        content = [type("T", (), {"text": good_reply()})()]
+    class Messages:
+        def create(self, **kw):
+            sent.update(kw)
+            return Msg()
+    class FakeClient:
+        def __init__(self): self.messages = Messages()
+    monkeypatch.setattr("hoops.narrative.anthropic.Anthropic", lambda: FakeClient())
+    stats = dict(STATS, almost_closeouts=2, closed_out=True, uncorroborated_calls=1)
+    n = generate_narrative(stats, ENV, "m")
+    assert n is not None
+    payload = sent["messages"][0]["content"]
+    assert "almost_closeouts" in payload and "uncorroborated_calls" in payload
+    assert "almost_closeouts" in sent["system"] or "almost_closeouts" in payload

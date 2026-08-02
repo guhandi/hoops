@@ -26,6 +26,27 @@ def _longest_streak(results: list[str], target: str) -> int:
         best = max(best, cur)
     return best
 
+def build_chase(rows: list[dict]) -> dict:
+    """Run structure of the session: consecutive same-result runs over live shots,
+    how many two-in-a-row make runs got broken ('almosts'), and whether the
+    session closed on three straight makes."""
+    live = [r for r in rows if not r["voided"]]
+    runs: list[dict] = []
+    for r in live:
+        if runs and runs[-1]["result"] == r["result"]:
+            runs[-1]["end_shot"] = r["shot_num"]
+            runs[-1]["end_t"] = r["t_call_s"]
+            runs[-1]["length"] += 1
+        else:
+            runs.append({"result": r["result"], "start_shot": r["shot_num"],
+                         "end_shot": r["shot_num"], "start_t": r["t_call_s"],
+                         "end_t": r["t_call_s"], "length": 1})
+    closed_out = bool(runs) and runs[-1]["result"] == "make" and runs[-1]["length"] >= 3
+    almosts = sum(1 for i, run in enumerate(runs)
+                  if run["result"] == "make" and run["length"] == 2
+                  and i < len(runs) - 1)
+    return {"runs": runs, "almosts": almosts, "closed_out": closed_out}
+
 def build_session_stats(rows, parse: ParseResult, words: list[Word], *,
                         session_id, session_date_local, start_time_local,
                         session_len_s, transcriber, parser_version, profanity) -> dict:
@@ -35,6 +56,7 @@ def build_session_stats(rows, parse: ParseResult, words: list[Word], *,
     gaps = [r["gap_s"] for r in live if r["gap_s"] is not None]
     first_make = next((r["t_call_s"] for r in live if r["result"] == "make"), None)
     pset = set(profanity)
+    chase = build_chase(rows)
     return {
         "session_id": session_id, "session_date_local": session_date_local,
         "start_time_local": start_time_local,
@@ -55,4 +77,7 @@ def build_session_stats(rows, parse: ParseResult, words: list[Word], *,
         "invariants_passed": True,
         "ambiguous_calls": len(parse.ambiguous),
         "transcriber": transcriber, "parser_version": parser_version,
+        "runs": chase["runs"],
+        "almost_closeouts": chase["almosts"],
+        "closed_out": chase["closed_out"],
     }

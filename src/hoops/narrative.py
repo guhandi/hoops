@@ -13,6 +13,10 @@ not enthusiastic. Rules, all hard:
   one session and nothing else.
 - Recap: at most three sentences. Within-session dynamics only.
 - quote: an EXACT verbatim substring of the transcript, with its start time.
+- Context may include almost_closeouts (two-in-a-row make runs that got broken
+  before the closeout) and uncorroborated_calls (calls where no ball-impact
+  sound was heard — feel free to tease, gently, that the mic has doubts).
+  Reference them only in words, never digits.
 Return ONLY JSON: {"headline": str, "recap": str, "quote": str, "quote_t_s": float}"""
 
 def _norm(s: str) -> str:
@@ -22,7 +26,7 @@ def generate_narrative(stats: dict, env: dict, model: str) -> Narrative | None:
     try:
         client = anthropic.Anthropic()
         payload = (f"Session stats (context only, do not restate numbers): "
-                   f"{json.dumps({k: stats.get(k) for k in ['shots_to_three', 'makes', 'misses', 'longest_make_streak', 'longest_miss_streak', 'median_gap_s', 'session_len_s', 'notes']})}\n\n"
+                   f"{json.dumps({k: stats.get(k) for k in ['shots_to_three', 'makes', 'misses', 'longest_make_streak', 'longest_miss_streak', 'median_gap_s', 'session_len_s', 'notes', 'almost_closeouts', 'closed_out', 'uncorroborated_calls']})}\n\n"
                    f"Transcript: {envelope_text(env)}")
         msg = client.messages.create(model=model, max_tokens=500, system=_SYSTEM,
                                      messages=[{"role": "user", "content": payload}])
