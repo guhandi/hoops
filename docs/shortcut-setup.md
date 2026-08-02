@@ -9,18 +9,20 @@ The Shortcut is the button that turns a recording into a POST straight to the cl
 1. Shortcuts app → + → rename to "Hoops".
 2. Add action **Record Audio** — Start Recording: On Tap, Finish Recording: On Tap.
 3. Add action **Format Date**: Date = Current Date, Format = Custom, string `yyyyMMdd-HHmmss`.
-4. Add action **Rename File** (or **Set Name**, depending on iOS version): rename *Recorded Audio* to `hoops__[Formatted Date]` (insert the Format Date variable). The `hoops__` prefix is how the pipeline tells this capture type apart from any others sharing the same inbox/bucket — don't drop it or change the separator.
-5. Add the upload step for whichever mode you're wiring — see below.
-6. Add to Home Screen (Shortcut settings → Add to Home Screen) for the one-button experience — tap the icon, no app-switching, no menus.
+4. Add the upload step for whichever mode you're wiring — see below. (The local fallback additionally needs a **Set Name** step; the cloud path doesn't.)
+5. Add to Home Screen (Shortcut settings → Add to Home Screen) for the one-button experience — tap the icon, no app-switching, no menus.
 
 ## Cloud upload (current)
 
-5. Add action **Get Contents of URL**:
-   - URL: `https://<your-modal-endpoint>/upload`
+Three actions total — the filename travels as a URL query parameter, so no rename step is needed:
+
+4. Add action **Get Contents of URL**:
+   - URL: `https://<your-modal-endpoint>/upload?name=hoops__[Formatted Date].m4a` — type the URL as text and insert the **Formatted Date** variable pill between `hoops__` and `.m4a`. The `hoops__` prefix is how the pipeline tells this capture type apart from any others sharing the same bucket — don't drop it or change the separator.
    - Method: POST
-   - Request Body: Form
-   - Form field: `file` = the renamed recording (from step 4 above)
    - Headers: `X-Hoops-Key` = the upload secret
+   - Request Body: **File** → select the **Recorded Audio** variable
+
+   (Why raw File and not a multipart form: iOS Shortcuts' Form + File-type field is unreliable at holding a variable; the endpoint accepts both shapes, and File mode is the one Shortcuts handles well. The multipart form field `file` remains supported for `curl` and `scripts/cloud_acceptance.py`.)
 
    The real endpoint URL and `X-Hoops-Key` value are not committed to this repo (public repo, defense in depth) — they live in your local `.env.r2`.
 
@@ -30,7 +32,8 @@ The Shortcut is the button that turns a recording into a POST straight to the cl
 
 Kept in the repo and on the Shortcut settings for rollback if the cloud endpoint is ever unreachable. Everything on the Mac (`hoops poll`, transcription, parsing, invariants, stats, email) works against files sitting in the iCloud inbox folder — this path just needs a file to land there with the right name.
 
-5. Add action **Save File**: file = *Renamed File*, Service = iCloud Drive, Destination Path `/Capture/inbox/`, Ask Where To Save = OFF, Overwrite = OFF. This must be the exact path the Mac side polls (`config.yaml: inbox`) — a typo here means recordings silently never arrive.
+4. Add action **Set Name**: rename *Recorded Audio* to `hoops__[Formatted Date].m4a` (insert the Format Date variable; don't forget the `.m4a`).
+5. Add action **Save File**: file = *Renamed Item*, Service = iCloud Drive, Destination Path `/Capture/inbox/`, Ask Where To Save = OFF, Overwrite = OFF. This must be the exact path the Mac side polls (`config.yaml: inbox`) — a typo here means recordings silently never arrive.
 
 ## Use
 
