@@ -72,6 +72,8 @@ def hist_svg(makes, misses, title, W=420, H=140, bins=12):
 def main():
     cfg = load_config(ROOT / "config.yaml")
     by_label = {"make": [], "miss": []}
+    status_counts = {"make": {"paired": 0, "impact_missing": 0},
+                     "miss": {"paired": 0, "impact_missing": 0}}
     for path in sorted((ROOT / "fixtures").glob("*.m4a")):
         if path.name in EXCLUDE:
             continue
@@ -90,8 +92,15 @@ def main():
         for s in fused["shots"]:
             if s["pairing_status"] == "paired":
                 by_label[s["result"]].append(s)
+            if s["pairing_status"] in ("paired", "impact_missing"):
+                status_counts[s["result"]][s["pairing_status"]] += 1
         print(f"{path.name}: pairing_rate {fused['summary']['pairing_rate']}, "
               f"median latency {fused['summary']['median_latency_s']}s")
+
+    make_paired, make_missing = status_counts["make"]["paired"], status_counts["make"]["impact_missing"]
+    miss_paired, miss_missing = status_counts["miss"]["paired"], status_counts["miss"]["impact_missing"]
+    print(f"\nimpact_missing: {make_missing} make / {miss_missing} miss "
+          f"(paired: {make_paired} make / {miss_paired} miss)")
 
     makes, misses = by_label["make"], by_label["miss"]
     print(f"\n{len(makes)} labelled makes, {len(misses)} labelled misses\n")

@@ -83,6 +83,19 @@ def test_gap_call_and_gap_impact():
     assert s3["pairing_status"] == "impact_missing" and s3["gap_impact_s"] is None
 
 @pytest.mark.unit
+def test_gap_impact_does_not_span_unpaired_predecessor():
+    # calls at 10/20/30s, events at 8.5/28.6s: shot 2 has no candidate (impact_missing),
+    # so shot 3's gap_impact_s must NOT be 28.6-8.5=20.1 -- the immediately preceding
+    # live row (shot 2) wasn't paired, so gap_impact_s is None.
+    out = fuse([row(1, 10.0), row(2, 20.0), row(3, 30.0)],
+               [ev(8.5), ev(28.6)], **P)
+    s1, s2, s3 = out["shots"]
+    assert s1["pairing_status"] == "paired" and s1["gap_impact_s"] is None  # first, no predecessor
+    assert s2["pairing_status"] == "impact_missing" and s2["gap_impact_s"] is None
+    assert s3["pairing_status"] == "paired" and s3["t_impact_s"] == 28.6
+    assert s3["gap_impact_s"] is None      # predecessor (shot 2) was unpaired
+
+@pytest.mark.unit
 def test_summary_median_latency():
     out = fuse([row(1, 10.0), row(2, 20.0)], [ev(8.5), ev(18.9)], **P)
     assert out["summary"]["median_latency_s"] == pytest.approx(1.3)
@@ -98,6 +111,13 @@ def test_write_fusion_writes_sidecar_and_never_raises(tmp_path):
     out = write_fusion(tmp_path, [row(1, 10.0)], [ev(8.5)], P)
     assert json.loads((tmp_path / "fusion.json").read_text()) == out
     assert write_fusion(tmp_path, [row(1, 10.0)], [ev(8.5)], {}) is None  # bad params
+
+@pytest.mark.unit
+def test_write_fusion_logs_on_failure(tmp_path, capsys):
+    out = write_fusion(tmp_path, [row(1, 10.0)], [ev(8.5)], {})  # bad params -> KeyError
+    assert out is None
+    err = capsys.readouterr().err
+    assert "fusion: stage skipped" in err
 
 @pytest.mark.unit
 def test_branch_modules_never_import_each_other():

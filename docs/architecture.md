@@ -12,10 +12,12 @@ src/hoops/
   parse.py       PURE: word stream → calls (isolation gate, vocabulary, scratch-that, note:)
   stats.py       PURE: calls → shot rows (§7.6 schema) → session stats (§7.7 schema)
   invariants.py  PURE: I1–I6 checks on the shot table
+  acoustics.py   Branch B — HPSS onset detection of ball impacts from raw audio, independent of voice/calls; acoustics.json sidecar
+  fusion.py      pairs branch A calls with branch B impact events (nearest-preceding, latency-windowed); fusion.json sidecar
   repair.py      LLM sequence reconstruction, only invoked on invariant failure
   narrative.py   LLM headline/recap/quote for the email, guardrailed, optional
   render.py      shot-strip PNG (matplotlib), fixture gallery
-  report_html.py interactive self-contained session report — SVG charts + audio-synced movie replay; session audio embedded base64
+  report_html.py interactive self-contained session report — SVG charts, audio-synced movie replay, impact-aligned replay with 🤥 no-contact flags + waveform scrubber (from acoustics.json/fusion.json sidecars); session audio embedded base64
   mailer.py      SMTP email: CID-inline strip.png, session zip attachment (all session files, report.html inside)
   session.py     session-id derivation, folder layout, artifact read/write
   fixtures.py    fixture runner + committed transcript cache
@@ -28,8 +30,10 @@ cloud/
   store.py       S3-compatible (R2) object store wrapper: put/get/list/delete
   config.cloud.yaml  scratch-space clone of config.yaml for the Modal container
 scripts/
-  build_db.py            rebuild disposable hoops.db from committed session text
-  install_launchd.sh     generates `com.hoops.poller.plist` from your clone's path; schedules `hoops poll` every 300s (local fallback path)
+  build_db.py                rebuild disposable hoops.db from committed session text
+  install_launchd.sh         generates `com.hoops.poller.plist` from your clone's path; schedules `hoops poll` every 300s (local fallback path)
+  sweep_thresholds.py        grid-searches acoustics detection thresholds against fixture baselines; feeds decision 002
+  analyze_separability.py    pools paired branch-A/branch-B shots to test whether acoustic features separate make/miss; feeds decision 003
 ```
 
 `parse.py`, `stats.py`, `invariants.py` are pure functions over data — no I/O, no clock, no network. That's deliberate: they're the load-bearing logic, so they're the most testable.

@@ -12,6 +12,7 @@ ambiguous (two calls, one impact: both flagged), warmup (impacts before the
 first call), voided (scratch-that rows never pair).
 """
 import json
+import sys
 from pathlib import Path
 from statistics import median
 
@@ -70,8 +71,8 @@ def fuse(rows: list[dict], events: list[dict], *,
                                        if t_impact is not None and prev_impact_t is not None
                                        else None)})
         prev_call_t = t_call
-        if t_impact is not None:
-            prev_impact_t = t_impact
+        prev_impact_t = t_impact          # None when unpaired: gap_impact_s must not
+                                           # span the hole (I2) — only a paired predecessor counts
 
     for s in shots:                       # "flag both": demote, keep data
         if s["shot_num"] in ambiguous and s["pairing_status"] == "paired":
@@ -112,5 +113,6 @@ def write_fusion(sdir: Path, rows: list[dict], events: list[dict] | None,
                      pair_max_s=float(params["pair_max_s"]))
         (sdir / "fusion.json").write_text(json.dumps(fused, indent=2))
         return fused
-    except Exception:
+    except Exception as e:
+        print(f"fusion: stage skipped ({e!r})", file=sys.stderr)
         return None

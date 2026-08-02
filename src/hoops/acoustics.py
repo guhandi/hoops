@@ -13,6 +13,7 @@ without them. Every threshold arrives via the params dict (config.yaml
 `acoustics:` block); the only defaults live in config.DEFAULT_ACOUSTICS.
 """
 import json
+import sys
 import warnings
 from pathlib import Path
 
@@ -97,7 +98,8 @@ def analyze_audio(audio_path: Path, params: dict,
             if y.size == 0:
                 return None
             return analyze_samples(y, sr, params)
-    except Exception:
+    except Exception as e:
+        print(f"acoustics: stage skipped ({e!r})", file=sys.stderr)
         return None
 
 
@@ -111,5 +113,6 @@ def write_acoustics(sdir: Path, audio_path: Path | None, params: dict) -> dict |
             return None
         (sdir / "acoustics.json").write_text(json.dumps(result, indent=2))
         return result
-    except Exception:
+    except Exception as e:
+        print(f"acoustics: stage skipped ({e!r})", file=sys.stderr)
         return None

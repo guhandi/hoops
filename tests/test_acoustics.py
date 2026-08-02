@@ -75,6 +75,22 @@ def test_write_acoustics_never_raises_on_bad_params(tmp_path):
     assert write_acoustics(tmp_path, tmp_path / "nope.m4a", {}) is None
 
 @pytest.mark.unit
+def test_analyze_audio_logs_on_failure(tmp_path, capsys):
+    assert analyze_audio(tmp_path / "nope.m4a", DEFAULT_ACOUSTICS) is None
+    err = capsys.readouterr().err
+    assert "acoustics: stage skipped" in err
+
+@pytest.mark.unit
+def test_write_acoustics_logs_on_failure(tmp_path, monkeypatch, capsys):
+    canned = {"envelope": [0.1], "envelope_hz": 14.35, "events": []}
+    monkeypatch.setattr("hoops.acoustics.analyze_audio", lambda *a, **k: canned)
+    bad_sdir = tmp_path / "does_not_exist"       # no mkdir -> write_text raises
+    out = write_acoustics(bad_sdir, tmp_path / "a.m4a", DEFAULT_ACOUSTICS)
+    assert out is None
+    err = capsys.readouterr().err
+    assert "acoustics: stage skipped" in err
+
+@pytest.mark.unit
 def test_write_acoustics_writes_sidecar(tmp_path, monkeypatch):
     canned = {"envelope": [0.1], "envelope_hz": 14.35, "events": []}
     monkeypatch.setattr("hoops.acoustics.analyze_audio", lambda *a, **k: canned)
