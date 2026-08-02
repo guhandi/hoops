@@ -31,7 +31,7 @@ This project exists to make **data acquisition as close to free as possible** fo
 
 The concrete instance: every morning I shoot at my basketball hoop until I make three in a row. It's a consistent, self-terminating daily protocol that produces a clean scalar (*shots to three-in-a-row*) — but logging it by hand would kill the habit. Hands are busy, it's 6am, and any friction means the logging stops.
 
-Voice is the only capture channel that costs nothing: the call-outs ("make", "miss") happen naturally as part of the activity. An Apple Shortcut bound to one Home Screen button records the audio and drops it in iCloud. Everything after that — transcription, parsing, validation, stats, charting, reporting — is machine work that runs unattended on a Mac.
+Voice is the only capture channel that costs nothing: the call-outs ("make", "miss") happen naturally as part of the activity. An Apple Shortcut bound to one Home Screen button records the audio and drops it in iCloud. Everything after that — transcription, parsing, validation, stats, charting, reporting — is machine work that runs unattended in the cloud (Modal + R2), with a Mac-based fallback path.
 
 At ~40 sessions the dataset becomes a real dependent variable: shots-to-three regressed against sleep, HRV, alcohol, late screens.
 
