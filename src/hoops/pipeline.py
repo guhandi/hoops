@@ -273,6 +273,8 @@ def replay_session(sdir: Path, cfg: Config, vocab_name: str | None = None) -> Ou
     if impacts is not None:
         stats["uncorroborated_calls"] = sum(
             1 for s in impacts["shots"] if s["no_contact"])
+    else:
+        (sdir / "impacts.json").unlink(missing_ok=True)   # stale sidecar from a prior run
     flags = [f"{v.id}: {v.message}" for v in violations]
     write_shots_csv(sdir, rows)
     write_session_json(sdir, stats)

@@ -419,8 +419,9 @@ if (DATA.wave && wsvg) {
     frag.push(`<rect x="${(i / n * W).toFixed(1)}" y="${(36 - h).toFixed(1)}" ` +
               `width="${Math.max(0.6, W / n * 0.8).toFixed(2)}" height="${h.toFixed(1)}" fill="#c9a678"/>`);
   });
+  const waveDur = DATA.wave.env.length / DATA.wave.hz;
   live.filter(s => s.impact != null).forEach(s => {
-    const x = (s.impact / dur * W).toFixed(1);
+    const x = (s.impact / waveDur * W).toFixed(1);
     frag.push(`<polygon points="${x},8 ${x - 4},0 ${Number(x) + 4},0" fill="var(--ball)"/>`);
   });
   wsvg.innerHTML = frag.join('');
@@ -453,7 +454,7 @@ if (audio && document.getElementById('play-btn')) {
   audio.onpause = () => { playBtn.textContent = '▶ Play'; };
   document.getElementById('skip-btn').onclick = () => {
     const next = live.find(s => s.t > audio.currentTime + 0.2);
-    if (next) { audio.currentTime = Math.max(0, next.t - 1.5); audio.play(); }
+    if (next) { audio.currentTime = Math.max(0, Math.min(next.t - 1.5, next.launch - 0.3)); audio.play(); }
   };
   scrub.oninput = () => { audio.currentTime = parseFloat(scrub.value); };
   function fireFlight(s) {

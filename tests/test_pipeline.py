@@ -225,6 +225,17 @@ def test_pipeline_survives_impacts_failure(tmp_path, cfg, monkeypatch):
     stats = json.loads((out.session_dir / "session.json").read_text())
     assert "uncorroborated_calls" not in stats
 
+def test_replay_removes_stale_impacts_when_write_impacts_returns_none(tmp_path, cfg, monkeypatch):
+    out = process_file(audio(tmp_path), cfg, FakeTranscriber(make_env(GOOD, duration=30.0)),
+                       email=False, archive="copy")
+    stale = out.session_dir / "impacts.json"
+    stale.write_text('{"envelope": [], "envelope_hz": 15, "shots": []}')
+    assert stale.exists()
+    monkeypatch.setattr("hoops.pipeline.write_impacts", lambda *a: None)
+    r = replay_session(out.session_dir, cfg)
+    assert r.status == "ok"
+    assert not stale.exists()
+
 def test_session_json_persists_vocab_and_replay_uses_it(tmp_path, cfg):
     f = audio(tmp_path)
     env = make_env([("make", 5.0, 5.3), ("miss", 12.0, 12.3)], duration=30.0)

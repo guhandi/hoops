@@ -46,6 +46,13 @@ def test_window_clamped_at_session_start():
     t = find_impact(env, 15, t_word=1.0)  # window would start at -1.0s -> clamp to 0
     assert t is not None
 
+def test_window_clamped_when_word_near_session_start():
+    # t_word=0.05s at hz=15 -> hi would be int(-1.425) = -1 without clamping,
+    # which would wrap into envelope[lo:-1] and scan nearly the whole session.
+    env = _flat(150)
+    env[100] = 0.9                       # a late peak that must NOT be picked up
+    assert find_impact(env, 15, t_word=0.05) is None
+
 def test_loudness_envelope_normalized_and_sized():
     rate, hz = 16000, 15
     quiet = [100] * rate                 # 1s quiet

@@ -62,7 +62,7 @@ def loudness_envelope(samples, rate: int = DECODE_RATE, hz: int = ENVELOPE_HZ) -
 def find_impact(envelope: list[float], hz: int, t_word: float) -> float | None:
     """Loudest transient in [t_word - 2.0, t_word - 0.15], or None (no contact)."""
     lo = max(0, int((t_word - SEARCH_BEFORE_S) * hz))
-    hi = int((t_word - GUARD_BEFORE_S) * hz)
+    hi = max(0, int((t_word - GUARD_BEFORE_S) * hz))
     window = envelope[lo:hi]
     if not window:
         return None
