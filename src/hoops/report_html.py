@@ -75,12 +75,14 @@ def _fmt(v, pat="{:.1f}", dash="—"):
 def _build_data(stats, rows, narrative, flags, words, has_audio: bool,
                 impacts=None) -> dict:
     by_shot = {s["shot_num"]: s for s in (impacts or {}).get("shots", [])}
-    shots = [{"n": r["shot_num"], "result": r["result"], "t": r["t_call_s"],
-              "gap": r["gap_s"], "streak": r["streak_after"],
-              "voided": r["voided"], "raw": r["raw_token"],
-              "impact": (by_shot.get(r["shot_num"]) or {}).get("impact_t_s"),
-              "lie": bool((by_shot.get(r["shot_num"]) or {}).get("no_contact"))}
-             for r in rows]
+    shots = []
+    for r in rows:
+        impact_info = by_shot.get(r["shot_num"]) or {}
+        shots.append({"n": r["shot_num"], "result": r["result"], "t": r["t_call_s"],
+                      "gap": r["gap_s"], "streak": r["streak_after"],
+                      "voided": r["voided"], "raw": r["raw_token"],
+                      "impact": impact_info.get("impact_t_s"),
+                      "lie": bool(impact_info.get("no_contact"))})
     def call_num(w):
         r = _call_row_for(w, rows)
         return r["shot_num"] if r else 0
@@ -383,6 +385,11 @@ if (audio && document.getElementById('play-btn')) {
     ball.classList.remove('fly-make', 'fly-miss');
     void ball.getBBox();                       // restart CSS animation
     ball.classList.add(s.result === 'make' ? 'fly-make' : 'fly-miss');
+    const upto = live.filter(x => x.launch <= s.launch);
+    document.getElementById('make-count').textContent =
+      upto.filter(x => x.result === 'make').length;
+    document.getElementById('miss-count').textContent =
+      upto.filter(x => x.result === 'miss').length;
   }
   function fireFlash(s) {
     flash.textContent = s.raw.toUpperCase() + (s.result === 'make' ? '!' : '') +
@@ -391,11 +398,6 @@ if (audio && document.getElementById('play-btn')) {
     flash.style.transition = 'none'; flash.style.opacity = 1;
     clearTimeout(flashTimer);
     flashTimer = setTimeout(() => { flash.style.transition = 'opacity .8s'; flash.style.opacity = 0; }, 700);
-    const upto = live.filter(x => x.t <= s.t);
-    document.getElementById('make-count').textContent =
-      upto.filter(x => x.result === 'make').length;
-    document.getElementById('miss-count').textContent =
-      upto.filter(x => x.result === 'miss').length;
   }
   function sync() {
     const t = audio.currentTime;
@@ -411,7 +413,7 @@ if (audio && document.getElementById('play-btn')) {
   audio.onseeked = () => {                     // keep scoreboard honest on seek
     firedFly = new Set(live.filter(s => s.launch <= audio.currentTime).map(s => s.n));
     firedFlash = new Set(live.filter(s => s.t <= audio.currentTime).map(s => s.n));
-    const upto = live.filter(s => s.t <= audio.currentTime);
+    const upto = live.filter(s => s.launch <= audio.currentTime);
     document.getElementById('make-count').textContent =
       upto.filter(x => x.result === 'make').length;
     document.getElementById('miss-count').textContent =
