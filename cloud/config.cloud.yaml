@@ -35,3 +35,19 @@ email:
   smtp_port: 465
 
 profanity: [fuck, fucking, shit, damn, goddamn, bullshit, ass]
+
+acoustics:                  # branch B — impact detection, independent of voice
+  sr: 22050
+  hop: 256
+  n_fft: 1024
+  hpss_margin_harmonic: 1.0
+  hpss_margin_percussive: 4.0
+  onset_delta: 0.4          # sweep-chosen — see docs/decisions/002-impact-detection-params.md
+  min_spacing_frames: 15
+  cluster_gap_s: 2.0
+  envelope_hz: 15
+  feature_win_s: 0.15
+
+fusion:                     # pairing voice calls to impact clusters
+  pair_min_s: 0.5
+  pair_max_s: 4.0

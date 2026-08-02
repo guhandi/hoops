@@ -4,6 +4,17 @@ from zoneinfo import ZoneInfo
 import os
 import yaml
 
+# Branch B / fusion tunables. config.yaml lists these explicitly; this table
+# is the fallback so older configs (and tests) keep working. Values chosen by
+# scripts/sweep_thresholds.py — see docs/decisions/002-impact-detection-params.md.
+DEFAULT_ACOUSTICS = {
+    "sr": 22050, "hop": 256, "n_fft": 1024,
+    "hpss_margin_harmonic": 1.0, "hpss_margin_percussive": 4.0,
+    "onset_delta": 0.4, "min_spacing_frames": 15, "cluster_gap_s": 2.0,
+    "envelope_hz": 15, "feature_win_s": 0.15,
+}
+DEFAULT_FUSION = {"pair_min_s": 0.5, "pair_max_s": 4.0}
+
 @dataclass(frozen=True)
 class Vocabulary:
     name: str
@@ -36,6 +47,8 @@ class Config:
     email: dict
     profanity: list[str]
     repo_root: Path
+    acoustics: dict = field(default_factory=lambda: dict(DEFAULT_ACOUSTICS))
+    fusion: dict = field(default_factory=lambda: dict(DEFAULT_FUSION))
 
     def vocab(self, name: str | None = None) -> Vocabulary:
         return self.vocabularies[name or self.vocab_default]
@@ -72,4 +85,6 @@ def load_config(path: Path | None = None) -> Config:
         email=_email_with_env_override(raw["email"]),
         profanity=[w.lower() for w in raw.get("profanity", [])],
         repo_root=root,
+        acoustics={**DEFAULT_ACOUSTICS, **(raw.get("acoustics") or {})},
+        fusion={**DEFAULT_FUSION, **(raw.get("fusion") or {})},
     )

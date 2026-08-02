@@ -13,6 +13,7 @@ image = (
     .apt_install("ffmpeg")
     .pip_install("openai>=1.35", "anthropic>=0.40", "matplotlib>=3.9",
                  "mutagen>=1.47", "pyyaml>=6.0", "python-dotenv>=1.0",
+                 "librosa>=0.10", "numpy>=1.26",
                  "fastapi>=0.110", "python-multipart>=0.0.9", "boto3>=1.34")
     .add_local_python_source("hoops", "cloud")
     .add_local_file(Path(__file__).parent / "config.cloud.yaml",
