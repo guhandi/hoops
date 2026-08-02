@@ -5,7 +5,8 @@ from pathlib import Path
 from mutagen.mp4 import MP4
 from . import PARSER_VERSION
 from .config import Config, Vocabulary
-from .impacts import write_impacts
+from .acoustics import write_acoustics
+from .fusion import write_fusion
 from .invariants import check_invariants
 from .parse import parse_words
 from .repair import attempt_repair
@@ -179,10 +180,11 @@ def process_file(path: Path, cfg: Config, transcriber, *, email: bool,
     stats["vocab_name"] = vocab.name
     stats["vocab_map"] = vocab.surface_to_canonical
 
-    impacts = write_impacts(sdir, path if path.exists() else None, rows)
-    if impacts is not None:
-        stats["uncorroborated_calls"] = sum(
-            1 for s in impacts["shots"] if s["no_contact"])
+    acoustics = write_acoustics(sdir, path if path.exists() else None, cfg.acoustics)
+    fused = write_fusion(sdir, rows, acoustics["events"] if acoustics else None,
+                         cfg.fusion)
+    if fused is not None:
+        stats["uncorroborated_calls"] = fused["summary"]["n_impact_missing"]
 
     write_shots_csv(sdir, rows)
     write_session_json(sdir, stats)
@@ -208,7 +210,8 @@ def process_file(path: Path, cfg: Config, transcriber, *, email: bool,
     if not audio_path.exists():                     # archive="none" leaves audio in place
         audio_path = path if path.exists() else None
     (sdir / "report.html").write_text(render_interactive_report(
-        stats, rows, narrative, flags, words, audio_path, impacts=impacts))
+        stats, rows, narrative, flags, words, audio_path,
+        acoustics=acoustics, fusion=fused))
 
     if email:
         try:
@@ -269,18 +272,24 @@ def replay_session(sdir: Path, cfg: Config, vocab_name: str | None = None) -> Ou
     if "session_id_source" in old:
         stats["session_id_source"] = old["session_id_source"]
     stats["vocab_name"], stats["vocab_map"] = vocab.name, vocab.surface_to_canonical
-    impacts = write_impacts(sdir, audio_path if audio_path.exists() else None, rows)
-    if impacts is not None:
-        stats["uncorroborated_calls"] = sum(
-            1 for s in impacts["shots"] if s["no_contact"])
-    else:
-        (sdir / "impacts.json").unlink(missing_ok=True)   # stale sidecar from a prior run
+    (sdir / "impacts.json").unlink(missing_ok=True)      # retired sidecar
+    acoustics = write_acoustics(sdir, audio_path if audio_path.exists() else None,
+                                cfg.acoustics)
+    fused = write_fusion(sdir, rows, acoustics["events"] if acoustics else None,
+                         cfg.fusion)
+    if fused is not None:
+        stats["uncorroborated_calls"] = fused["summary"]["n_impact_missing"]
+    if acoustics is None:
+        (sdir / "acoustics.json").unlink(missing_ok=True)  # stale from a prior run
+    if fused is None:
+        (sdir / "fusion.json").unlink(missing_ok=True)
     flags = [f"{v.id}: {v.message}" for v in violations]
     write_shots_csv(sdir, rows)
     write_session_json(sdir, stats)
     render_strip(rows, sdir / "strip.png")
     (sdir / "report.html").write_text(render_interactive_report(
         stats, rows, narrative, flags, words,
-        audio_path if audio_path.exists() else None, impacts=impacts))
+        audio_path if audio_path.exists() else None,
+        acoustics=acoustics, fusion=fused))
     return Outcome(status="ok", sid=sid, session_dir=sdir, stats=stats,
                    rows=rows, flags=flags)

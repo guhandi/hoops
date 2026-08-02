@@ -216,28 +216,45 @@ def test_shared_call_matcher_consistency():
     assert _call_row_for(off, ROWS) is None
 
 
-IMPACTS = {"envelope": [0.02] * 500 + [0.9] + [0.02] * 30, "envelope_hz": 15,
-           "shots": [{"shot_num": 1, "impact_t_s": 3.9, "no_contact": False},
-                     {"shot_num": 2, "impact_t_s": None, "no_contact": True},
-                     {"shot_num": 3, "impact_t_s": None, "no_contact": False},
-                     {"shot_num": 4, "impact_t_s": 19.2, "no_contact": False},
-                     {"shot_num": 5, "impact_t_s": 25.1, "no_contact": False}]}
+ACOUSTICS = {"envelope": [0.02] * 500 + [0.9] + [0.02] * 30, "envelope_hz": 14.35,
+             "events": [{"t_start": 33.0, "t_end": 33.4, "n_impacts": 2,
+                         "impact_times": [33.0, 33.4], "burst_duration_s": 0.4,
+                         "mean_centroid_hz": 3100.0, "max_peak_rms": 0.6,
+                         "mean_decay_ratio": 0.3, "impacts": []}]}
+def _fshot(n, status, t_impact):
+    return {"session_id": "s", "shot_num": n, "result": "make", "t_call_s": 0.0,
+            "isolation_s": 1.0, "raw_token": "swish", "voided": False,
+            "t_impact_s": t_impact, "n_impacts": 2, "burst_duration_s": 0.4,
+            "mean_centroid_hz": 3100.0, "max_peak_rms": 0.6, "decay_ratio": 0.3,
+            "call_latency_s": None, "pairing_status": status,
+            "gap_call_s": None, "gap_impact_s": None}
+FUSION = {"shots": [_fshot(1, "paired", 33.0),
+                    _fshot(2, "impact_missing", None)],
+          "extra_events": [{"t_start": 5.0, "t_end": 5.2, "n_impacts": 1,
+                            "pairing_status": "call_missing"}],
+          "summary": {"n_calls": 2, "n_paired": 1, "pairing_rate": 0.5,
+                      "n_impact_missing": 1, "n_ambiguous": 0, "n_call_missing": 1,
+                      "n_warmup": 0, "median_latency_s": 1.2, "latencies_s": [1.2]}}
 
 def test_data_carries_impacts():
-    d = data_blob(render(impacts=IMPACTS))
-    by_n = {s["n"]: s for s in d["shots"]}
-    assert by_n[1]["impact"] == 3.9 and by_n[1]["lie"] is False
-    assert by_n[2]["impact"] is None and by_n[2]["lie"] is True
-    assert d["wave"]["hz"] == 15 and len(d["wave"]["env"]) == 531
+    d = data_blob(render(acoustics=ACOUSTICS, fusion=FUSION))
+    paired = [s for s in d["shots"] if s["impact"] is not None]
+    assert paired and paired[0]["impact"] == 33.0
+    assert any(s["lie"] for s in d["shots"])
+    assert d["wave"]["hz"] == 14.35
 
-def test_data_without_impacts_degrades():
-    d = data_blob(render())            # impacts omitted entirely
-    assert d["wave"] is None
+def test_data_without_sidecars_degrades():
+    d = data_blob(render())
     assert all(s["impact"] is None and s["lie"] is False for s in d["shots"])
+    assert d["wave"] is None and d["extra"] == []
 
 def test_waveform_svg_present():
-    html = render(impacts=IMPACTS)
-    assert "id='waveform'" in html or 'id="waveform"' in html
+    assert "id='waveform'" in render(acoustics=ACOUSTICS, fusion=FUSION)
+
+def test_ghost_markers_for_unclaimed_events():
+    d = data_blob(render(acoustics=ACOUSTICS, fusion=FUSION))
+    assert d["extra"] == [{"t": 5.0, "status": "call_missing"}]
+    assert "DATA.extra" in render(acoustics=ACOUSTICS, fusion=FUSION)
 
 def test_uncorroborated_stat_shown():
     stats = dict(STATS, uncorroborated_calls=1)
@@ -245,12 +262,11 @@ def test_uncorroborated_stat_shown():
     assert "Uncorroborated" in html and "🤥" in html
 
 def test_replay_physics_constants_in_js():
-    html = render(impacts=IMPACTS)
-    assert "FLIGHT_S = 0.6" in html
-    assert "FALLBACK_LEAD_S = 0.5" in html
+    html = render(acoustics=ACOUSTICS, fusion=FUSION)
+    assert "FLIGHT_S = 0.6" in html and "FALLBACK_LEAD_S = 0.5" in html
 
-def test_self_contained_with_impacts():
-    html = render(impacts=IMPACTS)
+def test_self_contained_with_sidecars():
+    html = render(acoustics=ACOUSTICS, fusion=FUSION)
     assert not re.search(r"(src|href)\s*=\s*['\"]https?://", html)
 
 
@@ -288,7 +304,7 @@ def test_transcript_warmup_and_cooldown_blocks():
     assert "Warmup" in html and "Cooldown" in html
 
 def test_choreography_markup_present():
-    html = render(impacts=IMPACTS)
+    html = render(acoustics=ACOUSTICS, fusion=FUSION)
     assert "netRipple" in html         # make: net ripple keyframes
     assert "confetti" in html          # closeout celebration
     assert "bounce" in html.lower()    # miss: rim bounce-out

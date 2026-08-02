@@ -84,16 +84,16 @@ def _fmt(v, pat="{:.1f}", dash="—"):
     return dash if v is None else pat.format(v)
 
 def _build_data(stats, rows, narrative, flags, words, has_audio: bool,
-                impacts=None) -> dict:
-    by_shot = {s["shot_num"]: s for s in (impacts or {}).get("shots", [])}
+                acoustics=None, fusion=None) -> dict:
+    by_shot = {s["shot_num"]: s for s in (fusion or {}).get("shots", [])}
     shots = []
     for r in rows:
-        impact_info = by_shot.get(r["shot_num"]) or {}
+        f = by_shot.get(r["shot_num"]) or {}
         shots.append({"n": r["shot_num"], "result": r["result"], "t": r["t_call_s"],
                       "gap": r["gap_s"], "streak": r["streak_after"],
                       "voided": r["voided"], "raw": r["raw_token"],
-                      "impact": impact_info.get("impact_t_s"),
-                      "lie": bool(impact_info.get("no_contact"))})
+                      "impact": f.get("t_impact_s"),
+                      "lie": f.get("pairing_status") == "impact_missing"})
     def call_num(w):
         r = _call_row_for(w, rows)
         return r["shot_num"] if r else 0
@@ -103,8 +103,10 @@ def _build_data(stats, rows, narrative, flags, words, has_audio: bool,
                            "quote": narrative.quote, "quote_t_s": narrative.quote_t_s}
                           if narrative else None),
             "has_audio": has_audio,
-            "wave": ({"env": impacts["envelope"], "hz": impacts["envelope_hz"]}
-                     if impacts else None)}
+            "wave": ({"env": acoustics["envelope"], "hz": acoustics["envelope_hz"]}
+                     if acoustics else None),
+            "extra": [{"t": e["t_start"], "status": e["pairing_status"]}
+                      for e in (fusion or {}).get("extra_events", [])]}
 
 def _header(stats, narrative, flags) -> str:
     e = _html.escape
@@ -424,6 +426,11 @@ if (DATA.wave && wsvg) {
     const x = (s.impact / waveDur * W).toFixed(1);
     frag.push(`<polygon points="${x},8 ${x - 4},0 ${Number(x) + 4},0" fill="var(--ball)"/>`);
   });
+  (DATA.extra || []).forEach(e => {
+    const x = (e.t / waveDur * W).toFixed(1);
+    frag.push(`<polygon points="${x},8 ${Number(x) - 4},0 ${Number(x) + 4},0" ` +
+              `fill="#999" opacity="0.7"><title>${e.status} impact @ ${e.t.toFixed(1)}s</title></polygon>`);
+  });
   wsvg.innerHTML = frag.join('');
 } else if (wsvg) { wsvg.style.display = 'none'; }
 const audio = document.getElementById('session-audio');
@@ -513,10 +520,11 @@ if (audio && document.getElementById('play-btn')) {
 
 def render_interactive_report(stats: dict, rows: list[dict], narrative,
                               flags: list[str], words,
-                              audio_path: Path | None, impacts=None) -> str:
+                              audio_path: Path | None,
+                              acoustics=None, fusion=None) -> str:
     audio_html, has_audio = _audio_tag(audio_path)
     data = json.dumps(_build_data(stats, rows, narrative, flags, words, has_audio,
-                                  impacts)
+                                  acoustics, fusion)
                       ).replace("<", "\\u003c")
     return "\n".join([
         "<!doctype html><html lang='en'><head><meta charset='utf-8'>",
@@ -526,7 +534,7 @@ def render_interactive_report(stats: dict, rows: list[dict], narrative,
         _header(stats, narrative, flags),
         _hero(stats),
         audio_html,
-        _movie_section(has_audio, bool(impacts)),
+        _movie_section(has_audio, bool(acoustics)),
         _charts_section(rows, stats),
         _stats_grid(stats, narrative),
         _flags_section(flags),

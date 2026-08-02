@@ -201,40 +201,43 @@ def test_replay_without_audio_or_narrative_degrades(tmp_path, cfg):
     assert "audio unavailable" in html.lower()
     assert "const DATA =" in html
 
-def test_pipeline_writes_impacts_and_uncorroborated(tmp_path, cfg, monkeypatch):
-    canned = {"envelope": [0.1, 0.9], "envelope_hz": 15,
-              "shots": [{"shot_num": 1, "impact_t_s": 4.0, "no_contact": False},
-                        {"shot_num": 2, "impact_t_s": None, "no_contact": True}]}
-    def fake_write(sdir, audio_path, rows):
-        (sdir / "impacts.json").write_text(json.dumps(canned))
-        return canned
-    monkeypatch.setattr("hoops.pipeline.write_impacts", fake_write)
+def test_pipeline_writes_sidecars_and_uncorroborated(tmp_path, cfg, monkeypatch):
+    canned_ac = {"envelope": [0.1], "envelope_hz": 14.35, "events": []}
+    def fake_ac(sdir, audio, params):
+        (sdir / "acoustics.json").write_text(json.dumps(canned_ac)); return canned_ac
+    canned_fu = {"shots": [], "extra_events": [],
+                 "summary": {"n_calls": 2, "n_paired": 1, "pairing_rate": 0.5,
+                             "n_impact_missing": 1, "n_ambiguous": 0,
+                             "n_call_missing": 0, "n_warmup": 0,
+                             "median_latency_s": 1.2, "latencies_s": [1.2]}}
+    def fake_fu(sdir, rows, events, params):
+        (sdir / "fusion.json").write_text(json.dumps(canned_fu)); return canned_fu
+    monkeypatch.setattr("hoops.pipeline.write_acoustics", fake_ac)
+    monkeypatch.setattr("hoops.pipeline.write_fusion", fake_fu)
     out = process_file(audio(tmp_path), cfg, FakeTranscriber(make_env(GOOD, duration=30.0)),
                        email=False, archive="copy")
     assert out.status == "ok"
-    stats = json.loads((out.session_dir / "session.json").read_text())
-    assert stats["uncorroborated_calls"] == 1
-    assert (out.session_dir / "impacts.json").exists()
-    assert '"wave"' in (out.session_dir / "report.html").read_text()
+    assert (out.session_dir / "acoustics.json").exists()
+    assert (out.session_dir / "fusion.json").exists()
+    assert out.stats["uncorroborated_calls"] == 1
 
-def test_pipeline_survives_impacts_failure(tmp_path, cfg, monkeypatch):
-    monkeypatch.setattr("hoops.pipeline.write_impacts", lambda *a: None)
+def test_pipeline_survives_acoustics_failure(tmp_path, cfg, monkeypatch):
+    monkeypatch.setattr("hoops.pipeline.write_acoustics", lambda *a: None)
     out = process_file(audio(tmp_path), cfg, FakeTranscriber(make_env(GOOD, duration=30.0)),
                        email=False, archive="copy")
     assert out.status == "ok"
-    stats = json.loads((out.session_dir / "session.json").read_text())
-    assert "uncorroborated_calls" not in stats
+    assert "uncorroborated_calls" not in out.stats
+    assert not (out.session_dir / "fusion.json").exists()   # fusion got events=None
 
-def test_replay_removes_stale_impacts_when_write_impacts_returns_none(tmp_path, cfg, monkeypatch):
+def test_replay_removes_stale_sidecars_when_stages_yield_none(tmp_path, cfg, monkeypatch):
     out = process_file(audio(tmp_path), cfg, FakeTranscriber(make_env(GOOD, duration=30.0)),
                        email=False, archive="copy")
-    stale = out.session_dir / "impacts.json"
-    stale.write_text('{"envelope": [], "envelope_hz": 15, "shots": []}')
-    assert stale.exists()
-    monkeypatch.setattr("hoops.pipeline.write_impacts", lambda *a: None)
-    r = replay_session(out.session_dir, cfg)
-    assert r.status == "ok"
-    assert not stale.exists()
+    for name in ("impacts.json", "acoustics.json", "fusion.json"):
+        (out.session_dir / name).write_text("{}")            # plant stale sidecars
+    monkeypatch.setattr("hoops.pipeline.write_acoustics", lambda *a: None)
+    replay_session(out.session_dir, cfg)
+    for name in ("impacts.json", "acoustics.json", "fusion.json"):
+        assert not (out.session_dir / name).exists()
 
 def test_session_json_persists_vocab_and_replay_uses_it(tmp_path, cfg):
     f = audio(tmp_path)
