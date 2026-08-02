@@ -201,6 +201,30 @@ def test_replay_without_audio_or_narrative_degrades(tmp_path, cfg):
     assert "audio unavailable" in html.lower()
     assert "const DATA =" in html
 
+def test_pipeline_writes_impacts_and_uncorroborated(tmp_path, cfg, monkeypatch):
+    canned = {"envelope": [0.1, 0.9], "envelope_hz": 15,
+              "shots": [{"shot_num": 1, "impact_t_s": 4.0, "no_contact": False},
+                        {"shot_num": 2, "impact_t_s": None, "no_contact": True}]}
+    def fake_write(sdir, audio_path, rows):
+        (sdir / "impacts.json").write_text(json.dumps(canned))
+        return canned
+    monkeypatch.setattr("hoops.pipeline.write_impacts", fake_write)
+    out = process_file(audio(tmp_path), cfg, FakeTranscriber(make_env(GOOD, duration=30.0)),
+                       email=False, archive="copy")
+    assert out.status == "ok"
+    stats = json.loads((out.session_dir / "session.json").read_text())
+    assert stats["uncorroborated_calls"] == 1
+    assert (out.session_dir / "impacts.json").exists()
+    assert '"wave"' in (out.session_dir / "report.html").read_text()
+
+def test_pipeline_survives_impacts_failure(tmp_path, cfg, monkeypatch):
+    monkeypatch.setattr("hoops.pipeline.write_impacts", lambda *a: None)
+    out = process_file(audio(tmp_path), cfg, FakeTranscriber(make_env(GOOD, duration=30.0)),
+                       email=False, archive="copy")
+    assert out.status == "ok"
+    stats = json.loads((out.session_dir / "session.json").read_text())
+    assert "uncorroborated_calls" not in stats
+
 def test_session_json_persists_vocab_and_replay_uses_it(tmp_path, cfg):
     f = audio(tmp_path)
     env = make_env([("make", 5.0, 5.3), ("miss", 12.0, 12.3)], duration=30.0)

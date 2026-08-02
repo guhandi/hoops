@@ -5,6 +5,7 @@ from pathlib import Path
 from mutagen.mp4 import MP4
 from . import PARSER_VERSION
 from .config import Config, Vocabulary
+from .impacts import write_impacts
 from .invariants import check_invariants
 from .parse import parse_words
 from .repair import attempt_repair
@@ -178,6 +179,11 @@ def process_file(path: Path, cfg: Config, transcriber, *, email: bool,
     stats["vocab_name"] = vocab.name
     stats["vocab_map"] = vocab.surface_to_canonical
 
+    impacts = write_impacts(sdir, path if path.exists() else None, rows)
+    if impacts is not None:
+        stats["uncorroborated_calls"] = sum(
+            1 for s in impacts["shots"] if s["no_contact"])
+
     write_shots_csv(sdir, rows)
     write_session_json(sdir, stats)
 
@@ -202,7 +208,7 @@ def process_file(path: Path, cfg: Config, transcriber, *, email: bool,
     if not audio_path.exists():                     # archive="none" leaves audio in place
         audio_path = path if path.exists() else None
     (sdir / "report.html").write_text(render_interactive_report(
-        stats, rows, narrative, flags, words, audio_path))
+        stats, rows, narrative, flags, words, audio_path, impacts=impacts))
 
     if email:
         try:
@@ -248,6 +254,7 @@ def replay_session(sdir: Path, cfg: Config, vocab_name: str | None = None) -> Ou
         vocab = cfg.vocab(None)
     sid = sdir.name.removeprefix("hoops__")
     date_local, time_local = sid_date_and_time(sid)
+    audio_path = sdir / "audio.m4a"
     words = words_from_envelope(env)
     parsed = parse_words(words, vocab, cfg.isolation_low, cfg.isolation_high)
     rows = build_shot_rows(parsed.calls, sid, date_local)
@@ -262,13 +269,16 @@ def replay_session(sdir: Path, cfg: Config, vocab_name: str | None = None) -> Ou
     if "session_id_source" in old:
         stats["session_id_source"] = old["session_id_source"]
     stats["vocab_name"], stats["vocab_map"] = vocab.name, vocab.surface_to_canonical
+    impacts = write_impacts(sdir, audio_path if audio_path.exists() else None, rows)
+    if impacts is not None:
+        stats["uncorroborated_calls"] = sum(
+            1 for s in impacts["shots"] if s["no_contact"])
     flags = [f"{v.id}: {v.message}" for v in violations]
     write_shots_csv(sdir, rows)
     write_session_json(sdir, stats)
     render_strip(rows, sdir / "strip.png")
-    audio_path = sdir / "audio.m4a"
     (sdir / "report.html").write_text(render_interactive_report(
         stats, rows, narrative, flags, words,
-        audio_path if audio_path.exists() else None))
+        audio_path if audio_path.exists() else None, impacts=impacts))
     return Outcome(status="ok", sid=sid, session_dir=sdir, stats=stats,
                    rows=rows, flags=flags)

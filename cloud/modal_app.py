@@ -10,6 +10,7 @@ app = modal.App("hoops")
 
 image = (
     modal.Image.debian_slim(python_version="3.12")
+    .apt_install("ffmpeg")
     .pip_install("openai>=1.35", "anthropic>=0.40", "matplotlib>=3.9",
                  "mutagen>=1.47", "pyyaml>=6.0", "python-dotenv>=1.0",
                  "fastapi>=0.110", "python-multipart>=0.0.9", "boto3>=1.34")
