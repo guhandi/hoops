@@ -2,7 +2,7 @@
 fully testable with TestClient and reusable for future capture tools."""
 import hmac
 import inspect
-from fastapi import FastAPI, File, Header, HTTPException, UploadFile
+from fastapi import FastAPI, File, Header, HTTPException, Request, UploadFile
 from hoops.session import _PREFIX_RE
 
 MAX_BYTES = 64 * 1024 * 1024
@@ -15,23 +15,36 @@ def make_app(store, spawn, upload_key: str) -> FastAPI:
     app = FastAPI()
 
     @app.post("/upload")
-    async def upload(file: UploadFile = File(...),
+    async def upload(request: Request, name: str | None = None,
+                     file: UploadFile | None = File(None),
                      x_hoops_key: str = Header(default="")):
         if not hmac.compare_digest(x_hoops_key, upload_key):
             raise HTTPException(status_code=401, detail="bad key")
-        name = file.filename or ""
-        m = _PREFIX_RE.match(name)
+
+        if file is not None:
+            filename = file.filename or ""
+            data = await file.read()
+        elif name is not None:
+            filename = name
+            data = await request.body()
+        else:
+            raise HTTPException(status_code=400,
+                                detail="send multipart form field 'file' or raw body with ?name=")
+
+        if len(data) == 0:
+            raise HTTPException(status_code=400, detail="empty body")
+
+        m = _PREFIX_RE.match(filename)
         if not m:
             raise HTTPException(status_code=400,
                                 detail="filename must be hoops__YYYYMMDD-HHMMSS.m4a")
-        data = await file.read()
         if len(data) > MAX_BYTES:
             raise HTTPException(status_code=413, detail="recording too large")
         sid = m.group(1)
-        if store.exists(session_key_for(name)):
+        if store.exists(session_key_for(filename)):
             return {"status": "duplicate", "sid": sid}
-        store.put_bytes(f"raw/{name}", data)
-        res = spawn(name)
+        store.put_bytes(f"raw/{filename}", data)
+        res = spawn(filename)
         if inspect.isawaitable(res):
             await res
         return {"status": "processing", "sid": sid}

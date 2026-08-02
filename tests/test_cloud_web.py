@@ -24,6 +24,10 @@ def post(client, filename=GOOD, key=KEY, data=b"fake-audio"):
     return client.post("/upload", headers=headers,
                        files={"file": (filename, data, "audio/mp4")})
 
+def post_raw(client, name, key=KEY, data=b"fake-audio"):
+    headers = {"X-Hoops-Key": key} if key is not None else {}
+    return client.post(f"/upload?name={name}", headers=headers, content=data)
+
 def test_session_key_for():
     assert session_key_for(GOOD) == "sessions/2026/07/hoops__20260731-070000/session.json"
 
@@ -73,3 +77,50 @@ def test_async_spawn_is_awaited():
     assert r.status_code == 200
     assert r.json() == {"status": "processing", "sid": "20260731-070000"}
     assert spawned == [GOOD]
+
+def test_raw_happy_path(rig):
+    client, store, spawned = rig
+    r = post_raw(client, GOOD)
+    assert r.status_code == 200
+    assert r.json() == {"status": "processing", "sid": "20260731-070000"}
+    assert store.get_bytes(f"raw/{GOOD}") == b"fake-audio"
+    assert spawned == [GOOD]
+
+def test_raw_bad_name_400(rig):
+    client, store, spawned = rig
+    for bad in ["notright.m4a", "hoops_20990101-000001.m4a"]:
+        assert post_raw(client, bad).status_code == 400, bad
+    assert store.list_keys("raw/") == [] and spawned == []
+
+def test_raw_missing_name_and_file_400(rig):
+    client, store, spawned = rig
+    r = client.post("/upload", headers={"X-Hoops-Key": KEY}, content=b"fake-audio")
+    assert r.status_code == 400
+    detail = r.json()["detail"]
+    assert "file" in detail and "name=" in detail
+    assert store.list_keys("raw/") == [] and spawned == []
+
+def test_raw_empty_body_400(rig):
+    client, store, spawned = rig
+    r = post_raw(client, GOOD, data=b"")
+    assert r.status_code == 400
+    assert store.list_keys("raw/") == [] and spawned == []
+
+def test_raw_oversize_413(rig):
+    client, store, spawned = rig
+    r = post_raw(client, GOOD, data=b"x" * (64 * 1024 * 1024 + 1))
+    assert r.status_code == 413
+    assert store.list_keys("raw/") == [] and spawned == []
+
+def test_raw_duplicate_acks(rig):
+    client, store, spawned = rig
+    store.put_bytes(session_key_for(GOOD), b"{}")
+    r = post_raw(client, GOOD)
+    assert r.status_code == 200 and r.json()["status"] == "duplicate"
+    assert spawned == [] and store.list_keys("raw/") == []
+
+def test_raw_wrong_key_401_nothing_written(rig):
+    client, store, spawned = rig
+    r = post_raw(client, GOOD, key="nope")
+    assert r.status_code == 401
+    assert store.list_keys("raw/") == [] and spawned == []
