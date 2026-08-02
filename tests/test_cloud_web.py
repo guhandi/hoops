@@ -124,3 +124,25 @@ def test_raw_wrong_key_401_nothing_written(rig):
     r = post_raw(client, GOOD, key="nope")
     assert r.status_code == 401
     assert store.list_keys("raw/") == [] and spawned == []
+
+def test_raw_oversize_content_length_413(rig):
+    client, store, spawned = rig
+    # Declares an oversize body via Content-Length without actually sending it, so
+    # this pins the pre-read guard (cheap header check before `await request.body()`
+    # buffers everything into memory) rather than the post-read `len(data)` check.
+    r = client.post(f"/upload?name={GOOD}",
+                    headers={"X-Hoops-Key": KEY,
+                             "content-length": str(64 * 1024 * 1024 + 1)},
+                    content=b"x")
+    assert r.status_code == 413
+    assert store.list_keys("raw/") == [] and spawned == []
+
+def test_multipart_wins_over_query_name(rig):
+    client, store, spawned = rig
+    r = client.post("/upload?name=evil.m4a", headers={"X-Hoops-Key": KEY},
+                    files={"file": (GOOD, b"fake-audio", "audio/mp4")})
+    assert r.status_code == 200
+    assert r.json() == {"status": "processing", "sid": "20260731-070000"}
+    assert store.get_bytes(f"raw/{GOOD}") == b"fake-audio"
+    assert store.list_keys("raw/") == [f"raw/{GOOD}"]
+    assert spawned == [GOOD]

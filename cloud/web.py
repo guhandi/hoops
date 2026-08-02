@@ -26,6 +26,9 @@ def make_app(store, spawn, upload_key: str) -> FastAPI:
             data = await file.read()
         elif name is not None:
             filename = name
+            cl = request.headers.get("content-length")
+            if cl is not None and cl.isdigit() and int(cl) > MAX_BYTES:
+                raise HTTPException(status_code=413, detail="recording too large")
             data = await request.body()
         else:
             raise HTTPException(status_code=400,
