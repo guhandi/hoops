@@ -14,7 +14,7 @@ Branch B (`hoops.acoustics`) extracts spectral features per impact event — bri
 - **Not recorded yet:** F03, F09, F10 (per `fixtures/manifest.csv` / CLAUDE.md pending work) — not in this dataset.
 - **Included, worth flagging:** the two real morning sessions (`07262026_MorningHoops.m4a` / R01, `07272026_MorningHoops.m4a` / R02) are picked up by the same `fixtures/*.m4a` glob as the synthetic F-series and are pooled in without distinction — this is real, if noisy, field data, not just scripted fixtures.
 
-This is well short of the brief's "~100+" sanity estimate. Per-fixture pairing rates (below) are all in a normal 0.33–1.0 range, not a collapse — the shortfall is because only ~35% of live calls across the corpus end up in the fused-and-paired bucket at all (72 live calls total → 40 paired), not because any one fixture failed to pair. This is a **known, expected Task-5 property of this dataset** (isolation gating, quiet/distant audio, and 1:many call-to-event ambiguity all remove candidates before pairing), not a separability artifact — but it does mean every number below carries a small-n caveat.
+This is well short of the brief's "~100+" sanity estimate. Per-fixture pairing rates (below) are all in a normal 0.33–1.0 range, not a collapse — the shortfall is because only 55.6% of live calls across the corpus end up in the fused-and-paired bucket at all (72 live calls total → 40 paired, 32 `impact_missing`), not because any one fixture failed to pair. This is a **known, expected Task-5 property of this dataset** (isolation gating, quiet/distant audio, and 1:many call-to-event ambiguity all remove candidates before pairing), not a separability artifact — but it does mean every number below carries a small-n caveat.
 
 ### Per-fixture pairing rates + latencies
 
@@ -70,7 +70,7 @@ Decision 002 flagged one low-centroid tail event each in F01 (t=88.747s, 583.5 H
 
 ### Caveats on the null (small-n, don't over-read either direction)
 
-- **n=40 is small** for AUC/Cohen's-d estimation, especially per-fixture-conditional effects (whisper-quiet vs. chatty vs. beep-timed). A larger corpus (after F03/F09/F10 land and pairing-rate/isolation-gate work improves the ~35% pairing yield) could still surface something decay_ratio's weak lean gestures at — but it would need to move a lot to matter.
+- **n=40 is small** for AUC/Cohen's-d estimation, especially per-fixture-conditional effects (whisper-quiet vs. chatty vs. beep-timed). A larger corpus (after F03/F09/F10 land and pairing-rate/isolation-gate work improves the 55.6% pairing yield) could still surface something decay_ratio's weak lean gestures at — but it would need to move a lot to matter.
 - **Selection into "paired" is not random**: this dataset is conditioned on the shot being detected AND falling inside the fusion latency window. The `impact_missing` split above is the honest reminder that roughly half of every label's shots never enter this analysis at all, and the small make/miss imbalance there (49% vs. 41% unpaired) is a rate a classifier of transient-presence, not transient-shape, would need to explain — it is a different (and unexplored) hypothesis from "shape separates make/miss," which is what this doc answers, negatively.
 - **Real-session data (R01/R02) is pooled with synthetic fixtures** without separate reporting; if a future pass wants to check whether the synthetic F-series and the real 6am recordings behave differently acoustically, they should be split out — this analysis treats them as one population per the brief's `fixtures/*.m4a` glob.
 
