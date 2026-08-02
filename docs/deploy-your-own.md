@@ -19,7 +19,7 @@ You tap a Shortcut, it POSTs a recording to a Modal endpoint you deploy, the end
 | Anthropic | API key (repair + narrative) | console.anthropic.com |
 | Modal | account, free Starter plan — $30/mo credits, no card required | modal.com |
 | Cloudflare R2 | account, free tier — 10GB storage | dash.cloudflare.com |
-| Gmail | app password (requires 2-Step Verification) | Google Account → Security → App passwords |
+| Gmail | app password (requires 2-Step Verification) — paste WITHOUT the spaces Google displays | Google Account → Security → App passwords |
 
 For R2, create a bucket named `hoops-data` (or any name — you'll set `R2_BUCKET` to match). Then mint a token: **R2 Object Storage → Overview → Account Details → API Tokens → Manage → Create Account API token**, permission **Object Read & Write**, scoped to your bucket. The endpoint, access key ID, and secret access key are shown once — copy all three before closing the dialog.
 
@@ -58,12 +58,13 @@ uv run modal deploy cloud/modal_app.py   # prints your endpoint URL — put it i
 ## 5. Smoke test
 
 ```bash
+set -a; source .env; set +a   # re-load now that HOOPS_ENDPOINT is filled in
 curl -sS -X POST "$HOOPS_ENDPOINT/upload?name=hoops__20990101-000001.m4a" \
   -H "X-Hoops-Key: $HOOPS_UPLOAD_KEY" -H "Content-Type: application/octet-stream" \
   --data-binary @fixtures/F01_NormalSwishBrick.m4a
 ```
 
-Expect `{"status":"processing",...}` back immediately, and an email inside about 2 minutes. That email will carry a ⚠️ flag — the fixture deliberately violates the stop rule (no clean three-make ending), so invariants correctly flag it. A flagged fixture report is the system working, not a bug in your deploy.
+Expect `{"status":"processing",...}` back immediately, and an email inside about 2 minutes. That email should arrive clean, with no ⚠️ flag — F01 ends on three straight makes, so invariants pass. (If it arrives flagged, that's whisper transcription variance on re-transcription — not a broken deploy.)
 
 ## 6. Your phone
 
@@ -84,6 +85,7 @@ Daily use, one session a day: roughly $0.30/month, all of it API usage — infra
 - **401** — `X-Hoops-Key` header doesn't match the `HOOPS_UPLOAD_KEY` in your Modal secret. Check the Shortcut's header value against `.env`.
 - **400** — filename doesn't match the `hoops__YYYYMMDD-HHMMSS.m4a` contract. Check the Shortcut's Format Date step.
 - **No email** — check the Modal dashboard logs; every run is logged there, a failing attempt alerts you by email on its own, and the raw file stays in `raw/` in your R2 bucket for replay regardless of outcome.
+- **No email but Modal logs look clean** — confirm `GMAIL_ADDRESS` is in your `hoops-secrets` (without it the pipeline mails a placeholder address and Gmail silently drops it).
 - **Dev loop** — to pull processed sessions down to your Mac for `replay`/`score`/inspection:
   ```bash
   set -a; source .env; set +a

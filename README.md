@@ -17,7 +17,7 @@ Press one button on your phone, shoot until you make three in a row, call out ea
 git clone https://github.com/guhandi/hoops && cd hoops
 uv sync
 uv run hoops process-all fixtures --no-email
-open out/index.html
+open out/index.html    # Linux: xdg-open out/index.html
 ```
 
 That runs the full pipeline — isolation-gated parsing, invariants, stats, interactive reports — over the committed golden dataset (real recordings + cached transcripts). No accounts, no keys, nothing to configure. `uv run hoops score` prints the accuracy gate table the same way.
@@ -41,7 +41,7 @@ Basketball is instance #1. The capture pattern (one Shortcut, spoken vocabulary,
 
 ```
 [iPhone]  Apple Shortcut, one press
-   └─ records audio → POST https://<modal-endpoint>/upload (multipart + X-Hoops-Key)
+   └─ records audio → POST https://<modal-endpoint>/upload (raw upload + X-Hoops-Key)
 
 [Modal endpoint]  auth + filename check + size cap + dedupe → instant ack
    └─ raw recording lands in R2 (Cloudflare object storage); processor spawned
