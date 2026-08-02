@@ -65,8 +65,19 @@ svg { max-width:100%; height:auto; display:block; }
 #ball.fly-miss { animation:flyMiss .6s ease-in forwards; }
 @keyframes flyMake { 40% { cx:180px; cy:40px; } 70% { cx:236px; cy:58px; }
                      100% { cx:236px; cy:95px; } }
-@keyframes flyMiss { 40% { cx:180px; cy:40px; } 60% { cx:232px; cy:52px; }
-                     100% { cx:190px; cy:170px; } }
+#net.ripple { animation:netRipple .5s ease-out; transform-origin:236px 64px; }
+@keyframes netRipple { 40% { transform:scaleY(1.3) scaleX(1.12); } }
+#splash-fx.burst { animation:fxBurst .7s ease-out; }
+@keyframes fxBurst { 0% { opacity:0; } 25% { opacity:1; } 100% { opacity:0; transform:translateY(-8px); } }
+#confetti-fx.pop { animation:confettiFall 1.6s ease-in; }
+@keyframes confettiFall { 0% { opacity:0; transform:translateY(-20px); }
+  15% { opacity:1; } 100% { opacity:0; transform:translateY(150px); } }
+@keyframes flyMiss { 40% { cx:180px; cy:40px; } 55% { cx:228px; cy:56px; }
+  70% { cx:210px; cy:44px; } 100% { cx:186px; cy:172px; } }  /* rim bounce-out */
+.tblock { border-left:3px solid #eee; padding:4px 10px; margin:8px 0;
+          background:#fdfbf8; border-radius:0 8px 8px 0; cursor:pointer; }
+.tblock .thead { font-size:11px; color:var(--dim); margin-bottom:2px; }
+.tblock p { margin:0; }
 """
 
 def _fmt(v, pat="{:.1f}", dash="—"):
@@ -125,8 +136,20 @@ def _movie_section(has_audio: bool, has_wave: bool = False) -> str:
   <rect x='250' y='30' width='6' height='90' fill='#8a5a2b'/>
   <rect x='232' y='28' width='44' height='30' rx='3' fill='#fff' stroke='#8a5a2b' stroke-width='2'/>
   <ellipse id='rim' cx='236' cy='62' rx='14' ry='4' fill='none' stroke='var(--ball)' stroke-width='3'/>
-  <path d='M224 64 L230 84 L242 84 L248 64' fill='none' stroke='#bbb' stroke-width='1.5'/>
+  <path id='net' d='M224 64 L230 84 L242 84 L248 64' fill='none' stroke='#bbb' stroke-width='1.5'/>
   <circle id='ball' cx='60' cy='150' r='11' fill='var(--ball)' stroke='#a3540f' stroke-width='1.5'/>
+  <g id='splash-fx' opacity='0' font-size='11' fill='var(--make)'>
+    <text x='222' y='50'>✦</text><text x='252' y='48'>✦</text>
+    <text x='230' y='86'>✦</text><text x='246' y='90'>✦</text><text x='218' y='74'>✦</text>
+  </g>
+  <g id='confetti-fx' opacity='0'>
+    <rect x='120' y='10' width='5' height='8' fill='#e2711d'/>
+    <rect x='150' y='4' width='5' height='8' fill='#1a7f37'/>
+    <rect x='180' y='12' width='5' height='8' fill='#c0392b'/>
+    <rect x='210' y='6' width='5' height='8' fill='#e2b81d'/>
+    <rect x='140' y='18' width='5' height='8' fill='#1a5f7f'/>
+    <rect x='195' y='16' width='5' height='8' fill='#8a2be2'/>
+  </g>
   <text id='call-flash' x='160' y='120' text-anchor='middle' font-size='30'
         font-weight='800' opacity='0'></text>
   <g font-size='15' font-weight='700'>
@@ -146,7 +169,7 @@ def _movie_section(has_audio: bool, has_wave: bool = False) -> str:
   </div>
 </div></section>"""
 
-def _timeline_svg(rows, session_len) -> str:
+def _timeline_svg(rows, session_len, stats) -> str:
     W, H, pad = 640, 90, 24
     dur = max(session_len or 0, max((r["t_call_s"] for r in rows), default=1), 1)
     def x(t): return pad + (W - 2 * pad) * t / dur
@@ -169,6 +192,17 @@ def _timeline_svg(rows, session_len) -> str:
         else:
             parts.append(f'<circle {common} cx="{cx}" cy="45" r="8" fill="#fff" '
                          f'stroke="var(--miss)" stroke-width="2.5"/>')
+    runs = stats.get("runs") or []
+    for i, run in enumerate(runs):
+        if run["result"] == "make" and run["length"] == 2 and i < len(runs) - 1:
+            x1, x2 = x(run["start_t"]), x(run["end_t"])
+            parts.append(f'<path d="M{x1:.1f} 30 Q {(x1 + x2) / 2:.1f} 18 {x2:.1f} 30" '
+                         f'fill="none" stroke="var(--ball)" stroke-width="2"/>'
+                         f'<text x="{(x1 + x2) / 2:.1f}" y="14" text-anchor="middle" '
+                         f'font-size="10" fill="var(--ball)" font-weight="700">so close</text>')
+    if stats.get("closed_out") and runs:
+        parts.append(f'<text x="{x(runs[-1]["end_t"]) + 12:.1f}" y="66" '
+                     f'font-size="13">🏁</text>')
     parts.append(f'<text x="{pad}" y="{H - 4}" font-size="10" fill="var(--dim)">0s</text>'
                  f'<text x="{W - pad}" y="{H - 4}" font-size="10" fill="var(--dim)" '
                  f'text-anchor="end">{dur:.0f}s</text></svg>')
@@ -220,7 +254,7 @@ def _charts_section(rows, stats) -> str:
     fg_svg = _fg_chart_svg(rows)
     gap_svg = _gap_chart_svg(rows)
     out = ["<section id='charts'><h2>Shot timeline</h2>"
-           + _timeline_svg(rows, stats.get("session_len_s"))]
+           + _timeline_svg(rows, stats.get("session_len_s"), stats)]
     if fg_svg:
         out.append("<h2>Running FG%</h2>" + fg_svg)
     if gap_svg:
@@ -276,17 +310,56 @@ def _flags_section(flags) -> str:
         boxes.append(f"<div class='flagbox'><b>{e(f)}</b>{extra}</div>")
     return "<section><h2>Flags</h2>" + "".join(boxes) + "</section>"
 
+def _fmt_mmss(t: float) -> str:
+    return f"{int(t // 60)}:{int(t % 60):02d}"
+
 def _transcript(words, rows) -> str:
+    """Shot-anchored blocks (spec layout C): the first call's block holds only
+    its call word (earlier words are Warmup); every later block holds the words
+    since the previous call, inclusive of its own call word; trailing words are
+    Cooldown. Clicking a block seeks the audio."""
     e = _html.escape
-    spans = []
-    for w in words:
+
+    def span(w):
         row = _call_row_for(w, rows)
         if row:
             cls = "call-make" if row["result"] == "make" else "call-miss"
-            spans.append(f"<span class='word {cls}' data-t='{w.start}'>{e(w.text)}</span>")
+            return f"<span class='word {cls}' data-t='{w.start}'>{e(w.text)}</span>"
+        return f"<span class='word aside'>{e(w.text)}</span>"
+
+    out = ["<section><h2>Transcript</h2>"]
+
+    def block(head_html, chunk, t_seek):
+        body = " ".join(span(w) for w in chunk) or "<span class='word aside'>—</span>"
+        out.append(f"<div class='tblock' data-t='{t_seek}'>"
+                   f"<div class='thead'>{head_html}</div><p>{body}</p></div>")
+
+    first_t = rows[0]["t_call_s"] if rows else float("inf")
+    warmup = [w for w in words if w.start < first_t - CALL_MATCH_TOLERANCE_S]
+    if warmup:
+        block("<b>Warmup</b> · 0:00", warmup, 0)
+    prev_t = first_t - CALL_MATCH_TOLERANCE_S
+    for r in rows:
+        chunk = [w for w in words
+                 if prev_t <= w.start <= r["t_call_s"] + CALL_MATCH_TOLERANCE_S]
+        prev_t = r["t_call_s"] + CALL_MATCH_TOLERANCE_S
+        t = r["t_call_s"]
+        if r["voided"]:
+            head = (f"<b style='color:var(--dim)'>#{r['shot_num']} VOIDED</b>"
+                    f" · {_fmt_mmss(t)}")
         else:
-            spans.append(f"<span class='word aside'>{e(w.text)}</span>")
-    return "<section><h2>Transcript</h2><p>" + " ".join(spans) + "</p></section>"
+            color = "var(--make)" if r["result"] == "make" else "var(--miss)"
+            head = (f"<b style='color:{color}'>#{r['shot_num']} "
+                    f"{r['result'].upper()}</b> · {_fmt_mmss(t)}")
+            if r["gap_s"] is not None:
+                head += f" · gap {r['gap_s']:.1f}s"
+        block(head, chunk, t)
+    cooldown = [w for w in words if w.start > prev_t]
+    if cooldown:
+        block(f"<b>Cooldown</b> · {_fmt_mmss(cooldown[0].start)}",
+              cooldown, cooldown[0].start)
+    out.append("</section>")
+    return "".join(out)
 
 def _audio_tag(audio_path: Path | None) -> tuple[str, bool]:
     if audio_path is None or not audio_path.exists():
@@ -312,6 +385,8 @@ function seekTo(t) {
   if (a) { a.currentTime = Math.max(0, t - 1.0); a.play(); }
 }
 document.querySelectorAll('.word[data-t]').forEach(el =>
+  el.addEventListener('click', () => seekTo(parseFloat(el.dataset.t))));
+document.querySelectorAll('.tblock[data-t]').forEach(el =>
   el.addEventListener('click', () => seekTo(parseFloat(el.dataset.t))));
 const shotByNum = Object.fromEntries(DATA.shots.map(s => [s.n, s]));
 document.querySelectorAll('[data-shot]').forEach(el => {
@@ -385,6 +460,18 @@ if (audio && document.getElementById('play-btn')) {
     ball.classList.remove('fly-make', 'fly-miss');
     void ball.getBBox();                       // restart CSS animation
     ball.classList.add(s.result === 'make' ? 'fly-make' : 'fly-miss');
+    if (s.result === 'make') {
+      ['net', 'splash-fx'].forEach((id, k) => {
+        const el = document.getElementById(id);
+        el.classList.remove('ripple', 'burst'); void el.getBBox();
+        el.classList.add(k === 0 ? 'ripple' : 'burst');
+      });
+      const lastLive = live[live.length - 1];
+      if (s.n === lastLive.n && s.streak >= 3) {
+        const c = document.getElementById('confetti-fx');
+        c.classList.remove('pop'); void c.getBBox(); c.classList.add('pop');
+      }
+    }
     const upto = live.filter(x => x.launch <= s.launch);
     document.getElementById('make-count').textContent =
       upto.filter(x => x.result === 'make').length;

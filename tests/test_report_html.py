@@ -252,3 +252,43 @@ def test_replay_physics_constants_in_js():
 def test_self_contained_with_impacts():
     html = render(impacts=IMPACTS)
     assert not re.search(r"(src|href)\s*=\s*['\"]https?://", html)
+
+
+def _stats_with_chase():
+    return dict(STATS, runs=[
+        {"result": "miss", "start_shot": 1, "end_shot": 1, "start_t": 5.0,
+         "end_t": 5.0, "length": 1},
+        {"result": "make", "start_shot": 2, "end_shot": 5, "start_t": 12.0,
+         "end_t": 26.0, "length": 3},
+    ], almost_closeouts=1, closed_out=True)
+
+def test_timeline_has_chase_annotations():
+    html = render(stats=dict(_stats_with_chase(), runs=[
+        {"result": "make", "start_shot": 1, "end_shot": 2, "start_t": 5.0,
+         "end_t": 12.0, "length": 2},
+        {"result": "miss", "start_shot": 3, "end_shot": 3, "start_t": 15.0,
+         "end_t": 15.0, "length": 1},
+        {"result": "make", "start_shot": 4, "end_shot": 6, "start_t": 20.0,
+         "end_t": 30.0, "length": 3}]))
+    assert "so close" in html
+    assert "🏁" in html
+
+def test_transcript_is_shot_anchored():
+    html = render()
+    assert "#1 MISS" in html and "#2 MAKE" in html
+    assert "VOIDED" in html            # row 3 is voided
+    assert "gap 7.0s" in html          # shot 2's header carries its gap
+    assert "Warmup" not in html        # no words before the first call in fixture
+    # trailing silence: last word IS the last call -> no cooldown block either
+
+def test_transcript_warmup_and_cooldown_blocks():
+    words = [Word("morning", "morning", 1.0, 1.3, None)] + WORDS + \
+            [Word("done", "done", 30.0, 30.2, None)]
+    html = render(words=words)
+    assert "Warmup" in html and "Cooldown" in html
+
+def test_choreography_markup_present():
+    html = render(impacts=IMPACTS)
+    assert "netRipple" in html         # make: net ripple keyframes
+    assert "confetti" in html          # closeout celebration
+    assert "bounce" in html.lower()    # miss: rim bounce-out
