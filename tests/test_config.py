@@ -35,4 +35,5 @@ def test_gmail_address_env_overrides_from_and_to(monkeypatch):
 def test_no_gmail_address_env_keeps_yaml_values(monkeypatch):
     monkeypatch.delenv("GMAIL_ADDRESS", raising=False)
     cfg = load_config(REPO / "config.yaml")
-    assert cfg.email["from"] == "guhandiji@gmail.com"
+    assert cfg.email["from"] == "you@example.com"
+    assert cfg.email["to"] == "you@example.com"
