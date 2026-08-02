@@ -2,6 +2,15 @@
 name = "hoops"
 version = "0.1.0"
 requires-python = ">=3.12"
+description = "One-button voice logging: record shot call-outs on your phone, get an interactive session report by email — a full capture-to-report data pipeline"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Guhan Sundar" }]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Multimedia :: Sound/Audio :: Speech",
+]
 dependencies = [
   "openai>=1.35", "anthropic>=0.40", "matplotlib>=3.9",
   "mutagen>=1.47", "pyyaml>=6.0", "python-dotenv>=1.0",
@@ -9,6 +18,9 @@ dependencies = [
 
 [project.scripts]
 hoops = "hoops.cli:main"
+
+[project.urls]
+Repository = "https://github.com/guhandi/hoops"
 
 [project.optional-dependencies]
 cloud = ["modal>=1.0", "boto3>=1.34", "fastapi>=0.110", "python-multipart>=0.0.9"]

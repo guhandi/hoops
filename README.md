@@ -1,6 +1,29 @@
-# hoops — one-button voice logging for daily basketball shots
+# 🏀 hoops — one-button voice logging, from jump shot to emailed report
 
-Press one button on your phone, shoot until you make three in a row, call out each shot as it happens, stop the recording. Fifteen minutes later a structured shot table, a chart, and a short written recap are in your inbox — with zero further interaction. That's the whole product.
+[![CI](https://github.com/guhandi/hoops/actions/workflows/ci.yml/badge.svg)](https://github.com/guhandi/hoops/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](pyproject.toml)
+
+Press one button on your phone, shoot until you make three in a row, call out each shot as it happens, stop the recording. Two minutes later an interactive session report is in your inbox — audio-synced replay, shot charts, streaks — with zero further interaction.
+
+![Movie replay demo](docs/assets/movie-demo.gif)
+
+*The report replays your session: your real audio drives an animated court — every call fires a make/miss animation as you hear yourself say it.*
+
+## Try it in 60 seconds — zero API keys
+
+```bash
+# needs uv (https://docs.astral.sh/uv): curl -LsSf https://astral.sh/uv/install.sh | sh
+git clone https://github.com/guhandi/hoops && cd hoops
+uv sync
+uv run hoops process-all fixtures --no-email
+open out/index.html    # Linux: xdg-open out/index.html
+```
+
+That runs the full pipeline — isolation-gated parsing, invariants, stats, interactive reports — over the committed golden dataset (real recordings + cached transcripts). No accounts, no keys, nothing to configure. `uv run hoops score` prints the accuracy gate table the same way.
+
+| ![Shot timeline](docs/assets/report-timeline.png) | ![Session stats](docs/assets/report-stats.png) |
+|---|---|
 
 ## Purpose
 
@@ -8,7 +31,7 @@ This project exists to make **data acquisition as close to free as possible** fo
 
 The concrete instance: every morning I shoot at my basketball hoop until I make three in a row. It's a consistent, self-terminating daily protocol that produces a clean scalar (*shots to three-in-a-row*) — but logging it by hand would kill the habit. Hands are busy, it's 6am, and any friction means the logging stops.
 
-Voice is the only capture channel that costs nothing: the call-outs ("make", "miss") happen naturally as part of the activity. An Apple Shortcut bound to one Home Screen button records the audio and drops it in iCloud. Everything after that — transcription, parsing, validation, stats, charting, reporting — is machine work that runs unattended on a Mac.
+Voice is the only capture channel that costs nothing: the call-outs ("make", "miss") happen naturally as part of the activity. An Apple Shortcut bound to one Home Screen button records the audio and drops it in iCloud. Everything after that — transcription, parsing, validation, stats, charting, reporting — is machine work that runs unattended in the cloud (Modal + R2), with a Mac-based fallback path.
 
 At ~40 sessions the dataset becomes a real dependent variable: shots-to-three regressed against sleep, HRV, alcohol, late screens.
 
@@ -18,7 +41,7 @@ Basketball is instance #1. The capture pattern (one Shortcut, spoken vocabulary,
 
 ```
 [iPhone]  Apple Shortcut, one press
-   └─ records audio → POST https://<modal-endpoint>/upload (multipart + X-Hoops-Key)
+   └─ records audio → POST https://<modal-endpoint>/upload (raw upload + X-Hoops-Key)
 
 [Modal endpoint]  auth + filename check + size cap + dedupe → instant ack
    └─ raw recording lands in R2 (Cloudflare object storage); processor spawned
@@ -60,21 +83,19 @@ Everything else you say — muttering, cussing, commentary — is ignored by the
 
 Bad sessions never disappear silently: too-short recordings are rejected, sessions with no detected calls are set aside and emailed with the raw transcript, invariant failures ship *flagged* in the subject line rather than guessed at.
 
-## Setup (one-time)
+## Deploy your own (~15 minutes, all free-tier)
 
-```bash
-git clone https://github.com/guhandi/hoops && cd hoops
-uv sync
-cp .env.example .env        # fill: OPENAI_API_KEY, ANTHROPIC_API_KEY, GMAIL_APP_PASSWORD, GMAIL_ADDRESS
-# edit config.yaml if needed: timezone, email address, vocabulary
-bash scripts/install_launchd.sh   # schedules `hoops poll` every 5 minutes
-```
+The primary deployment is serverless: your phone POSTs recordings to a [Modal](https://modal.com) endpoint, artifacts live in Cloudflare R2, reports arrive by email. Infra cost: $0/month; API cost ≈ 1¢/session.
+
+**[→ docs/deploy-your-own.md](docs/deploy-your-own.md)** — accounts checklist, one `.env`, two commands, smoke test, phone Shortcut.
+
+### Local fallback mode (macOS)
+
+No cloud required: an Apple Shortcut drops recordings in iCloud Drive and a launchd job on your Mac polls and processes them. `bash scripts/install_launchd.sh` schedules it (generates `com.hoops.poller.plist` from your clone's path). Same pipeline, slower delivery (~5-10 min). See [docs/architecture.md](docs/architecture.md) for both paths.
 
 `GMAIL_ADDRESS` overrides the `email.from`/`email.to` in `config.yaml` — set it if you don't want to edit the YAML directly.
 
-Apple Shortcut: **Record Audio** → save to `iCloud Drive/Capture/inbox/` named `hoops__<YYYYMMDD-HHMMSS>.m4a` (local time). Bind it to the Action Button or a Home Screen icon so capture is one press.
-
-**Troubleshooting:** confirm the poller is alive with `launchctl list com.guhan.hoops` (status must be `0`); logs live in `logs/poll.log`.
+**Troubleshooting:** confirm the poller is alive with `launchctl list com.hoops.poller` (status must be `0`); logs live in `logs/poll.log`.
 
 ## CLI
 
@@ -108,7 +129,7 @@ Fixtures and their transcripts are committed — that's the golden dataset. Per-
 ## Accuracy and testing
 
 - `fixtures/` holds labeled recordings; `fixtures/manifest.csv` is the single source of truth for expected call sequences.
-- `hoops score` prints the gate table (call recall/precision ≥ 0.99, sequence exact-match ≥ 0.90, **zero** phantom shots on bait-word fixtures — a hard failure).
+- `hoops score` prints the gate table (call recall/precision ≥ 0.99, sequence exact-match ≥ 0.90, **zero** phantom shots on bait-word fixtures — a hard failure). `hoops score` writes its results back into `fixtures/manifest.csv` (the `heard_calls`/`got_calls`/`match`/`scored_at` columns) — that diff is intentional.
 - The parser runs from stored transcripts, so `hoops replay --all` re-parses every archived session for free and `hoops score` re-scores every committed fixture transcript. Parser changes merge only after a no-op replay leaves session outputs byte-identical — `sessions/` isn't tracked in git, so snapshot the folder first and compare with `git diff --no-index` — and the score gates pass.
 - `uv run pytest` — the full suite is offline and free; API-touching tests are opt-in (`-m paid`).
 

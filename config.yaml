@@ -1,4 +1,4 @@
-timezone: America/Los_Angeles     # EDIT if not your timezone
+timezone: America/Los_Angeles     # EDIT to your timezone — in this file AND cloud/config.cloud.yaml
 inbox: ~/Library/Mobile Documents/com~apple~CloudDocs/Capture/inbox
 sessions_root: sessions
 prefix: hoops
@@ -29,8 +29,8 @@ llm:
   model: claude-sonnet-5
 
 email:
-  from: guhandiji@gmail.com
-  to: guhandiji@gmail.com
+  from: you@example.com   # set GMAIL_ADDRESS in .env instead of editing this
+  to: you@example.com     # (it overrides both from and to)
   smtp_host: smtp.gmail.com
   smtp_port: 465
 
