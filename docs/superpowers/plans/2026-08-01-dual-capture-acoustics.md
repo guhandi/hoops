@@ -6,7 +6,7 @@
 
 **Architecture:** Branch A (voice: `transcribe.py` → `parse.py`) is untouched. New `src/hoops/acoustics.py` (branch B) detects impact clusters and features from audio alone; new `src/hoops/fusion.py` (pure stdlib) is the only place the branches' *outputs* meet. Pipeline gains two never-raise optional stages writing `acoustics.json` + `fusion.json`; the report consumes those sidecars instead of `impacts.json`.
 
-**Tech Stack:** Python 3.12, uv, librosa + numpy (new), ffmpeg (present), pytest. Spec: `docs/superpowers/specs/2026-08-01-dual-capture-acoustics-design.md`. Source brief: `from_claude/claude-code-brief-dual-capture.md`; prototype: `from_claude/impact_detect.py`.
+**Tech Stack:** Python 3.12, uv, librosa + numpy (new), ffmpeg (present), pytest. Spec: `docs/superpowers/specs/2026-08-01-dual-capture-acoustics-design.md`. Source brief + prototype lived in owner-local `from_claude/` (removed after merge; later references to `impact_detect.py` in this plan are historical — its method is preserved in `src/hoops/acoustics.py`).
 
 ## Global Constraints
 

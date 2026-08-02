@@ -8,7 +8,7 @@ Press one button on your phone, shoot until you make three in a row, call out ea
 
 ![Movie replay demo](docs/assets/movie-demo.gif)
 
-*The report replays your session: your real audio drives an animated court — every call fires a make/miss animation as you hear yourself say it.*
+*The report replays your session: your real audio drives an animated court — the ball lands on the actual impact sound detected in the audio, and your call-out fires the confirmation a beat later (calls with no audible impact get flagged 🤥).*
 
 ## Try it in 60 seconds — zero API keys
 
@@ -54,8 +54,9 @@ Basketball is instance #1. The capture pattern (one Shortcut, spoken vocabulary,
    ├─ 5. Validate    invariants (e.g. session must end on exactly three straight makes)
    ├─ 6. Repair      only if invariants fail: LLM reconstructs the sequence, re-validated
    ├─ 7. Stats       shots-to-three, streaks, gaps, FG%
-   ├─ 8. Render      shot-strip PNG + HTML report
-   └─ 9. Email       report + every artifact attached (R2 is the source of truth; the emailed zip is the belt-and-suspenders copy)
+   ├─ 8. Listen      independent acoustic branch: HPSS impact detection, paired to calls at fusion (never informs parsing — calls stay clean training labels; 🤥 flags calls with no audible impact)
+   ├─ 9. Render      shot-strip PNG + HTML report
+   └─ 10. Email      report + every artifact attached (R2 is the source of truth; the emailed zip is the belt-and-suspenders copy)
 ```
 
 Report email lands ~2 minutes after the tap — no iCloud sync wait. A local mode (Mac + launchd + iCloud drop folder, same pipeline core) is kept as a fallback; see [docs/architecture.md](docs/architecture.md) and [docs/shortcut-setup.md](docs/shortcut-setup.md).

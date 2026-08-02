@@ -1,7 +1,7 @@
 # Dual-branch capture — independent acoustics + fusion — design
 
 **Date:** 2026-08-01 · **Status:** approved (brainstorm 2026-08-01) · **Owner:** Guhan
-**Source brief:** `from_claude/claude-code-brief-dual-capture.md` (+ prototype `from_claude/impact_detect.py`, confirmed working on fixtures)
+**Source brief:** `claude-code-brief-dual-capture.md` + librosa prototype `impact_detect.py` (owner-local scratch under `from_claude/`, removed after the work merged — the brief's content is summarized in this spec and the prototype's method lives on in `src/hoops/acoustics.py`)
 
 ## Goal
 
