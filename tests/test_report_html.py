@@ -37,7 +37,8 @@ STATS = {"session_id": "20260727-061204", "session_date_local": "2026-07-27",
          "session_len_s": 35.0, "notes": "", "quote_of_day": "ugh come on",
          "profanity_count": 1, "words_per_miss": 9.0, "invariants_passed": True,
          "ambiguous_calls": 0, "transcriber": "whisper-1",
-         "parser_version": "1", "vocab_name": "swish_brick", "session_id_source": "filename"}
+         "parser_version": "1", "vocab_name": "swish_brick", "session_id_source": "filename",
+         "runs": [], "almost_closeouts": 0, "closed_out": True}
 WORDS = [Word("brick", "brick.", 5.0, 5.3, None),
          Word("ugh", "ugh", 8.0, 8.2, None),
          Word("come", "come", 8.3, 8.5, None),
@@ -70,7 +71,8 @@ def test_data_blob_matches_rows():
     d = data_blob(render())
     assert len(d["shots"]) == 5
     assert d["shots"][0] == {"n": 1, "result": "miss", "t": 5.0, "gap": None,
-                             "streak": 0, "voided": False, "raw": "brick"}
+                             "streak": 0, "voided": False, "raw": "brick",
+                             "impact": None, "lie": False}
     assert d["shots"][4]["streak"] == 3
     assert d["stats"]["fg_pct"] == 0.75
     assert d["has_audio"] is False
@@ -212,3 +214,41 @@ def test_shared_call_matcher_consistency():
     assert _call_row_for(w, ROWS)["shot_num"] == 1
     off = type(w)(w.text, w.raw, w.start + CALL_MATCH_TOLERANCE_S + 0.01, w.end, None)
     assert _call_row_for(off, ROWS) is None
+
+
+IMPACTS = {"envelope": [0.02] * 500 + [0.9] + [0.02] * 30, "envelope_hz": 15,
+           "shots": [{"shot_num": 1, "impact_t_s": 3.9, "no_contact": False},
+                     {"shot_num": 2, "impact_t_s": None, "no_contact": True},
+                     {"shot_num": 3, "impact_t_s": None, "no_contact": False},
+                     {"shot_num": 4, "impact_t_s": 19.2, "no_contact": False},
+                     {"shot_num": 5, "impact_t_s": 25.1, "no_contact": False}]}
+
+def test_data_carries_impacts():
+    d = data_blob(render(impacts=IMPACTS))
+    by_n = {s["n"]: s for s in d["shots"]}
+    assert by_n[1]["impact"] == 3.9 and by_n[1]["lie"] is False
+    assert by_n[2]["impact"] is None and by_n[2]["lie"] is True
+    assert d["wave"]["hz"] == 15 and len(d["wave"]["env"]) == 531
+
+def test_data_without_impacts_degrades():
+    d = data_blob(render())            # impacts omitted entirely
+    assert d["wave"] is None
+    assert all(s["impact"] is None and s["lie"] is False for s in d["shots"])
+
+def test_waveform_svg_present():
+    html = render(impacts=IMPACTS)
+    assert "id='waveform'" in html or 'id="waveform"' in html
+
+def test_uncorroborated_stat_shown():
+    stats = dict(STATS, uncorroborated_calls=1)
+    html = render(stats=stats)
+    assert "Uncorroborated" in html and "🤥" in html
+
+def test_replay_physics_constants_in_js():
+    html = render(impacts=IMPACTS)
+    assert "FLIGHT_S = 0.6" in html
+    assert "FALLBACK_LEAD_S = 0.5" in html
+
+def test_self_contained_with_impacts():
+    html = render(impacts=IMPACTS)
+    assert not re.search(r"(src|href)\s*=\s*['\"]https?://", html)

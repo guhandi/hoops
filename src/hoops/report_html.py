@@ -57,11 +57,12 @@ svg { max-width:100%; height:auto; display:block; }
                    background:var(--ball); color:#fff; font-weight:700; cursor:pointer; }
 #controls button:active { transform:scale(.96); }
 #scrub-wrap { flex:1 1 160px; position:relative; }
+#waveform { width:100%; height:34px; display:block; }
 #scrubber { width:100%; display:block; margin:0; accent-color:var(--ball); }
 #scrub-marks { position:relative; width:100%; height:8px; }
 .scrub-mark { position:absolute; top:0; width:4px; height:8px; border-radius:2px; }
-#ball.fly-make { animation:flyMake .9s ease-in forwards; }
-#ball.fly-miss { animation:flyMiss .9s ease-in forwards; }
+#ball.fly-make { animation:flyMake .6s ease-in forwards; }
+#ball.fly-miss { animation:flyMiss .6s ease-in forwards; }
 @keyframes flyMake { 40% { cx:180px; cy:40px; } 70% { cx:236px; cy:58px; }
                      100% { cx:236px; cy:95px; } }
 @keyframes flyMiss { 40% { cx:180px; cy:40px; } 60% { cx:232px; cy:52px; }
@@ -71,10 +72,15 @@ svg { max-width:100%; height:auto; display:block; }
 def _fmt(v, pat="{:.1f}", dash="—"):
     return dash if v is None else pat.format(v)
 
-def _build_data(stats, rows, narrative, flags, words, has_audio: bool) -> dict:
+def _build_data(stats, rows, narrative, flags, words, has_audio: bool,
+                impacts=None) -> dict:
+    by_shot = {s["shot_num"]: s for s in (impacts or {}).get("shots", [])}
     shots = [{"n": r["shot_num"], "result": r["result"], "t": r["t_call_s"],
               "gap": r["gap_s"], "streak": r["streak_after"],
-              "voided": r["voided"], "raw": r["raw_token"]} for r in rows]
+              "voided": r["voided"], "raw": r["raw_token"],
+              "impact": (by_shot.get(r["shot_num"]) or {}).get("impact_t_s"),
+              "lie": bool((by_shot.get(r["shot_num"]) or {}).get("no_contact"))}
+             for r in rows]
     def call_num(w):
         r = _call_row_for(w, rows)
         return r["shot_num"] if r else 0
@@ -83,7 +89,9 @@ def _build_data(stats, rows, narrative, flags, words, has_audio: bool) -> dict:
             "narrative": ({"headline": narrative.headline, "recap": narrative.recap,
                            "quote": narrative.quote, "quote_t_s": narrative.quote_t_s}
                           if narrative else None),
-            "has_audio": has_audio}
+            "has_audio": has_audio,
+            "wave": ({"env": impacts["envelope"], "hz": impacts["envelope_hz"]}
+                     if impacts else None)}
 
 def _header(stats, narrative, flags) -> str:
     e = _html.escape
@@ -102,11 +110,13 @@ def _hero(stats) -> str:
             f"<b class='miss'>{stats['misses']} misses</b> · "
             f"{_fmt(fg, '{:.0%}')} FG</div></section>")
 
-def _movie_section(has_audio: bool) -> str:
+def _movie_section(has_audio: bool, has_wave: bool = False) -> str:
     if not has_audio:
+        wave_svg = ("<svg id='waveform' viewBox='0 0 640 40' preserveAspectRatio='none' "
+                    "aria-label='session loudness'></svg>") if has_wave else ""
         return ("<section id='movie'><h2>Replay</h2>"
                 "<p class='word aside'>audio unavailable for this session — "
-                "no movie, but everything below still works.</p></section>")
+                f"no movie, but everything below still works.</p>{wave_svg}</section>")
     return """<section id='movie'><h2>Replay</h2>
 <svg id='court' viewBox='0 0 320 200' aria-label='replay court'>
   <rect x='0' y='0' width='320' height='200' rx='10' fill='#f2dfc9'/>
@@ -126,8 +136,12 @@ def _movie_section(has_audio: bool) -> str:
   <button id='play-btn'>▶ Play</button>
   <button id='speed-btn'>1×</button>
   <button id='skip-btn'>⏭ next shot</button>
-  <div id='scrub-wrap'><input id='scrubber' type='range' min='0' max='100' step='0.1' value='0'>
-  <div id='scrub-marks'></div></div>
+  <div id='scrub-wrap'>
+    <svg id='waveform' viewBox='0 0 640 40' preserveAspectRatio='none'
+         aria-label='session loudness'></svg>
+    <input id='scrubber' type='range' min='0' max='100' step='0.1' value='0'>
+    <div id='scrub-marks'></div>
+  </div>
 </div></section>"""
 
 def _timeline_svg(rows, session_len) -> str:
@@ -226,7 +240,8 @@ def _stats_grid(stats, narrative) -> str:
                     ("Session", _fmt(stats.get("session_len_s"), "{:.0f}s")),
                     ("Started", stats.get("start_time_local") or "—")]),
         ("Fun", [("Profanity", stats.get("profanity_count", 0)),
-                 ("Words per miss", _fmt(stats.get("words_per_miss"), "{:.1f}"))]),
+                 ("Words per miss", _fmt(stats.get("words_per_miss"), "{:.1f}")),
+                 ("Uncorroborated 🤥", stats.get("uncorroborated_calls", "—"))]),
         ("Meta", [("Transcriber", stats.get("transcriber", "—")),
                   ("Parser", stats.get("parser_version", "—")),
                   ("Vocabulary", stats.get("vocab_name", "—")),
@@ -303,20 +318,43 @@ document.querySelectorAll('[data-shot]').forEach(el => {
   const label = s.voided ? 'voided' : s.result.toUpperCase();
   const card = `#${s.n} ${label} — "${s.raw}" @ ${s.t.toFixed(1)}s` +
     (s.gap != null ? `<br>gap ${s.gap.toFixed(1)}s` : '') +
-    (s.voided ? '' : `<br>streak ${s.streak}`);
+    (s.voided ? '' : `<br>streak ${s.streak}`) +
+    (s.impact != null ? `<br>impact @ ${s.impact.toFixed(1)}s` : '') +
+    (s.lie ? '<br>🤥 no impact heard' : '');
   el.addEventListener('mousemove', evt => showTip(evt, card));
   el.addEventListener('mouseleave', hideTip);
   el.addEventListener('click', () => seekTo(s.t));
 });
+// Physics + waveform are independent of audio playback (loudness data can
+// exist even when the audio itself isn't embedded), so they run unconditionally.
+const live = DATA.shots.filter(s => !s.voided);
+const dur = DATA.stats.session_len_s || (live.length ? live[live.length-1].t + 2 : 1);
+const FLIGHT_S = 0.6, FALLBACK_LEAD_S = 0.5;
+live.forEach(s => {
+  s.land = s.impact != null ? s.impact : Math.max(0, s.t - FALLBACK_LEAD_S);
+  s.launch = Math.max(0, s.land - FLIGHT_S);
+});
+const wsvg = document.getElementById('waveform');
+if (DATA.wave && wsvg) {
+  const n = DATA.wave.env.length, W = 640, frag = [];
+  DATA.wave.env.forEach((v, i) => {
+    const h = Math.max(1, v * 34);
+    frag.push(`<rect x="${(i / n * W).toFixed(1)}" y="${(36 - h).toFixed(1)}" ` +
+              `width="${Math.max(0.6, W / n * 0.8).toFixed(2)}" height="${h.toFixed(1)}" fill="#c9a678"/>`);
+  });
+  live.filter(s => s.impact != null).forEach(s => {
+    const x = (s.impact / dur * W).toFixed(1);
+    frag.push(`<polygon points="${x},8 ${x - 4},0 ${Number(x) + 4},0" fill="var(--ball)"/>`);
+  });
+  wsvg.innerHTML = frag.join('');
+} else if (wsvg) { wsvg.style.display = 'none'; }
 const audio = document.getElementById('session-audio');
 if (audio && document.getElementById('play-btn')) {
-  const live = DATA.shots.filter(s => !s.voided);
   const playBtn = document.getElementById('play-btn');
   const speedBtn = document.getElementById('speed-btn');
   const scrub = document.getElementById('scrubber');
   const ball = document.getElementById('ball');
   const flash = document.getElementById('call-flash');
-  const dur = DATA.stats.session_len_s || (live.length ? live[live.length-1].t + 2 : 1);
   scrub.max = dur;
   const marks = document.getElementById('scrub-marks');
   live.forEach(s => {
@@ -327,7 +365,7 @@ if (audio && document.getElementById('play-btn')) {
     marks.appendChild(m);
   });
   const speeds = [1, 2, 4];
-  let speedIdx = 0, fired = new Set(), flashTimer;
+  let speedIdx = 0, firedFly = new Set(), firedFlash = new Set(), flashTimer;
   speedBtn.onclick = () => {
     speedIdx = (speedIdx + 1) % speeds.length;
     audio.playbackRate = speeds[speedIdx];
@@ -341,11 +379,14 @@ if (audio && document.getElementById('play-btn')) {
     if (next) { audio.currentTime = Math.max(0, next.t - 1.5); audio.play(); }
   };
   scrub.oninput = () => { audio.currentTime = parseFloat(scrub.value); };
-  function fireShot(s) {
+  function fireFlight(s) {
     ball.classList.remove('fly-make', 'fly-miss');
     void ball.getBBox();                       // restart CSS animation
     ball.classList.add(s.result === 'make' ? 'fly-make' : 'fly-miss');
-    flash.textContent = s.raw.toUpperCase() + (s.result === 'make' ? '!' : '');
+  }
+  function fireFlash(s) {
+    flash.textContent = s.raw.toUpperCase() + (s.result === 'make' ? '!' : '') +
+      (s.lie ? ' 🤥' : '');
     flash.setAttribute('fill', s.result === 'make' ? 'var(--make)' : 'var(--miss)');
     flash.style.transition = 'none'; flash.style.opacity = 1;
     clearTimeout(flashTimer);
@@ -360,13 +401,16 @@ if (audio && document.getElementById('play-btn')) {
     const t = audio.currentTime;
     scrub.value = t;
     live.forEach(s => {
-      if (t >= s.t && !fired.has(s.n)) { fired.add(s.n); fireShot(s); }
-      if (t < s.t) fired.delete(s.n);          // rewound past it: re-arm
+      if (t >= s.launch && !firedFly.has(s.n)) { firedFly.add(s.n); fireFlight(s); }
+      if (t >= s.t && !firedFlash.has(s.n)) { firedFlash.add(s.n); fireFlash(s); }
+      if (t < s.launch) firedFly.delete(s.n);  // rewound past it: re-arm
+      if (t < s.t) firedFlash.delete(s.n);
     });
   }
   function tick() { if (!audio.paused) { sync(); requestAnimationFrame(tick); } }
   audio.onseeked = () => {                     // keep scoreboard honest on seek
-    fired = new Set(live.filter(s => s.t <= audio.currentTime).map(s => s.n));
+    firedFly = new Set(live.filter(s => s.launch <= audio.currentTime).map(s => s.n));
+    firedFlash = new Set(live.filter(s => s.t <= audio.currentTime).map(s => s.n));
     const upto = live.filter(s => s.t <= audio.currentTime);
     document.getElementById('make-count').textContent =
       upto.filter(x => x.result === 'make').length;
@@ -379,9 +423,10 @@ if (audio && document.getElementById('play-btn')) {
 
 def render_interactive_report(stats: dict, rows: list[dict], narrative,
                               flags: list[str], words,
-                              audio_path: Path | None) -> str:
+                              audio_path: Path | None, impacts=None) -> str:
     audio_html, has_audio = _audio_tag(audio_path)
-    data = json.dumps(_build_data(stats, rows, narrative, flags, words, has_audio)
+    data = json.dumps(_build_data(stats, rows, narrative, flags, words, has_audio,
+                                  impacts)
                       ).replace("<", "\\u003c")
     return "\n".join([
         "<!doctype html><html lang='en'><head><meta charset='utf-8'>",
@@ -391,7 +436,7 @@ def render_interactive_report(stats: dict, rows: list[dict], narrative,
         _header(stats, narrative, flags),
         _hero(stats),
         audio_html,
-        _movie_section(has_audio),
+        _movie_section(has_audio, bool(impacts)),
         _charts_section(rows, stats),
         _stats_grid(stats, narrative),
         _flags_section(flags),
