@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg  # m4a decode for the acoustics branch (parity with the Modal image)
       - uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
