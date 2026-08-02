@@ -29,8 +29,7 @@ cloud/
   config.cloud.yaml  scratch-space clone of config.yaml for the Modal container
 scripts/
   build_db.py            rebuild disposable hoops.db from committed session text
-  install_launchd.sh     schedule `hoops poll` every 300s (local fallback path)
-  com.guhan.hoops.plist  the launchd job (kept for rollback)
+  install_launchd.sh     generates `com.hoops.poller.plist` from your clone's path; schedules `hoops poll` every 300s (local fallback path)
 ```
 
 `parse.py`, `stats.py`, `invariants.py` are pure functions over data — no I/O, no clock, no network. That's deliberate: they're the load-bearing logic, so they're the most testable.
@@ -74,7 +73,7 @@ pulls new session artifacts down from R2 into local `sessions/`, skipping files 
 
 ### Local fallback mode
 
-Kept for rollback — `launchctl load ~/Library/LaunchAgents/com.guhan.hoops.plist` (the plist is retained on disk for exactly this) and re-point the Shortcut at iCloud — if the cloud endpoint is ever unreachable. Both ingest paths share the same downstream pipeline core; only how a file arrives on disk differs:
+Kept for rollback — run `install_launchd.sh` (generates `com.hoops.poller.plist` from your clone's path) and re-point the Shortcut at iCloud — if the cloud endpoint is ever unreachable. Both ingest paths share the same downstream pipeline core; only how a file arrives on disk differs:
 
 ```
 [iPhone]  Apple Shortcut → Save File → iCloud Drive/Capture/inbox/hoops__<yyyyMMdd-HHmmss>.m4a

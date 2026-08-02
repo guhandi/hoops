@@ -74,7 +74,7 @@ bash scripts/install_launchd.sh   # schedules `hoops poll` every 5 minutes
 
 Apple Shortcut: **Record Audio** → save to `iCloud Drive/Capture/inbox/` named `hoops__<YYYYMMDD-HHMMSS>.m4a` (local time). Bind it to the Action Button or a Home Screen icon so capture is one press.
 
-**Troubleshooting:** confirm the poller is alive with `launchctl list com.guhan.hoops` (status must be `0`); logs live in `logs/poll.log`.
+**Troubleshooting:** confirm the poller is alive with `launchctl list com.hoops.poller` (status must be `0`); logs live in `logs/poll.log`.
 
 ## CLI
 
