@@ -15,6 +15,7 @@ One-button voice data capture: Apple Shortcut records shot call-outs → cloud e
 - Vocabulary: production default `swish_brick`, widened for whisper variance (`swish`/`splash`/`make` → make, `brick`/`break`/`miss` → miss); `make_miss` also defined; per-recording sidecar override + `--vocab` flag; all in `config.yaml`. The whisper bias prompt is deliberately transcript-style, not instructions (`transcribe.py:vocab_prompt`) — don't regress this.
 - `fixtures/manifest.csv` is the single fixture file: hand columns are owner-only ground truth; `hoops score` writes back `heard_calls`/`got_calls`/`match`/`scored_at` machine columns.
 - Session data lives in the R2 bucket (source of truth for the cloud path); local `sessions/` is a gitignored cache filled by `pull_sessions`, not the store itself — nothing per-session is committed to git either way.
+- **GuData push stage** (`src/hoops/gudata.py`): after Stats, session values + per-shot rows POST to GuData's `hoops_shooting` instrument — non-fatal (failures are flagged in report/email, never block them), default off via `gudata.enabled` in `config.yaml` (needs `GUDATA_*` env vars, see `.env.example`). `hoops push [--all | <sid>]` backfills archived sessions idempotently (server dedupes on `external_id`). Offline tests mock `hoops.gudata.post_json`.
 
 ## Pending work
 

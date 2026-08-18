@@ -96,6 +96,8 @@ No cloud required: an Apple Shortcut drops recordings in iCloud Drive and a laun
 
 `GMAIL_ADDRESS` overrides the `email.from`/`email.to` in `config.yaml` — set it if you don't want to edit the YAML directly.
 
+**GuData push (optional):** with `gudata.enabled: true` in `config.yaml` and the three `GUDATA_*` vars set (see `.env.example`), each session's stats + per-shot rows are POSTed after Stats to GuData's `hoops_shooting` instrument. Failures never block the report email — they're flagged in it — and `hoops push --all` backfills the archive idempotently (the server dedupes on `external_id`).
+
 **Troubleshooting:** confirm the poller is alive with `launchctl list com.hoops.poller` (status must be `0`); logs live in `logs/poll.log`.
 
 ## CLI
@@ -104,6 +106,7 @@ No cloud required: an Apple Shortcut drops recordings in iCloud Drive and a laun
 hoops process <path.m4a> [--no-email]      # one file, end to end
 hoops process-all fixtures --no-email      # run the test-fixture set + visual gallery (out/index.html)
 hoops replay [--all | <sid>]               # re-parse stored transcripts (free, no API)
+hoops push [--all | <sid>]                 # push archived session(s) to GuData (idempotent)
 hoops poll                                 # one-shot inbox scan (what launchd runs)
 hoops score                                # accuracy gate table vs fixtures/manifest.csv
 hoops transcribe-fixtures [--only <name>]  # refresh fixture transcripts (paid API call)
