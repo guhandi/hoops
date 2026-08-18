@@ -4,8 +4,9 @@ Additive and non-fatal by design: the report/email path never depends on this
 module. Server-side idempotency via external_id makes retries/backfills safe.
 Pure stdlib (hmac/base64/urllib) — no new dependencies.
 """
-import base64, hashlib, hmac, json, os, time, urllib.request
+import base64, csv, hashlib, hmac, json, os, time, urllib.request
 from datetime import datetime, timedelta
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 INSTRUMENT_ID = "hoops_shooting"
@@ -77,3 +78,13 @@ def push_stage(cfg, stats: dict, rows: list[dict],
         return push_payload(build_payload(stats, rows, cfg.tz.key, external_id)), None
     except Exception as e:  # non-fatal by contract
         return None, str(e)
+
+def read_shot_rows(sdir: Path) -> list[dict]:
+    """shots.csv round-trip: coerce the stringified columns build_payload uses."""
+    with (sdir / "shots.csv").open(newline="") as f:
+        return [{**r, "voided": r["voided"] == "True", "t_call_s": float(r["t_call_s"])}
+                for r in csv.DictReader(f)]
+
+def backfill_session(sdir: Path, tz_name: str) -> dict:
+    stats = json.loads((sdir / "session.json").read_text())
+    return push_payload(build_payload(stats, read_shot_rows(sdir), tz_name, sdir.name))

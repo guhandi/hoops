@@ -19,6 +19,11 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--all", action="store_true")
     g.add_argument("sid", nargs="?")
 
+    spu = sub.add_parser("push", help="Push archived session(s) to GuData (idempotent)")
+    gp = spu.add_mutually_exclusive_group(required=False)
+    gp.add_argument("--all", action="store_true")
+    gp.add_argument("sid", nargs="?")
+
     sub.add_parser("poll", help="One-shot inbox scan")
     sub.add_parser("score", help="Print the gate table from manifest.csv")
 
@@ -71,6 +76,28 @@ def main() -> int:
             print(f"{r.sid}: replayed ({len(r.rows)} calls, "
                   f"{'clean' if not r.flags else 'FLAGS: ' + '; '.join(r.flags)})")
         return 0
+
+    if args.command == "push":
+        from .gudata import backfill_session
+        if not args.all and not args.sid:
+            print("push: specify --all or a session id")
+            return 2
+        dirs = (find_session_dirs(cfg.sessions_root) if args.all
+                else [d for d in find_session_dirs(cfg.sessions_root)
+                      if d.name.endswith(args.sid)])
+        if not dirs:
+            print("push: no matching sessions (run pull_sessions to sync from R2 first)")
+            return 2
+        failures = 0
+        for d in dirs:
+            try:
+                res = backfill_session(d, cfg.tz.key)
+                print(f"{d.name}: pushed — session {res.get('session_id')}, "
+                      f"{res.get('count')} observation(s)")
+            except Exception as e:
+                failures += 1
+                print(f"{d.name}: FAILED — {e}")
+        return 1 if failures else 0
 
     if args.command == "score":
         from .score import score_and_print

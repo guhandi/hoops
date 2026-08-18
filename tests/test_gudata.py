@@ -150,3 +150,21 @@ def test_push_stage_failure_never_raises(tmp_path, monkeypatch):
     stats, rows = fixture_stats_and_rows()
     result, err = gd.push_stage(_cfg_with_gudata(tmp_path, True), stats, rows, "hoops__x")
     assert result is None and "connection refused" in err
+
+def test_backfill_session_round_trips_archived_artifacts(tmp_path, monkeypatch):
+    import hoops.gudata as gd
+    from hoops.session import session_dir_for, write_session_json, write_shots_csv
+    for k in ("GUDATA_API_URL", "GUDATA_JWT_SECRET", "GUDATA_SUBJECT_ID"):
+        monkeypatch.setenv(k, "x")
+    stats, rows = fixture_stats_and_rows()
+    sdir = session_dir_for(tmp_path / "sessions", SID)   # sessions/2026/07/hoops__<sid>
+    sdir.mkdir(parents=True)
+    write_session_json(sdir, stats)
+    write_shots_csv(sdir, rows)                          # the REAL csv writer: bools/floats -> strings
+    sent = {}
+    monkeypatch.setattr(gd, "post_json", lambda url, body, tok, timeout=20.0:
+                        sent.update(body=body) or {"session_id": "s1",
+                                                   "observation_ids": [], "count": 9})
+    out = gd.backfill_session(sdir, "America/Los_Angeles")
+    assert out["count"] == 9
+    assert sent["body"] == gd.build_payload(stats, rows, "America/Los_Angeles", sdir.name)
