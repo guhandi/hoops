@@ -7,6 +7,7 @@ from . import PARSER_VERSION
 from .config import Config, Vocabulary
 from .acoustics import write_acoustics
 from .fusion import write_fusion
+from .gudata import push_stage
 from .invariants import check_invariants
 from .parse import parse_words
 from .repair import attempt_repair
@@ -188,6 +189,12 @@ def process_file(path: Path, cfg: Config, transcriber, *, email: bool,
 
     write_shots_csv(sdir, rows)
     write_session_json(sdir, stats)
+
+    gud_result, gud_err = push_stage(cfg, stats, rows, sdir.name)
+    if gud_result is not None:
+        (sdir / "gudata_push.json").write_text(json.dumps(gud_result, indent=2))
+    if gud_err:
+        flags.append(f"gudata push failed: {gud_err}")
 
     narrative = None
     if email:

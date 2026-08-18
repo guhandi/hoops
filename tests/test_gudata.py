@@ -113,3 +113,40 @@ def test_push_payload_missing_env_names_the_vars(monkeypatch):
     with pytest.raises(gd.GuDataError) as e:
         gd.push_payload({})
     assert "GUDATA_API_URL" in str(e.value) and "GUDATA_SUBJECT_ID" in str(e.value)
+
+def _cfg_with_gudata(tmp_path, enabled: bool):
+    from pathlib import Path
+    from hoops.config import load_config
+    repo = Path(__file__).resolve().parents[1]
+    text = (repo / "config.yaml").read_text()
+    text = text.replace("enabled: false", f"enabled: {'true' if enabled else 'false'}")
+    (tmp_path / "config.yaml").write_text(text)
+    return load_config(tmp_path / "config.yaml")
+
+def test_push_stage_disabled_is_a_noop(tmp_path, monkeypatch):
+    import hoops.gudata as gd
+    monkeypatch.setattr(gd, "post_json",
+                        lambda *a, **k: pytest.fail("must not touch HTTP when disabled"))
+    stats, rows = fixture_stats_and_rows()
+    assert gd.push_stage(_cfg_with_gudata(tmp_path, False), stats, rows, "hoops__x") == (None, None)
+
+def test_push_stage_success_returns_result(tmp_path, monkeypatch):
+    import hoops.gudata as gd
+    for k in ("GUDATA_API_URL", "GUDATA_JWT_SECRET", "GUDATA_SUBJECT_ID"):
+        monkeypatch.setenv(k, "x")
+    monkeypatch.setattr(gd, "post_json",
+        lambda *a, **k: {"session_id": "s1", "observation_ids": [], "count": 5})
+    stats, rows = fixture_stats_and_rows()
+    result, err = gd.push_stage(_cfg_with_gudata(tmp_path, True), stats, rows, "hoops__x")
+    assert err is None and result["session_id"] == "s1"
+
+def test_push_stage_failure_never_raises(tmp_path, monkeypatch):
+    import hoops.gudata as gd
+    for k in ("GUDATA_API_URL", "GUDATA_JWT_SECRET", "GUDATA_SUBJECT_ID"):
+        monkeypatch.setenv(k, "x")
+    def boom(*a, **k):
+        raise OSError("connection refused")
+    monkeypatch.setattr(gd, "post_json", boom)
+    stats, rows = fixture_stats_and_rows()
+    result, err = gd.push_stage(_cfg_with_gudata(tmp_path, True), stats, rows, "hoops__x")
+    assert result is None and "connection refused" in err

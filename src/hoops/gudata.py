@@ -66,3 +66,14 @@ def push_payload(payload: dict) -> dict:
     token = mint_jwt(env["GUDATA_JWT_SECRET"], env["GUDATA_SUBJECT_ID"])
     url = f"{env['GUDATA_API_URL'].rstrip('/')}/api/ingest/{INSTRUMENT_ID}"
     return post_json(url, payload, token)
+
+def push_stage(cfg, stats: dict, rows: list[dict],
+               external_id: str) -> tuple[dict | None, str | None]:
+    """Pipeline stage wrapper. Returns (result, error); NEVER raises —
+    a push failure must not block the report/email (spec 4b)."""
+    if not cfg.gudata.get("enabled"):
+        return None, None
+    try:
+        return push_payload(build_payload(stats, rows, cfg.tz.key, external_id)), None
+    except Exception as e:  # non-fatal by contract
+        return None, str(e)
