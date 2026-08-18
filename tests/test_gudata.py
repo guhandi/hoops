@@ -76,3 +76,40 @@ def test_no_live_shots_raises():
     stats, _ = fixture_stats_and_rows()
     with pytest.raises(GuDataError):
         build_payload(stats, [], "America/Los_Angeles", "hoops__x")
+
+def test_mint_jwt_is_valid_hs256_with_contract_claims():
+    import base64, hashlib, hmac, json
+    from hoops.gudata import mint_jwt
+    tok = mint_jwt("topsecret", "subject-123", now=1_700_000_000)
+    h64, c64, s64 = tok.split(".")
+    pad = lambda s: s + "=" * (-len(s) % 4)
+    assert json.loads(base64.urlsafe_b64decode(pad(h64))) == {"alg": "HS256", "typ": "JWT"}
+    claims = json.loads(base64.urlsafe_b64decode(pad(c64)))
+    assert claims == {"sub": "subject-123", "aud": "authenticated",
+                      "iat": 1_700_000_000, "exp": 1_700_000_600}
+    expect = hmac.new(b"topsecret", f"{h64}.{c64}".encode(), hashlib.sha256).digest()
+    assert base64.urlsafe_b64decode(pad(s64)) == expect
+
+def test_push_payload_posts_to_ingest_endpoint(monkeypatch):
+    import hoops.gudata as gd
+    for k, v in [("GUDATA_API_URL", "https://gudata.example/"),
+                 ("GUDATA_JWT_SECRET", "s3cret"), ("GUDATA_SUBJECT_ID", "sub-1")]:
+        monkeypatch.setenv(k, v)
+    seen = {}
+    def fake_post(url, body, token, timeout=20.0):
+        seen.update(url=url, body=body, token=token)
+        return {"session_id": "abc", "observation_ids": ["o1"], "count": 1}
+    monkeypatch.setattr(gd, "post_json", fake_post)
+    out = gd.push_payload({"external_id": "hoops__x"})
+    assert out["session_id"] == "abc"
+    assert seen["url"] == "https://gudata.example/api/ingest/hoops_shooting"
+    assert seen["body"] == {"external_id": "hoops__x"}
+    assert seen["token"].count(".") == 2          # a minted JWT, not the raw secret
+
+def test_push_payload_missing_env_names_the_vars(monkeypatch):
+    import hoops.gudata as gd
+    for k in ("GUDATA_API_URL", "GUDATA_JWT_SECRET", "GUDATA_SUBJECT_ID"):
+        monkeypatch.delenv(k, raising=False)
+    with pytest.raises(gd.GuDataError) as e:
+        gd.push_payload({})
+    assert "GUDATA_API_URL" in str(e.value) and "GUDATA_SUBJECT_ID" in str(e.value)

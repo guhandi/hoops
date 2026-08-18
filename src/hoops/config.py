@@ -14,6 +14,7 @@ DEFAULT_ACOUSTICS = {
     "envelope_hz": 15, "feature_win_s": 0.15,
 }
 DEFAULT_FUSION = {"pair_min_s": 0.5, "pair_max_s": 4.0}
+DEFAULT_GUDATA = {"enabled": False}
 
 @dataclass(frozen=True)
 class Vocabulary:
@@ -49,6 +50,7 @@ class Config:
     repo_root: Path
     acoustics: dict = field(default_factory=lambda: dict(DEFAULT_ACOUSTICS))
     fusion: dict = field(default_factory=lambda: dict(DEFAULT_FUSION))
+    gudata: dict = field(default_factory=lambda: dict(DEFAULT_GUDATA))
 
     def vocab(self, name: str | None = None) -> Vocabulary:
         return self.vocabularies[name or self.vocab_default]
@@ -87,4 +89,5 @@ def load_config(path: Path | None = None) -> Config:
         repo_root=root,
         acoustics={**DEFAULT_ACOUSTICS, **(raw.get("acoustics") or {})},
         fusion={**DEFAULT_FUSION, **(raw.get("fusion") or {})},
+        gudata={**DEFAULT_GUDATA, **(raw.get("gudata") or {})},
     )
