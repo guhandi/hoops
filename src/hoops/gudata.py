@@ -4,7 +4,7 @@ Additive and non-fatal by design: the report/email path never depends on this
 module. Server-side idempotency via external_id makes retries/backfills safe.
 Pure stdlib (hmac/base64/urllib) — no new dependencies.
 """
-import base64, csv, hashlib, hmac, json, os, time, urllib.request
+import base64, csv, hashlib, hmac, json, os, time, urllib.error, urllib.request
 from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -55,8 +55,18 @@ def post_json(url: str, body: dict, token: str, timeout: float = 20.0) -> dict:
         url, data=json.dumps(body).encode(), method="POST",
         headers={"Content-Type": "application/json",
                  "Authorization": f"Bearer {token}"})
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return json.loads(resp.read().decode())
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return json.loads(resp.read().decode())
+    except urllib.error.HTTPError as e:
+        # Surface the server's response body (e.g. the 422 names the offending
+        # slug) — str(HTTPError) alone would discard it and leave the
+        # report/email flag undiagnosable.
+        try:
+            detail = e.read(500).decode(errors="replace").strip()
+        except Exception:
+            detail = ""
+        raise GuDataError(f"HTTP {e.code}: {detail or e.reason}") from e
 
 def push_payload(payload: dict) -> dict:
     env = {k: os.environ.get(k, "").strip()

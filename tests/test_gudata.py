@@ -106,6 +106,22 @@ def test_push_payload_posts_to_ingest_endpoint(monkeypatch):
     assert seen["body"] == {"external_id": "hoops__x"}
     assert seen["token"].count(".") == 2          # a minted JWT, not the raw secret
 
+def test_post_json_http_error_surfaces_status_and_body(monkeypatch):
+    import io
+    import urllib.error
+    import urllib.request
+    from hoops.gudata import GuDataError, post_json
+    def fake_urlopen(req, timeout=20.0):
+        raise urllib.error.HTTPError(
+            req.full_url, 422, "Unprocessable Entity", hdrs=None,
+            fp=io.BytesIO(b'{"detail": "unknown variable slug activity.hoops.bogus"}'))
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+    with pytest.raises(GuDataError) as e:
+        post_json("https://gudata.example/api/ingest/hoops_shooting", {}, "tok")
+    msg = str(e.value)
+    assert "422" in msg
+    assert "activity.hoops.bogus" in msg
+
 def test_push_payload_missing_env_names_the_vars(monkeypatch):
     import hoops.gudata as gd
     for k in ("GUDATA_API_URL", "GUDATA_JWT_SECRET", "GUDATA_SUBJECT_ID"):
