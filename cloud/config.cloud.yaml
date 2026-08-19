@@ -53,4 +53,4 @@ fusion:                     # pairing voice calls to impact clusters
   pair_max_s: 4.0
 
 gudata:                     # push session stats + per-shot rows to GuData (non-fatal stage)
-  enabled: false            # flip on once GUDATA_* env vars are set (.env.example)
+  enabled: true             # GUDATA_* set in hoops-secrets + .env (2026-08-18)
