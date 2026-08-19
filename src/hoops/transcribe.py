@@ -24,8 +24,12 @@ def make_envelope(response: dict, model_id: str) -> dict:
 def words_from_envelope(env: dict) -> list[Word]:
     resp = env["response"]
     segments = resp.get("segments") or []
+    raw_words = list(resp.get("words") or [])
+    for span in (env.get("gap_repair") or {}).get("spans", []):
+        raw_words.extend(span.get("recovered", []))
+    raw_words.sort(key=lambda w: float(w["start"]))
     out = []
-    for w in resp.get("words") or []:
+    for w in raw_words:
         conf = None
         for seg in segments:
             if seg["start"] <= w["start"] < seg["end"]:

@@ -72,3 +72,28 @@ def test_transcriber_language_attr():
     t = WhisperApiTranscriber("whisper-1", language="en")
     assert t.language == "en"
     assert WhisperApiTranscriber("whisper-1").language == "en"
+
+def test_words_from_envelope_merges_gap_repair():
+    from hoops.transcribe import words_from_envelope
+    env = {"model": "whisper-1",
+           "response": {"words": [{"word": "break", "start": 5.0, "end": 5.4},
+                                  {"word": "splash", "start": 111.0, "end": 111.6}],
+                        "segments": []},
+           "gap_repair": {"spans": [
+               {"gap": [31.5, 49.6], "clip": [29.5, 51.6],
+                "recovered": [{"word": "break", "start": 39.6, "end": 40.0}]},
+               {"gap": [111.7, 127.5], "clip": [109.7, 129.5],
+                "recovered": [{"word": "splash", "start": 119.7, "end": 120.1}]}],
+               "n_recovered": 2, "truncated": False, "errors": []}}
+    words = words_from_envelope(env)
+    assert [w.text for w in words] == ["break", "break", "splash", "splash"]
+    assert [w.start for w in words] == [5.0, 39.6, 111.0, 119.7]
+    assert words[1].confidence is None
+
+def test_words_from_envelope_without_gap_repair_unchanged():
+    from hoops.transcribe import words_from_envelope
+    env = {"model": "whisper-1",
+           "response": {"words": [{"word": "swish", "start": 1.0, "end": 1.3}],
+                        "segments": []}}
+    words = words_from_envelope(env)
+    assert len(words) == 1 and words[0].text == "swish"
