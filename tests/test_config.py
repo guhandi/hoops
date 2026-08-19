@@ -37,3 +37,22 @@ def test_no_gmail_address_env_keeps_yaml_values(monkeypatch):
     cfg = load_config(REPO / "config.yaml")
     assert cfg.email["from"] == "you@example.com"
     assert cfg.email["to"] == "you@example.com"
+
+def test_gap_repair_defaults_when_absent(tmp_path):
+    # a config.yaml with no transcriber.language / gap_repair keys
+    src = (REPO / "config.yaml").read_text()
+    stripped = "\n".join(l for l in src.splitlines()
+                         if not l.strip().startswith(("language:", "gap_repair:",
+                                                      "enabled: true", "trigger_gap_s:",
+                                                      "pad_s:", "max_spans:")))
+    (tmp_path / "config.yaml").write_text(stripped)
+    c = load_config(tmp_path / "config.yaml")
+    assert c.transcriber_language == "en"
+    assert c.gap_repair == {"enabled": False, "trigger_gap_s": 10.0,
+                            "pad_s": 2.0, "max_spans": 8}
+
+def test_gap_repair_from_repo_config():
+    c = load_config(REPO / "config.yaml")
+    assert c.transcriber_language == "en"
+    assert c.gap_repair["enabled"] is True
+    assert c.gap_repair["trigger_gap_s"] == 10.0

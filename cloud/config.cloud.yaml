@@ -24,6 +24,12 @@ limits:
 
 transcriber:
   model: whisper-1
+  language: en          # pin whisper language (main + gap-repair clip calls)
+  gap_repair:           # re-transcribe word-timeline gaps whisper skipped
+    enabled: true
+    trigger_gap_s: 10   # gap length that triggers a clip re-transcription
+    pad_s: 2.0          # context padding around each gap
+    max_spans: 8        # per-session cost bound; hitting it adds a flag
 
 llm:
   model: claude-sonnet-5

@@ -15,6 +15,8 @@ DEFAULT_ACOUSTICS = {
 }
 DEFAULT_FUSION = {"pair_min_s": 0.5, "pair_max_s": 4.0}
 DEFAULT_GUDATA = {"enabled": False}
+DEFAULT_GAP_REPAIR = {"enabled": False, "trigger_gap_s": 10.0, "pad_s": 2.0,
+                      "max_spans": 8}
 
 @dataclass(frozen=True)
 class Vocabulary:
@@ -51,6 +53,8 @@ class Config:
     acoustics: dict = field(default_factory=lambda: dict(DEFAULT_ACOUSTICS))
     fusion: dict = field(default_factory=lambda: dict(DEFAULT_FUSION))
     gudata: dict = field(default_factory=lambda: dict(DEFAULT_GUDATA))
+    transcriber_language: str = "en"
+    gap_repair: dict = field(default_factory=lambda: dict(DEFAULT_GAP_REPAIR))
 
     def vocab(self, name: str | None = None) -> Vocabulary:
         return self.vocabularies[name or self.vocab_default]
@@ -90,4 +94,7 @@ def load_config(path: Path | None = None) -> Config:
         acoustics={**DEFAULT_ACOUSTICS, **(raw.get("acoustics") or {})},
         fusion={**DEFAULT_FUSION, **(raw.get("fusion") or {})},
         gudata={**DEFAULT_GUDATA, **(raw.get("gudata") or {})},
+        transcriber_language=str(raw["transcriber"].get("language", "en")),
+        gap_repair={**DEFAULT_GAP_REPAIR,
+                    **(raw["transcriber"].get("gap_repair") or {})},
     )
