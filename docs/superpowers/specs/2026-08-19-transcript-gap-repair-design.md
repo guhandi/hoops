@@ -186,7 +186,10 @@ Per session directory (local, populated via `pull_sessions`):
 
 1. Read existing envelope + `audio.m4a`; **detect gaps on the existing
    envelope first (free, no API)**. `--all` skips sessions with no
-   qualifying gaps or an existing `gap_repair` key; prints what it skipped.
+   qualifying gaps or an existing CLEAN `gap_repair` repair (no errors, not
+   truncated); errored or truncated repairs are retried, wholesale-replacing
+   the stored repair — this applies to explicit-sid invocations too; prints
+   what it skipped.
 2. Run the repair passes → rewrite `transcript.json` / `transcript.txt`.
 3. `replay_session()` regenerates shots.csv, session.json, fusion, strip,
    report.

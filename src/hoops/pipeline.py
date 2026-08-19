@@ -327,7 +327,8 @@ def retranscribe_session(sdir: Path, cfg: Config, transcriber) -> Outcome:
     Free checks first — the API is only hit when qualifying gaps exist."""
     sid = sdir.name.removeprefix("hoops__")
     env = read_envelope(sdir)
-    if "gap_repair" in env:
+    gr = env.get("gap_repair")
+    if gr is not None and not gr.get("errors") and not gr.get("truncated"):
         return Outcome(status="skipped_repaired", sid=sid, session_dir=sdir)
     audio_f = sdir / "audio.m4a"
     if not audio_f.exists():

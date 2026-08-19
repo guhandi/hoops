@@ -384,6 +384,39 @@ def test_retranscribe_skips_already_repaired(tmp_path, cfg):
     r = retranscribe_session(sdir, cfg, NeverCalled())
     assert r.status == "skipped_repaired"
 
+def test_retranscribe_retries_errored_repair(tmp_path, cfg, monkeypatch):
+    import json as _json
+    from hoops.pipeline import retranscribe_session
+    monkeypatch.setattr("hoops.gap_repair.extract_clip",
+                        lambda audio, t0, t1, dest: dest)
+    sdir = _archived_session(tmp_path, cfg, HOLED, 41.5)
+    env = _json.loads((sdir / "transcript.json").read_text())
+    env["gap_repair"] = {"spans": [], "n_recovered": 0, "truncated": False,
+                         "errors": ["span [24.3, 41.5]: api down"],
+                         "trigger_gap_s": 10.0, "pad_s": 2.0, "edge_margin_s": 0.4}
+    (sdir / "transcript.json").write_text(_json.dumps(env))
+    clip = {"words": [{"word": "swish", "start": 8.0, "end": 8.3}]}
+    r = retranscribe_session(sdir, cfg, FakeTranscriber({"response": clip}))
+    assert r.status == "ok"
+    env2 = _json.loads((sdir / "transcript.json").read_text())
+    assert env2["gap_repair"]["errors"] == []
+    assert env2["gap_repair"]["n_recovered"] == 1
+
+def test_retranscribe_retries_truncated_repair(tmp_path, cfg, monkeypatch):
+    import json as _json
+    from hoops.pipeline import retranscribe_session
+    monkeypatch.setattr("hoops.gap_repair.extract_clip",
+                        lambda audio, t0, t1, dest: dest)
+    sdir = _archived_session(tmp_path, cfg, HOLED, 41.5)
+    env = _json.loads((sdir / "transcript.json").read_text())
+    env["gap_repair"] = {"spans": [], "n_recovered": 0, "truncated": True,
+                         "errors": [],
+                         "trigger_gap_s": 10.0, "pad_s": 2.0, "edge_margin_s": 0.4}
+    (sdir / "transcript.json").write_text(_json.dumps(env))
+    clip = {"words": [{"word": "swish", "start": 8.0, "end": 8.3}]}
+    r = retranscribe_session(sdir, cfg, FakeTranscriber({"response": clip}))
+    assert r.status == "ok"
+
 def test_retranscribe_skips_missing_audio(tmp_path, cfg):
     from hoops.pipeline import retranscribe_session
     sdir = _archived_session(tmp_path, cfg, HOLED, 41.5)
