@@ -346,3 +346,62 @@ def test_replay_preserves_gap_repair_stats(tmp_path, cfg, monkeypatch):
     r = replay_session(out.session_dir, cfg)
     assert r.stats["gap_repair_recovered"] == 1
     assert any("recovered by transcript gap repair" in fl for fl in r.flags)
+
+def _archived_session(tmp_path, cfg, env_words, duration):
+    """Build a real archived session dir by processing, then strip it back
+    to the artifacts retranscribe needs."""
+    f = audio(tmp_path)
+    out = process_file(f, cfg, FakeTranscriber(make_env(env_words, duration=duration)),
+                       email=False, archive="copy", repair_enabled=False)
+    assert out.status == "ok"
+    return out.session_dir
+
+DENSE = [("brick", float(t), float(t) + 0.3) for t in range(1, 40, 5)]  # no gaps in 41.5s
+HOLED = [("brick", 5.0, 5.3), ("swish", 12.0, 12.3),
+         ("swish", 18.0, 18.3), ("swish", 24.0, 24.3)]                  # tail gap ~17s
+
+def test_retranscribe_skips_no_gaps(tmp_path, cfg):
+    from hoops.pipeline import retranscribe_session
+    sdir = _archived_session(tmp_path, cfg, DENSE, 41.5)
+    before = (sdir / "transcript.json").read_text()
+    class NeverCalled:
+        def transcribe(self, path, prompt): raise AssertionError("no API call allowed")
+    r = retranscribe_session(sdir, cfg, NeverCalled())
+    assert r.status == "skipped_no_gaps"
+    assert (sdir / "transcript.json").read_text() == before
+
+def test_retranscribe_skips_already_repaired(tmp_path, cfg):
+    import json as _json
+    from hoops.pipeline import retranscribe_session
+    sdir = _archived_session(tmp_path, cfg, HOLED, 41.5)
+    env = _json.loads((sdir / "transcript.json").read_text())
+    env["gap_repair"] = {"spans": [], "n_recovered": 0, "truncated": False,
+                         "errors": [], "trigger_gap_s": 10.0, "pad_s": 2.0}
+    (sdir / "transcript.json").write_text(_json.dumps(env))
+    class NeverCalled:
+        def transcribe(self, path, prompt): raise AssertionError("no API call allowed")
+    r = retranscribe_session(sdir, cfg, NeverCalled())
+    assert r.status == "skipped_repaired"
+
+def test_retranscribe_skips_missing_audio(tmp_path, cfg):
+    from hoops.pipeline import retranscribe_session
+    sdir = _archived_session(tmp_path, cfg, HOLED, 41.5)
+    (sdir / "audio.m4a").unlink()
+    r = retranscribe_session(sdir, cfg, FakeTranscriber(make_env([])))
+    assert r.status == "skipped_no_audio"
+
+def test_retranscribe_repairs_and_replays(tmp_path, cfg, monkeypatch):
+    import json as _json
+    from hoops.pipeline import retranscribe_session
+    monkeypatch.setattr("hoops.gap_repair.extract_clip",
+                        lambda audio, t0, t1, dest: dest)
+    sdir = _archived_session(tmp_path, cfg, HOLED, 41.5)
+    n_before = len(_json.loads((sdir / "transcript.json").read_text())
+                   ["response"]["words"])
+    clip = {"words": [{"word": "swish", "start": 8.0, "end": 8.3}]}
+    r = retranscribe_session(sdir, cfg, FakeTranscriber({"response": clip}))
+    assert r.status == "ok"
+    assert len(r.rows) == n_before + 1                       # recovered call landed
+    assert r.stats["gap_repair_recovered"] == 1
+    env = _json.loads((sdir / "transcript.json").read_text())
+    assert env["gap_repair"]["n_recovered"] == 1

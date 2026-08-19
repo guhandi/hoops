@@ -7,7 +7,7 @@ from . import PARSER_VERSION
 from .config import Config, Vocabulary
 from .acoustics import write_acoustics
 from .fusion import write_fusion
-from .gap_repair import apply_gap_repair
+from .gap_repair import apply_gap_repair, find_gaps
 from .gudata import push_stage
 from .invariants import check_invariants
 from .parse import parse_words
@@ -320,3 +320,33 @@ def replay_session(sdir: Path, cfg: Config, vocab_name: str | None = None) -> Ou
         acoustics=acoustics, fusion=fused))
     return Outcome(status="ok", sid=sid, session_dir=sdir, stats=stats,
                    rows=rows, flags=flags)
+
+def retranscribe_session(sdir: Path, cfg: Config, transcriber) -> Outcome:
+    """Backfill: gap-repair an archived session's transcript, then replay.
+    Free checks first — the API is only hit when qualifying gaps exist."""
+    sid = sdir.name.removeprefix("hoops__")
+    env = read_envelope(sdir)
+    if "gap_repair" in env:
+        return Outcome(status="skipped_repaired", sid=sid, session_dir=sdir)
+    audio_f = sdir / "audio.m4a"
+    if not audio_f.exists():
+        return Outcome(status="skipped_no_audio", sid=sid, session_dir=sdir)
+    dur = _audio_duration(audio_f) or envelope_duration(env)
+    words = words_from_envelope(env)
+    gaps = find_gaps([(w.start, w.end) for w in words], dur,
+                     cfg.gap_repair["trigger_gap_s"])
+    if not gaps:
+        return Outcome(status="skipped_no_gaps", sid=sid, session_dir=sdir)
+    try:
+        old = read_session_json(sdir)
+    except FileNotFoundError:
+        old = {}
+    if old.get("vocab_map"):
+        vocab = Vocabulary(name=old.get("vocab_name", "persisted"),
+                           surface_to_canonical=old["vocab_map"])
+    else:
+        vocab = cfg.vocab(None)
+    env2 = apply_gap_repair(env, audio_f, transcriber, vocab_prompt(vocab),
+                            cfg.gap_repair, dur)
+    write_transcript(sdir, env2)
+    return replay_session(sdir, cfg)

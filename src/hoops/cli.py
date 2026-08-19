@@ -24,6 +24,14 @@ def build_parser() -> argparse.ArgumentParser:
     gp.add_argument("--all", action="store_true")
     gp.add_argument("sid", nargs="?")
 
+    srt = sub.add_parser("retranscribe",
+                         help="Gap-repair archived session transcripts (paid)")
+    grt = srt.add_mutually_exclusive_group(required=False)
+    grt.add_argument("--all", action="store_true")
+    grt.add_argument("sid", nargs="?")
+    srt.add_argument("--email", action="store_true",
+                     help="resend the report email after repair")
+
     sub.add_parser("poll", help="One-shot inbox scan")
     sub.add_parser("score", help="Print the gate table from manifest.csv")
 
@@ -97,6 +105,54 @@ def main() -> int:
             except Exception as e:
                 failures += 1
                 print(f"{d.name}: FAILED — {e}")
+        return 1 if failures else 0
+
+    if args.command == "retranscribe":
+        import json as _json
+        from .pipeline import retranscribe_session
+        if not args.all and not args.sid:
+            print("retranscribe: specify --all or a session id")
+            return 2
+        dirs = (find_session_dirs(cfg.sessions_root) if args.all
+                else [d for d in find_session_dirs(cfg.sessions_root)
+                      if d.name.endswith(args.sid)])
+        if not dirs:
+            print("retranscribe: no matching sessions "
+                  "(run pull_sessions to sync from R2 first)")
+            return 2
+        failures = repaired = 0
+        for d in dirs:
+            try:
+                r = retranscribe_session(d, cfg, transcriber)
+                if r.status.startswith("skipped_"):
+                    reason = r.status.removeprefix("skipped_").replace("_", " ")
+                    print(f"{d.name}: {reason} — skipped")
+                    continue
+                repaired += 1
+                n = r.stats.get("gap_repair_recovered", 0)
+                print(f"{d.name}: {n} word(s) recovered, replayed "
+                      f"({len(r.rows)} calls, "
+                      f"{'clean' if not r.flags else 'FLAGS: ' + '; '.join(r.flags)})")
+                if args.email:
+                    from .mailer import build_email, send
+                    from .render import Narrative
+                    narrative = None
+                    nfile = d / "narrative.json"
+                    if nfile.exists():
+                        try:
+                            narrative = Narrative(**_json.loads(nfile.read_text()))
+                        except (TypeError, ValueError):
+                            narrative = None
+                    send(build_email(r.stats, d, narrative, r.flags, cfg), cfg)
+            except Exception as e:
+                failures += 1
+                print(f"{d.name}: FAILED — {e}")
+        if repaired:
+            print("\nreminders: `hoops push <sid>` re-pushes stats to GuData "
+                  "(server dedupes on external_id — corrected values may be "
+                  "skipped unless GuData upserts); "
+                  "`uv run modal run cloud/modal_app.py::push_sessions` syncs "
+                  "repaired artifacts back to R2.")
         return 1 if failures else 0
 
     if args.command == "score":
