@@ -93,7 +93,16 @@ Pure, unit-testable span math (stdlib only):
   of words already in the main transcript and prompt-bleed at clip edges
   (whisper echoes vocab-prompt decoys like "scratch" over near-silence). No
   content filtering beyond that — the parser's isolation gate and fusion's
-  corroboration do their normal jobs on recovered words.
+  corroboration do their normal jobs on recovered words. Word-backed edge
+  margins (added 2026-08-19 after the R03 gate caught a boundary
+  re-hearing): recovered words starting within `isolation.high` of a gap
+  edge that abuts a transcribed word are excluded — a clip re-hearing of
+  the boundary word passes the inside-gap test on timestamp drift, then
+  voids the real boundary word via the parser's isolation gate (R03: clip
+  brick@31.6 vs main break ending 31.5 killed both). Lossless: a real call
+  that close to the boundary word could never survive isolation as a
+  distinct call anyway. Head-gap starts (t=0) and tail-gap ends
+  (t=duration) have no boundary word and get no margin.
 
 Plus one orchestration function with I/O:
 

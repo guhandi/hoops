@@ -148,7 +148,8 @@ def process_file(path: Path, cfg: Config, transcriber, *, email: bool,
                             transcriber.model_id)
         if cfg.gap_repair.get("enabled"):
             env = apply_gap_repair(env, path, transcriber, vocab_prompt(vocab),
-                                   cfg.gap_repair, duration=dur)
+                                   cfg.gap_repair, duration=dur,
+                                   edge_margin_s=cfg.isolation_high)
     sdir.mkdir(parents=True)
     write_transcript(sdir, env)                         # L2 persisted BEFORE parse
 
@@ -347,6 +348,6 @@ def retranscribe_session(sdir: Path, cfg: Config, transcriber) -> Outcome:
     else:
         vocab = cfg.vocab(None)
     env2 = apply_gap_repair(env, audio_f, transcriber, vocab_prompt(vocab),
-                            cfg.gap_repair, dur)
+                            cfg.gap_repair, dur, edge_margin_s=cfg.isolation_high)
     write_transcript(sdir, env2)
     return replay_session(sdir, cfg)

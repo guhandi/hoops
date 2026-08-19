@@ -69,6 +69,18 @@ def test_merge_recovered_keeps_only_inside_gap():
 def test_merge_recovered_empty_clip():
     assert merge_recovered((10.0, 25.0), 8.0, []) == []
 
+def test_merge_recovered_excludes_boundary_rehearing():
+    # main-pass word ends at gap start; clip re-hears it 0.1s inside the gap
+    clip_words = [{"word": "brick", "start": 2.1, "end": 2.5},    # 31.6 — within margin
+                  {"word": "brick", "start": 7.94, "end": 8.3}]   # 37.44 — real
+    out = merge_recovered((31.5, 49.6), 29.5, clip_words, 0.4, 0.4)
+    assert [round(w["start"], 2) for w in out] == [37.44]
+
+def test_merge_recovered_margins_default_zero():
+    clip_words = [{"word": "brick", "start": 2.1, "end": 2.5}]
+    out = merge_recovered((31.5, 49.6), 29.5, clip_words)
+    assert len(out) == 1   # old behavior preserved when margins omitted
+
 # Dense words up to ~112s so ONLY the tail gap (112.4 -> 136.13) qualifies.
 # (A lone word at 111s would also create a head gap — two spans, not one.)
 DENSE_THEN_TAIL = [("w", float(t), float(t) + 0.4) for t in range(0, 113, 8)]
@@ -119,3 +131,17 @@ def test_apply_single_pass_no_recursion(monkeypatch, tmp_path):
     env = _env(DENSE_THEN_TAIL)
     apply_gap_repair(env, tmp_path / "a.m4a", t, "p", GR_CFG, duration=136.13)
     assert len(t.calls) == 1
+
+def test_apply_gap_repair_margins_only_on_word_backed_edges(monkeypatch, tmp_path):
+    _stub_clip(monkeypatch)
+    # head gap (starts at 0.0): word 0.2s into the recording must be KEPT
+    env = _env([("splash", 111.0, 111.66), ("go", 130.0, 130.4)])
+    # spans: head gap (0.0, 111.0) and interior gap (111.66, 130.0)
+    head_clip = {"words": [{"word": "brick", "start": 0.2, "end": 0.6}]}
+    mid_clip = {"words": [{"word": "splash", "start": 2.1, "end": 2.5}]}  # 111.76: within 0.4 of 111.66 -> dropped
+    t = ClipTranscriber([head_clip, mid_clip])
+    out = apply_gap_repair(env, tmp_path / "a.m4a", t, "p", GR_CFG,
+                           duration=136.13, edge_margin_s=0.4)
+    recs = [w for s in out["gap_repair"]["spans"] for w in s["recovered"]]
+    assert [round(w["start"], 2) for w in recs] == [0.2]
+    assert out["gap_repair"]["edge_margin_s"] == 0.4

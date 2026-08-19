@@ -309,6 +309,7 @@ def test_gap_repair_recovers_calls(tmp_path, cfg, monkeypatch):
     assert any("recovered by transcript gap repair" in fl for fl in out.flags)
     env = json.loads((out.session_dir / "transcript.json").read_text())
     assert env["gap_repair"]["n_recovered"] == 1
+    assert env["gap_repair"]["edge_margin_s"] == cfg.isolation_high
 
 def test_gap_repair_disabled_no_stage(tmp_path, cfg):
     f = audio(tmp_path)
