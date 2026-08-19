@@ -23,6 +23,7 @@ def cfg(tmp_path, monkeypatch):
     shutil.copy(REPO / "config.yaml", tmp_path / "config.yaml")
     c = load_config(tmp_path / "config.yaml")
     c.gudata["enabled"] = False      # tests assert offline behavior regardless of live config
+    c.gap_repair["enabled"] = False      # gap-repair tests opt in explicitly
     return c
 
 def audio(tmp_path, name="hoops__20260727-061204.m4a"):
@@ -283,3 +284,65 @@ def test_session_json_persists_vocab_and_replay_uses_it(tmp_path, cfg):
     r = replay_session(out.session_dir, cfg)
     assert [row["result"] for row in r.rows] == ["make", "miss"]
     assert read_session_json(out.session_dir)["vocab_name"] == "make_miss"
+
+class SeqTranscriber:
+    """Main response first, then one canned clip response per gap span."""
+    model_id = "fake"
+    def __init__(self, responses): self.responses = list(responses)
+    def transcribe(self, path, prompt): return self.responses.pop(0)
+
+def test_gap_repair_recovers_calls(tmp_path, cfg, monkeypatch):
+    monkeypatch.setattr("hoops.gap_repair.extract_clip",
+                        lambda audio, t0, t1, dest: dest)
+    cfg.gap_repair["enabled"] = True
+    # dev03.m4a is ~41.5s; main transcript ends at 24.3 -> tail gap ~17s
+    main = make_env([("brick", 5.0, 5.3), ("swish", 12.0, 12.3),
+                     ("swish", 18.0, 18.3), ("swish", 24.0, 24.3)],
+                    duration=41.5)["response"]
+    clip = {"words": [{"word": "swish", "start": 8.0, "end": 8.3}]}  # ~30.3s session time
+    f = audio(tmp_path)
+    out = process_file(f, cfg, SeqTranscriber([main, clip]),
+                       email=False, archive="copy", repair_enabled=False)
+    assert out.status == "ok"
+    assert len(out.rows) == 5
+    assert out.stats["gap_repair_recovered"] == 1
+    assert any("recovered by transcript gap repair" in fl for fl in out.flags)
+    env = json.loads((out.session_dir / "transcript.json").read_text())
+    assert env["gap_repair"]["n_recovered"] == 1
+
+def test_gap_repair_disabled_no_stage(tmp_path, cfg):
+    f = audio(tmp_path)
+    out = process_file(f, cfg, FakeTranscriber(make_env(GOOD, duration=30.0)),
+                       email=False, archive="copy", repair_enabled=False)
+    assert "gap_repair_recovered" not in out.stats
+    env = json.loads((out.session_dir / "transcript.json").read_text())
+    assert "gap_repair" not in env
+
+def test_gap_repair_errors_flagged(tmp_path, cfg, monkeypatch):
+    def broken(audio, t0, t1, dest): raise RuntimeError("no codec")
+    monkeypatch.setattr("hoops.gap_repair.extract_clip", broken)
+    cfg.gap_repair["enabled"] = True
+    main = make_env([("brick", 5.0, 5.3), ("swish", 12.0, 12.3),
+                     ("swish", 18.0, 18.3), ("swish", 24.0, 24.3)],
+                    duration=41.5)["response"]
+    f = audio(tmp_path)
+    out = process_file(f, cfg, SeqTranscriber([main]), email=False,
+                       archive="copy", repair_enabled=False)
+    assert out.status == "ok"                       # never blocks the report
+    assert out.stats["gap_repair_recovered"] == 0
+    assert any(fl.startswith("gap repair error:") for fl in out.flags)
+
+def test_replay_preserves_gap_repair_stats(tmp_path, cfg, monkeypatch):
+    monkeypatch.setattr("hoops.gap_repair.extract_clip",
+                        lambda audio, t0, t1, dest: dest)
+    cfg.gap_repair["enabled"] = True
+    main = make_env([("brick", 5.0, 5.3), ("swish", 12.0, 12.3),
+                     ("swish", 18.0, 18.3), ("swish", 24.0, 24.3)],
+                    duration=41.5)["response"]
+    clip = {"words": [{"word": "swish", "start": 8.0, "end": 8.3}]}
+    f = audio(tmp_path)
+    out = process_file(f, cfg, SeqTranscriber([main, clip]),
+                       email=False, archive="copy", repair_enabled=False)
+    r = replay_session(out.session_dir, cfg)
+    assert r.stats["gap_repair_recovered"] == 1
+    assert any("recovered by transcript gap repair" in fl for fl in r.flags)

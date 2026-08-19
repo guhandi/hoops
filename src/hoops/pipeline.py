@@ -7,6 +7,7 @@ from . import PARSER_VERSION
 from .config import Config, Vocabulary
 from .acoustics import write_acoustics
 from .fusion import write_fusion
+from .gap_repair import apply_gap_repair
 from .gudata import push_stage
 from .invariants import check_invariants
 from .parse import parse_words
@@ -90,6 +91,20 @@ def _audio_duration(path: Path) -> float | None:
     except Exception:
         return None
 
+def _gap_repair_stats(env: dict, cfg: Config, stats: dict, flags: list) -> None:
+    gr = env.get("gap_repair")
+    if gr is None:
+        return
+    stats["gap_repair_recovered"] = gr["n_recovered"]
+    if gr["n_recovered"]:
+        flags.append(f"{gr['n_recovered']} call word(s) recovered by "
+                     "transcript gap repair")
+    if gr.get("truncated"):
+        flags.append(f"gap repair span cap ({cfg.gap_repair['max_spans']}) "
+                     "hit — later gaps unprocessed")
+    for err in gr.get("errors", []):
+        flags.append(f"gap repair error: {err}")
+
 def _reject(path: Path, cfg: Config, archive: str, sid: str, base: Path) -> Outcome:
     rej = base / "rejected"
     if archive != "none":
@@ -131,6 +146,9 @@ def process_file(path: Path, cfg: Config, transcriber, *, email: bool,
     else:
         env = make_envelope(transcriber.transcribe(path, vocab_prompt(vocab)),
                             transcriber.model_id)
+        if cfg.gap_repair.get("enabled"):
+            env = apply_gap_repair(env, path, transcriber, vocab_prompt(vocab),
+                                   cfg.gap_repair, duration=dur)
     sdir.mkdir(parents=True)
     write_transcript(sdir, env)                         # L2 persisted BEFORE parse
 
@@ -172,6 +190,7 @@ def process_file(path: Path, cfg: Config, transcriber, *, email: bool,
         session_len_s=envelope_duration(env), transcriber=env["model"],
         parser_version=PARSER_VERSION, profanity=cfg.profanity)
     flags = [f"{v.id}: {v.message}" for v in violations]
+    _gap_repair_stats(env, cfg, stats, flags)
     if parsed.ambiguous:
         flags.append(f"{len(parsed.ambiguous)} ambiguous call-like token(s)")
     if dur > cfg.max_duration_s:
@@ -291,6 +310,7 @@ def replay_session(sdir: Path, cfg: Config, vocab_name: str | None = None) -> Ou
     if fused is None:
         (sdir / "fusion.json").unlink(missing_ok=True)
     flags = [f"{v.id}: {v.message}" for v in violations]
+    _gap_repair_stats(env, cfg, stats, flags)
     write_shots_csv(sdir, rows)
     write_session_json(sdir, stats)
     render_strip(rows, sdir / "strip.png")

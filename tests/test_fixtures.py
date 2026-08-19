@@ -29,7 +29,9 @@ def sandbox(tmp_path):
         NEW_HEADER + "\n"
         "dev/dev01.m4a,D01,dev,recorded,,,,aac,x,x,regression,FALSE,,"
         "miss make make make,,TRUE,,,,LABELED,smoke\n")
-    return load_config(tmp_path / "config.yaml")
+    c = load_config(tmp_path / "config.yaml")
+    c.gap_repair["enabled"] = False      # deterministic transcribe() call counts in these tests
+    return c
 
 def test_run_all_skips_not_recorded_and_blank_filename(sandbox):
     (sandbox.repo_root / "fixtures" / "manifest.csv").write_text(
