@@ -83,8 +83,11 @@ Pure, unit-testable span math (stdlib only):
   qualifies when longer than `trigger_gap_s` (default **10s**; the two misses
   in R03 were 18.1s and 16.6s; median real call spacing is ~6s).
 - **Span building:** qualifying gaps padded by `pad_s` (default 2.0s),
-  clamped to `[0, duration]`, overlapping spans merged, count capped at
-  `max_spans` (default 8). Hitting the cap adds a flag — never silent.
+  clamped to `[0, duration]`, count capped at `max_spans` (default 8).
+  Hitting the cap adds a flag — never silent. Padded clips may overlap;
+  spans are deliberately NOT merged — gaps are disjoint by construction, so
+  the keep-only-inside-the-unpadded-gap rule makes cross-span duplicates
+  impossible, and overlap only re-transcribes a couple of padding seconds.
 - **Merge rule (hallucination guard):** only recovered words whose `start`
   falls **inside the unpadded gap** are kept. This drops boundary duplicates
   of words already in the main transcript and prompt-bleed at clip edges
