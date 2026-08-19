@@ -6,9 +6,10 @@ How the pipeline is built, why it's shaped this way, and where to look when some
 
 ```
 src/hoops/
-  cli.py         entry points: process / process-all / replay / poll / score / transcribe-fixtures
+  cli.py         entry points: process / process-all / replay / push / retranscribe / poll / score / transcribe-fixtures
   ingest.py      inbox poller: stability rules, .icloud stubs, lock file, pending-email retry (local fallback path)
   transcribe.py  Transcriber interface + whisper-1 backend; Word model; transcript envelope
+  gap_repair.py  transcript gap repair: re-transcribes word-timeline gaps > trigger_gap_s as padded clips, merges recovered words into the envelope (sibling gap_repair key; raw response pristine; word-backed edge margins drop boundary re-hearings)
   parse.py       PURE: word stream → calls (isolation gate, vocabulary, scratch-that, note:)
   stats.py       PURE: calls → shot rows (§7.6 schema) → session stats (§7.7 schema)
   invariants.py  PURE: I1–I6 checks on the shot table
@@ -74,6 +75,8 @@ uv run modal run cloud/modal_app.py::pull_sessions
 ```
 
 pulls new session artifacts down from R2 into local `sessions/`, skipping files already present. The mirror command, `uv run modal run cloud/modal_app.py::push_sessions`, backfills local session folders up to the bucket (skip-if-exists, never overwrites) — used once to migrate the pre-cloud July 2026 history, and safe to re-run any time.
+
+`hoops retranscribe [<sid>|--all] [--email]` backfills gap repair (see `gap_repair.py` above) onto archived sessions synced down by `pull_sessions`. Gap detection on the existing envelope is a free pre-check (no API call) — `--all` skips sessions that are already repaired, have no audio, or have no qualifying gaps, and prints what it skipped; only sessions with real gaps pay for re-transcription. A session that needs it gets the repair pass, then `replay_session()` regenerates shots.csv/session.json/fusion/report from the augmented envelope; `--email` optionally resends the report. Two reminders the command itself prints: `hoops push <sid>` re-pushes corrected stats to GuData but GuData dedupes on `external_id`, so a re-push of a previously-pushed session may be server-side skipped rather than updated (upsert is a GuData-side gap, out of scope here — treat a reported skip as "did not land," not as success); and repaired sessions still need `uv run modal run cloud/modal_app.py::push_sessions` to sync the corrected artifacts back to R2 — `retranscribe` never does this automatically.
 
 ### Local fallback mode
 
@@ -159,6 +162,7 @@ whisper-1 via the OpenAI API with `response_format=verbose_json` and `timestamp_
 | Audio > 20min | Processed, flagged prominently (forgot to stop) |
 | Zero calls detected | Session moved to `needs_review/`, emailed with the raw transcript |
 | Invariants fail after repair | Row written anyway with `invariants_passed=false`, flagged in subject |
+| Whisper drops sparse calls | gap-repair second pass re-transcribes gaps; recovered words flagged in report/email; fusion call_missing corroborates |
 | Duplicate session | Skipped; stray inbox copy drained |
 | SMTP failure | `pending_email` marker; retried automatically on later polls |
 | LLM narrative failure | Email sends without the narrative blocks |
