@@ -69,7 +69,7 @@ def test_transcribe_fixtures_cli_clears_stale_out_dir(sandbox, monkeypatch):
     calls = {"n": 0}
     class CountingTranscriber:
         model_id = "fake"
-        def __init__(self, model): pass
+        def __init__(self, model, language="en"): pass
         def transcribe(self, path, prompt):
             calls["n"] += 1
             return make_env(GOOD, duration=30.0)["response"]
