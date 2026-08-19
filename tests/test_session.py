@@ -49,3 +49,20 @@ def test_find_session_dirs(tmp_path):
     (a / "transcript.json").write_text("{}")
     (tmp_path / "2026" / "07" / "empty").mkdir()
     assert find_session_dirs(tmp_path) == [a]
+
+def test_write_transcript_annotates_recovered(tmp_path):
+    from hoops.session import write_transcript
+    env = {"model": "whisper-1", "response": {"text": "break. splash."},
+           "gap_repair": {"spans": [
+               {"gap": [111.7, 127.5], "clip": [109.7, 129.5],
+                "recovered": [{"word": " splash", "start": 119.66, "end": 120.1}]}],
+               "n_recovered": 1, "truncated": False, "errors": []}}
+    write_transcript(tmp_path, env)
+    txt = (tmp_path / "transcript.txt").read_text()
+    assert txt == "break. splash.\n[gap repair recovered: splash@119.7]"
+
+def test_write_transcript_no_gap_repair_unchanged(tmp_path):
+    from hoops.session import write_transcript
+    env = {"model": "whisper-1", "response": {"text": "break. splash."}}
+    write_transcript(tmp_path, env)
+    assert (tmp_path / "transcript.txt").read_text() == "break. splash."
