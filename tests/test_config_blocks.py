@@ -33,6 +33,18 @@ def test_partial_block_merges_over_defaults(tmp_path):
     assert cfg.acoustics["cluster_gap_s"] == DEFAULT_ACOUSTICS["cluster_gap_s"]
 
 @pytest.mark.unit
+def test_gudata_block_defaults_disabled(tmp_path):
+    (tmp_path / "config.yaml").write_text(MINIMAL)
+    cfg = load_config(tmp_path / "config.yaml")
+    assert cfg.gudata == {"enabled": False}
+
+@pytest.mark.unit
+def test_gudata_block_parses(tmp_path):
+    (tmp_path / "config.yaml").write_text(MINIMAL + "\ngudata:\n  enabled: true\n")
+    cfg = load_config(tmp_path / "config.yaml")
+    assert cfg.gudata["enabled"] is True
+
+@pytest.mark.unit
 def test_repo_configs_carry_explicit_blocks():
     # raw yaml, not load_config: cloud/config.cloud.yaml is a partial config
     import yaml

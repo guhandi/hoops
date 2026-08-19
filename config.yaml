@@ -51,3 +51,6 @@ acoustics:                  # branch B — impact detection, independent of voic
 fusion:                     # pairing voice calls to impact clusters
   pair_min_s: 0.5
   pair_max_s: 4.0
+
+gudata:                     # push session stats + per-shot rows to GuData (non-fatal stage)
+  enabled: false            # flip on once GUDATA_* env vars are set (.env.example)

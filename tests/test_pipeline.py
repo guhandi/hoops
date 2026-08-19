@@ -239,6 +239,35 @@ def test_replay_removes_stale_sidecars_when_stages_yield_none(tmp_path, cfg, mon
     for name in ("impacts.json", "acoustics.json", "fusion.json"):
         assert not (out.session_dir / name).exists()
 
+def test_gudata_success_writes_sidecar_no_flag(tmp_path, cfg, monkeypatch):
+    monkeypatch.setattr("hoops.pipeline.push_stage",
+        lambda *a: ({"session_id": "s1", "observation_ids": [], "count": 5}, None))
+    out = process_file(audio(tmp_path), cfg, FakeTranscriber(make_env(GOOD, duration=30.0)),
+                       email=False, archive="copy")
+    assert out.status == "ok"
+    assert json.loads((out.session_dir / "gudata_push.json").read_text())["session_id"] == "s1"
+    assert not any("gudata" in f for f in out.flags)
+
+def test_gudata_failure_is_flagged_and_never_blocks_email(tmp_path, cfg, monkeypatch):
+    calls = {}
+    monkeypatch.setattr("hoops.pipeline.push_stage", lambda *a: (None, "connection refused"))
+    monkeypatch.setattr("hoops.narrative.generate_narrative", lambda *a, **k: None)
+    monkeypatch.setattr("hoops.mailer.send", lambda msg, c: calls.setdefault("sent", True))
+    out = process_file(audio(tmp_path), cfg, FakeTranscriber(make_env(GOOD, duration=30.0)),
+                       email=True, archive="copy")
+    assert out.status == "ok"
+    assert "gudata push failed: connection refused" in out.flags
+    assert "gudata push failed" in (out.session_dir / "report.html").read_text()
+    assert calls.get("sent") is True                      # email still went out
+    assert not (out.session_dir / "gudata_push.json").exists()
+
+def test_gudata_disabled_by_default_makes_no_call(tmp_path, cfg, monkeypatch):
+    monkeypatch.setattr("hoops.gudata.post_json",
+                        lambda *a, **k: pytest.fail("HTTP called with gudata disabled"))
+    out = process_file(audio(tmp_path), cfg, FakeTranscriber(make_env(GOOD, duration=30.0)),
+                       email=False, archive="copy")
+    assert out.status == "ok" and not (out.session_dir / "gudata_push.json").exists()
+
 def test_session_json_persists_vocab_and_replay_uses_it(tmp_path, cfg):
     f = audio(tmp_path)
     env = make_env([("make", 5.0, 5.3), ("miss", 12.0, 12.3)], duration=30.0)

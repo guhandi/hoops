@@ -11,13 +11,18 @@ def test_parser_has_all_subcommands():
     args = p.parse_args(["process", "some.m4a", "--no-email"])
     assert args.command == "process" and args.no_email is True
     for cmd, extra in [("process-all", ["fixtures"]), ("replay", []), ("poll", []),
-                       ("score", []), ("transcribe-fixtures", [])]:
+                       ("score", []), ("transcribe-fixtures", []), ("push", ["--all"])]:
         assert p.parse_args([cmd, *extra]).command == cmd
 
 def test_replay_flags():
     p = build_parser()
     assert p.parse_args(["replay", "--all"]).all is True
     assert p.parse_args(["replay", "20260727-061204"]).sid == "20260727-061204"
+
+def test_push_parser_flags():
+    p = build_parser()
+    assert p.parse_args(["push", "--all"]).all is True
+    assert p.parse_args(["push", "20260728-061204"]).sid == "20260728-061204"
 
 def test_process_accepts_vocab_flag():
     p = build_parser()
