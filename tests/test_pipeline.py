@@ -22,6 +22,7 @@ class FakeTranscriber:
 def cfg(tmp_path, monkeypatch):
     shutil.copy(REPO / "config.yaml", tmp_path / "config.yaml")
     c = load_config(tmp_path / "config.yaml")
+    c.gudata["enabled"] = False      # tests assert offline behavior regardless of live config
     return c
 
 def audio(tmp_path, name="hoops__20260727-061204.m4a"):
