@@ -45,7 +45,7 @@ def main() -> int:
     args = build_parser().parse_args()
     load_dotenv(Path(__file__).resolve().parents[2] / ".env")
     cfg = load_config(Path(__file__).resolve().parents[2] / "config.yaml")
-    transcriber = WhisperApiTranscriber(cfg.transcriber_model)
+    transcriber = WhisperApiTranscriber(cfg.transcriber_model, cfg.transcriber_language)
 
     if args.command == "process":
         if args.vocab and args.vocab not in cfg.vocabularies:

@@ -66,3 +66,9 @@ def test_whisper_transcriber_calls_api(monkeypatch, tmp_path):
     assert calls["response_format"] == "verbose_json"
     assert calls["timestamp_granularities"] == ["word"]
     assert calls["prompt"] == "hint"
+
+def test_transcriber_language_attr():
+    from hoops.transcribe import WhisperApiTranscriber
+    t = WhisperApiTranscriber("whisper-1", language="en")
+    assert t.language == "en"
+    assert WhisperApiTranscriber("whisper-1").language == "en"

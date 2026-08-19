@@ -53,13 +53,15 @@ def vocab_prompt(vocab: Vocabulary) -> str:
     return ". ".join(surfaces) + ". scratch that. note: legs a bit tired today."
 
 class WhisperApiTranscriber:
-    def __init__(self, model: str = "whisper-1"):
+    def __init__(self, model: str = "whisper-1", language: str = "en"):
         self.model_id = model
+        self.language = language
 
     def transcribe(self, audio_path: Path, prompt: str) -> dict:
         client = OpenAI()
         with audio_path.open("rb") as f:
             resp = client.audio.transcriptions.create(
                 model=self.model_id, file=f, response_format="verbose_json",
-                timestamp_granularities=["word"], prompt=prompt)
+                timestamp_granularities=["word"], prompt=prompt,
+                language=self.language)
         return resp.model_dump()

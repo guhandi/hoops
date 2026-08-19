@@ -44,7 +44,7 @@ def test_main_loads_dotenv_before_config(monkeypatch):
     def fake_load_dotenv(*a, **k):
         order.append("dotenv")
 
-    fake_cfg = SimpleNamespace(transcriber_model="whisper-1")
+    fake_cfg = SimpleNamespace(transcriber_model="whisper-1", transcriber_language="en")
 
     def fake_load_config(*a, **k):
         order.append("config")
