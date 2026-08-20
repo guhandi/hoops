@@ -29,7 +29,9 @@ def sandbox(tmp_path):
         NEW_HEADER + "\n"
         "dev/dev01.m4a,D01,dev,recorded,,,,aac,x,x,regression,FALSE,,"
         "miss make make make,,TRUE,,,,LABELED,smoke\n")
-    return load_config(tmp_path / "config.yaml")
+    c = load_config(tmp_path / "config.yaml")
+    c.gap_repair["enabled"] = False      # deterministic transcribe() call counts in these tests
+    return c
 
 def test_run_all_skips_not_recorded_and_blank_filename(sandbox):
     (sandbox.repo_root / "fixtures" / "manifest.csv").write_text(
@@ -67,7 +69,7 @@ def test_transcribe_fixtures_cli_clears_stale_out_dir(sandbox, monkeypatch):
     calls = {"n": 0}
     class CountingTranscriber:
         model_id = "fake"
-        def __init__(self, model): pass
+        def __init__(self, model, language="en"): pass
         def transcribe(self, path, prompt):
             calls["n"] += 1
             return make_env(GOOD, duration=30.0)["response"]

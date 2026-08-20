@@ -93,7 +93,16 @@ Pure, unit-testable span math (stdlib only):
   of words already in the main transcript and prompt-bleed at clip edges
   (whisper echoes vocab-prompt decoys like "scratch" over near-silence). No
   content filtering beyond that — the parser's isolation gate and fusion's
-  corroboration do their normal jobs on recovered words.
+  corroboration do their normal jobs on recovered words. Word-backed edge
+  margins (added 2026-08-19 after the R03 gate caught a boundary
+  re-hearing): recovered words starting within `isolation.high` of a gap
+  edge that abuts a transcribed word are excluded — a clip re-hearing of
+  the boundary word passes the inside-gap test on timestamp drift, then
+  voids the real boundary word via the parser's isolation gate (R03: clip
+  brick@31.6 vs main break ending 31.5 killed both). Lossless: a real call
+  that close to the boundary word could never survive isolation as a
+  distinct call anyway. Head-gap starts (t=0) and tail-gap ends
+  (t=duration) have no boundary word and get no margin.
 
 Plus one orchestration function with I/O:
 
@@ -177,7 +186,10 @@ Per session directory (local, populated via `pull_sessions`):
 
 1. Read existing envelope + `audio.m4a`; **detect gaps on the existing
    envelope first (free, no API)**. `--all` skips sessions with no
-   qualifying gaps or an existing `gap_repair` key; prints what it skipped.
+   qualifying gaps or an existing CLEAN `gap_repair` repair (no errors, not
+   truncated); errored or truncated repairs are retried, wholesale-replacing
+   the stored repair — this applies to explicit-sid invocations too; prints
+   what it skipped.
 2. Run the repair passes → rewrite `transcript.json` / `transcript.txt`.
 3. `replay_session()` regenerates shots.csv, session.json, fusion, strip,
    report.

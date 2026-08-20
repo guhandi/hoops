@@ -20,7 +20,9 @@ def cfg(tmp_path):
         str(tmp_path / "inbox"))
     (tmp_path / "config.yaml").write_text(text)
     (tmp_path / "inbox").mkdir()
-    return load_config(tmp_path / "config.yaml")
+    c = load_config(tmp_path / "config.yaml")
+    c.gap_repair["enabled"] = False      # deterministic transcribe() call counts in these tests
+    return c
 
 def drop(cfg, name="hoops__20260727-061204.m4a"):
     dst = cfg.inbox / name

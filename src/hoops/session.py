@@ -23,7 +23,13 @@ def sid_date_and_time(sid: str) -> tuple[str, str]:
 
 def write_transcript(sdir: Path, env: dict) -> None:
     (sdir / "transcript.json").write_text(json.dumps(env, indent=2, ensure_ascii=False))
-    (sdir / "transcript.txt").write_text(env["response"].get("text", ""))
+    text = env["response"].get("text", "")
+    recovered = [w for s in (env.get("gap_repair") or {}).get("spans", [])
+                 for w in s.get("recovered", [])]
+    if recovered:
+        ann = " ".join(f"{w['word'].strip()}@{w['start']:.1f}" for w in recovered)
+        text = (text + "\n" if text else "") + f"[gap repair recovered: {ann}]"
+    (sdir / "transcript.txt").write_text(text)
 
 def write_shots_csv(sdir: Path, rows: list[dict]) -> None:
     with (sdir / "shots.csv").open("w", newline="") as f:

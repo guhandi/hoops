@@ -135,6 +135,7 @@ def _cfg_with_gudata(tmp_path, enabled: bool):
     from hoops.config import load_config
     repo = Path(__file__).resolve().parents[1]
     text = (repo / "config.yaml").read_text()
+    text = text.replace("enabled: true", f"enabled: {'true' if enabled else 'false'}")
     text = text.replace("enabled: false", f"enabled: {'true' if enabled else 'false'}")
     (tmp_path / "config.yaml").write_text(text)
     return load_config(tmp_path / "config.yaml")

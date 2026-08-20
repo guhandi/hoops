@@ -25,6 +25,10 @@ def rig(tmp_path, monkeypatch):
     monkeypatch.setattr("hoops.narrative.generate_narrative", lambda *a, **k: None)
     sent = []
     monkeypatch.setattr("hoops.mailer.send", lambda msg, cfg: sent.append(msg))
+    # cloud/config.cloud.yaml has gap_repair.enabled: true (production default); avoid a
+    # real librosa decode in this offline unit test by stubbing the clip extraction step.
+    monkeypatch.setattr("hoops.gap_repair.extract_clip",
+                        lambda audio, t0, t1, dest: dest)
     store = ObjectStore(FakeClient(), "hoops-data")
     store.put_bytes(f"raw/{NAME}", (REPO / "fixtures" / "dev" / "dev03.m4a").read_bytes())
     return store, sent, tmp_path

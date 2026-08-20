@@ -24,8 +24,12 @@ def make_envelope(response: dict, model_id: str) -> dict:
 def words_from_envelope(env: dict) -> list[Word]:
     resp = env["response"]
     segments = resp.get("segments") or []
+    raw_words = list(resp.get("words") or [])
+    for span in (env.get("gap_repair") or {}).get("spans", []):
+        raw_words.extend(span.get("recovered", []))
+    raw_words.sort(key=lambda w: float(w["start"]))
     out = []
-    for w in resp.get("words") or []:
+    for w in raw_words:
         conf = None
         for seg in segments:
             if seg["start"] <= w["start"] < seg["end"]:
@@ -53,13 +57,15 @@ def vocab_prompt(vocab: Vocabulary) -> str:
     return ". ".join(surfaces) + ". scratch that. note: legs a bit tired today."
 
 class WhisperApiTranscriber:
-    def __init__(self, model: str = "whisper-1"):
+    def __init__(self, model: str = "whisper-1", language: str = "en"):
         self.model_id = model
+        self.language = language
 
     def transcribe(self, audio_path: Path, prompt: str) -> dict:
         client = OpenAI()
         with audio_path.open("rb") as f:
             resp = client.audio.transcriptions.create(
                 model=self.model_id, file=f, response_format="verbose_json",
-                timestamp_granularities=["word"], prompt=prompt)
+                timestamp_granularities=["word"], prompt=prompt,
+                language=self.language)
         return resp.model_dump()

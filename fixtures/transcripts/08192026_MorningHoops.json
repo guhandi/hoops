@@ -1,0 +1,281 @@
+{
+  "model": "whisper-1",
+  "response": {
+    "duration": 136.1300048828125,
+    "language": "english",
+    "text": "break. break. break. break.    break. break. break. break. break.  break. splash. break. break. break. break. splash.   let's fucking go.",
+    "segments": null,
+    "usage": {
+      "seconds": 137.0,
+      "type": "duration"
+    },
+    "words": [
+      {
+        "end": 7.039999961853027,
+        "start": 5.639999866485596,
+        "word": "break"
+      },
+      {
+        "end": 14.0600004196167,
+        "start": 12.65999984741211,
+        "word": "break"
+      },
+      {
+        "end": 20.440000534057617,
+        "start": 19.040000915527344,
+        "word": "break"
+      },
+      {
+        "end": 31.5,
+        "start": 30.100000381469727,
+        "word": "break"
+      },
+      {
+        "end": 50.15999984741211,
+        "start": 49.599998474121094,
+        "word": "break"
+      },
+      {
+        "end": 51.97999954223633,
+        "start": 51.959999084472656,
+        "word": "break"
+      },
+      {
+        "end": 57.79999923706055,
+        "start": 56.400001525878906,
+        "word": "break"
+      },
+      {
+        "end": 65.5999984741211,
+        "start": 64.19999694824219,
+        "word": "break"
+      },
+      {
+        "end": 71.76000213623047,
+        "start": 71.0199966430664,
+        "word": "break"
+      },
+      {
+        "end": 78.9800033569336,
+        "start": 78.0999984741211,
+        "word": "break"
+      },
+      {
+        "end": 85.55999755859375,
+        "start": 84.16000366210938,
+        "word": "splash"
+      },
+      {
+        "end": 92.05999755859375,
+        "start": 91.9800033569336,
+        "word": "break"
+      },
+      {
+        "end": 97.54000091552734,
+        "start": 97.5199966430664,
+        "word": "break"
+      },
+      {
+        "end": 102.0,
+        "start": 101.86000061035156,
+        "word": "break"
+      },
+      {
+        "end": 107.41999816894531,
+        "start": 106.72000122070312,
+        "word": "break"
+      },
+      {
+        "end": 111.66000366210938,
+        "start": 110.95999908447266,
+        "word": "splash"
+      },
+      {
+        "end": 127.5999984741211,
+        "start": 127.4800033569336,
+        "word": "let's"
+      },
+      {
+        "end": 128.05999755859375,
+        "start": 127.5999984741211,
+        "word": "fucking"
+      },
+      {
+        "end": 128.36000061035156,
+        "start": 128.05999755859375,
+        "word": "go"
+      }
+    ],
+    "task": "transcribe"
+  },
+  "gap_repair": {
+    "trigger_gap_s": 10,
+    "pad_s": 2.0,
+    "edge_margin_s": 0.4,
+    "spans": [
+      {
+        "gap": [
+          31.5,
+          49.599998474121094
+        ],
+        "clip": [
+          29.5,
+          51.599998474121094
+        ],
+        "response": {
+          "duration": 22.100000381469727,
+          "language": "english",
+          "text": "brick. brick. brick. brick. brick. what the fuck, I'm so fucking tired.",
+          "segments": null,
+          "usage": {
+            "seconds": 23.0,
+            "type": "duration"
+          },
+          "words": [
+            {
+              "end": 2.7200000286102295,
+              "start": 2.0799999237060547,
+              "word": "brick"
+            },
+            {
+              "end": 8.140000343322754,
+              "start": 7.940000057220459,
+              "word": "brick"
+            },
+            {
+              "end": 13.319999694824219,
+              "start": 12.680000305175781,
+              "word": "brick"
+            },
+            {
+              "end": 16.299999237060547,
+              "start": 15.979999542236328,
+              "word": "brick"
+            },
+            {
+              "end": 20.600000381469727,
+              "start": 20.520000457763672,
+              "word": "brick"
+            },
+            {
+              "end": 20.8799991607666,
+              "start": 20.639999389648438,
+              "word": "what"
+            },
+            {
+              "end": 21.239999771118164,
+              "start": 20.8799991607666,
+              "word": "the"
+            },
+            {
+              "end": 21.399999618530273,
+              "start": 21.239999771118164,
+              "word": "fuck"
+            },
+            {
+              "end": 21.579999923706055,
+              "start": 21.579999923706055,
+              "word": "I'm"
+            },
+            {
+              "end": 21.799999237060547,
+              "start": 21.579999923706055,
+              "word": "so"
+            },
+            {
+              "end": 22.079999923706055,
+              "start": 21.799999237060547,
+              "word": "fucking"
+            },
+            {
+              "end": 22.079999923706055,
+              "start": 22.079999923706055,
+              "word": "tired"
+            }
+          ],
+          "task": "transcribe"
+        },
+        "recovered": [
+          {
+            "word": "brick",
+            "start": 37.44000005722046,
+            "end": 37.640000343322754
+          },
+          {
+            "word": "brick",
+            "start": 42.18000030517578,
+            "end": 42.81999969482422
+          },
+          {
+            "word": "brick",
+            "start": 45.47999954223633,
+            "end": 45.79999923706055
+          }
+        ]
+      },
+      {
+        "gap": [
+          111.66000366210938,
+          127.4800033569336
+        ],
+        "clip": [
+          109.66000366210938,
+          129.4800033569336
+        ],
+        "response": {
+          "duration": 19.81999969482422,
+          "language": "english",
+          "text": "splash.  splash. let's fucking go.",
+          "segments": null,
+          "usage": {
+            "seconds": 20.0,
+            "type": "duration"
+          },
+          "words": [
+            {
+              "end": 3.559999942779541,
+              "start": 2.7200000286102295,
+              "word": "splash"
+            },
+            {
+              "end": 17.15999984741211,
+              "start": 17.139999389648438,
+              "word": "splash"
+            },
+            {
+              "end": 17.8799991607666,
+              "start": 17.579999923706055,
+              "word": "let's"
+            },
+            {
+              "end": 18.239999771118164,
+              "start": 17.8799991607666,
+              "word": "fucking"
+            },
+            {
+              "end": 18.459999084472656,
+              "start": 18.239999771118164,
+              "word": "go"
+            }
+          ],
+          "task": "transcribe"
+        },
+        "recovered": [
+          {
+            "word": "splash",
+            "start": 112.3800036907196,
+            "end": 113.22000360488892
+          },
+          {
+            "word": "splash",
+            "start": 126.80000305175781,
+            "end": 126.82000350952148
+          }
+        ]
+      }
+    ],
+    "n_recovered": 5,
+    "truncated": false,
+    "errors": []
+  }
+}

@@ -32,8 +32,9 @@ def processor(name: str) -> str:
     try:
         with tempfile.TemporaryDirectory() as scratch:
             cfg_path = Path("/root/cloud/config.cloud.yaml")
-            model = yaml.safe_load(cfg_path.read_text())["transcriber"]["model"]
-            transcriber = WhisperApiTranscriber(model)
+            tblock = yaml.safe_load(cfg_path.read_text())["transcriber"]
+            transcriber = WhisperApiTranscriber(tblock["model"],
+                                                tblock.get("language", "en"))
             return run_from_bucket(name, store, transcriber, Path(scratch))
     except Exception as e:
         _alert(name, f"{e!r}\n{traceback.format_exc()[-1500:]}")
